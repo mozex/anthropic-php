@@ -8,19 +8,18 @@ use Anthropic\Factory;
 final class Anthropic
 {
     /**
-     * Creates a new Open AI Client with the given API token.
+     * Creates a new Anthropic Client with the given API token.
      */
-    public static function client(string $apiKey, ?string $organization = null): Client
+    public static function client(string $apiKey): Client
     {
         return self::factory()
             ->withApiKey($apiKey)
-            ->withOrganization($organization)
-            ->withHttpHeader('Anthropic-Beta', 'assistants=v1')
+            ->withHttpHeader('anthropic-version', '2023-06-01')
             ->make();
     }
 
     /**
-     * Creates a new factory instance to configure a custom Open AI Client
+     * Creates a new factory instance to configure a custom Anthropic Client
      */
     public static function factory(): Factory
     {

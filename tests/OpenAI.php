@@ -25,14 +25,6 @@ it('may create a client via factory', function () {
     expect($anthropic)->toBeInstanceOf(Client::class);
 });
 
-it('sets an organization via factory', function () {
-    $anthropic = Anthropic::factory()
-        ->withOrganization('nunomaduro')
-        ->make();
-
-    expect($anthropic)->toBeInstanceOf(Client::class);
-});
-
 it('sets a custom client via factory', function () {
     $anthropic = Anthropic::factory()
         ->withHttpClient(new GuzzleClient())

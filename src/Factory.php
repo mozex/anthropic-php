@@ -24,11 +24,6 @@ final class Factory
     private ?string $apiKey = null;
 
     /**
-     * The organization for the requests.
-     */
-    private ?string $organization = null;
-
-    /**
      * The HTTP client for the requests.
      */
     private ?ClientInterface $httpClient = null;
@@ -60,16 +55,6 @@ final class Factory
     public function withApiKey(string $apiKey): self
     {
         $this->apiKey = trim($apiKey);
-
-        return $this;
-    }
-
-    /**
-     * Sets the organization for the requests.
-     */
-    public function withOrganization(?string $organization): self
-    {
-        $this->organization = $organization;
 
         return $this;
     }
@@ -127,7 +112,7 @@ final class Factory
     }
 
     /**
-     * Creates a new Open AI Client.
+     * Creates a new Anthropic Client.
      */
     public function make(): Client
     {
@@ -137,15 +122,11 @@ final class Factory
             $headers = Headers::withAuthorization(ApiKey::from($this->apiKey));
         }
 
-        if ($this->organization !== null) {
-            $headers = $headers->withOrganization($this->organization);
-        }
-
         foreach ($this->headers as $name => $value) {
             $headers = $headers->withCustomHeader($name, $value);
         }
 
-        $baseUri = BaseUri::from($this->baseUri ?: 'api.openai.com/v1');
+        $baseUri = BaseUri::from($this->baseUri ?: 'api.anthropic.com/v1');
 
         $queryParams = QueryParams::create();
         foreach ($this->queryParams as $name => $value) {
