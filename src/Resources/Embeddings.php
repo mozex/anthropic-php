@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\Resources;
+namespace Anthropic\Resources;
 
-use OpenAI\Contracts\Resources\EmbeddingsContract;
-use OpenAI\Responses\Embeddings\CreateResponse;
-use OpenAI\ValueObjects\Transporter\Payload;
-use OpenAI\ValueObjects\Transporter\Response;
+use Anthropic\Contracts\Resources\EmbeddingsContract;
+use Anthropic\Responses\Embeddings\CreateResponse;
+use Anthropic\ValueObjects\Transporter\Payload;
+use Anthropic\ValueObjects\Transporter\Response;
 
 final class Embeddings implements EmbeddingsContract
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenAI\Responses\Meta;
+namespace Anthropic\Responses\Meta;
 
 final class MetaInformationRateLimit
 {

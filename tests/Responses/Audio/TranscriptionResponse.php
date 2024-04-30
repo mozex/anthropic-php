@@ -1,9 +1,9 @@
 <?php
 
-use OpenAI\Responses\Audio\TranscriptionResponse;
-use OpenAI\Responses\Audio\TranscriptionResponseSegment;
-use OpenAI\Responses\Audio\TranscriptionResponseWord;
-use OpenAI\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Audio\TranscriptionResponse;
+use Anthropic\Responses\Audio\TranscriptionResponseSegment;
+use Anthropic\Responses\Audio\TranscriptionResponseWord;
+use Anthropic\Responses\Meta\MetaInformation;
 
 test('from json', function () {
     $transcription = TranscriptionResponse::from(audioTranscriptionJson(), meta());

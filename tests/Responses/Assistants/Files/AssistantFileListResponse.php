@@ -1,8 +1,8 @@
 <?php
 
-use OpenAI\Responses\Assistants\Files\AssistantFileListResponse;
-use OpenAI\Responses\Assistants\Files\AssistantFileResponse;
-use OpenAI\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Assistants\Files\AssistantFileListResponse;
+use Anthropic\Responses\Assistants\Files\AssistantFileResponse;
+use Anthropic\Responses\Meta\MetaInformation;
 
 test('from', function () {
     $response = AssistantFileListResponse::from(assistantFileListResource(), meta());

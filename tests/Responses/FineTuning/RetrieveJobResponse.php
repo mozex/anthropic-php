@@ -1,8 +1,8 @@
 <?php
 
-use OpenAI\Responses\FineTuning\RetrieveJobResponse;
-use OpenAI\Responses\FineTuning\RetrieveJobResponseHyperparameters;
-use OpenAI\Responses\Meta\MetaInformation;
+use Anthropic\Responses\FineTuning\RetrieveJobResponse;
+use Anthropic\Responses\FineTuning\RetrieveJobResponseHyperparameters;
+use Anthropic\Responses\Meta\MetaInformation;
 
 test('from create response', function () {
     $result = RetrieveJobResponse::from(fineTuningJobCreateResource(), meta());

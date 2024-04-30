@@ -1,8 +1,8 @@
 <?php
 
-namespace OpenAI\Contracts\Resources;
+namespace Anthropic\Contracts\Resources;
 
-use OpenAI\Responses\Embeddings\CreateResponse;
+use Anthropic\Responses\Embeddings\CreateResponse;
 
 interface EmbeddingsContract
 {

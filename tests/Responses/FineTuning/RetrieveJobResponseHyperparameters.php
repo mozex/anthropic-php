@@ -1,6 +1,6 @@
 <?php
 
-use OpenAI\Responses\FineTuning\RetrieveJobResponseHyperparameters;
+use Anthropic\Responses\FineTuning\RetrieveJobResponseHyperparameters;
 
 test('from', function () {
     $result = RetrieveJobResponseHyperparameters::from(fineTuningJobRetrieveResource()['hyperparameters']);

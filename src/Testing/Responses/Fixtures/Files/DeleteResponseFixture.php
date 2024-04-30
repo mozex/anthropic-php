@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenAI\Testing\Responses\Fixtures\Files;
+namespace Anthropic\Testing\Responses\Fixtures\Files;
 
 final class DeleteResponseFixture
 {

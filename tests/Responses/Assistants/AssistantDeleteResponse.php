@@ -1,7 +1,7 @@
 <?php
 
-use OpenAI\Responses\Assistants\AssistantDeleteResponse;
-use OpenAI\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Assistants\AssistantDeleteResponse;
+use Anthropic\Responses\Meta\MetaInformation;
 
 test('from', function () {
     $result = AssistantDeleteResponse::from(assistantDeleteResource(), meta());

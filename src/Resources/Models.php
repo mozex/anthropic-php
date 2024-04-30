@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\Resources;
+namespace Anthropic\Resources;
 
-use OpenAI\Contracts\Resources\ModelsContract;
-use OpenAI\Responses\Models\DeleteResponse;
-use OpenAI\Responses\Models\ListResponse;
-use OpenAI\Responses\Models\RetrieveResponse;
-use OpenAI\ValueObjects\Transporter\Payload;
-use OpenAI\ValueObjects\Transporter\Response;
+use Anthropic\Contracts\Resources\ModelsContract;
+use Anthropic\Responses\Models\DeleteResponse;
+use Anthropic\Responses\Models\ListResponse;
+use Anthropic\Responses\Models\RetrieveResponse;
+use Anthropic\ValueObjects\Transporter\Payload;
+use Anthropic\ValueObjects\Transporter\Response;
 
 final class Models implements ModelsContract
 {

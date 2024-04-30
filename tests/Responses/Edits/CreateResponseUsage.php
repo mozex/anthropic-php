@@ -1,6 +1,6 @@
 <?php
 
-use OpenAI\Responses\Edits\CreateResponseUsage;
+use Anthropic\Responses\Edits\CreateResponseUsage;
 
 test('from', function () {
     $result = CreateResponseUsage::from(edit()['usage']);

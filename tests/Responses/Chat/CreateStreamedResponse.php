@@ -1,7 +1,7 @@
 <?php
 
-use OpenAI\Responses\Chat\CreateStreamedResponse;
-use OpenAI\Responses\Chat\CreateStreamedResponseChoice;
+use Anthropic\Responses\Chat\CreateStreamedResponse;
+use Anthropic\Responses\Chat\CreateStreamedResponseChoice;
 
 test('from', function () {
     $completion = CreateStreamedResponse::from(chatCompletionStreamFirstChunk());

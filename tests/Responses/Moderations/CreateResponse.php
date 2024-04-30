@@ -1,8 +1,8 @@
 <?php
 
-use OpenAI\Responses\Meta\MetaInformation;
-use OpenAI\Responses\Moderations\CreateResponse;
-use OpenAI\Responses\Moderations\CreateResponseResult;
+use Anthropic\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Moderations\CreateResponse;
+use Anthropic\Responses\Moderations\CreateResponseResult;
 
 test('from', function () {
     $moderation = CreateResponse::from(moderationResource(), meta());

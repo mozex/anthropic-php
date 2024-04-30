@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\Contracts;
+namespace Anthropic\Contracts;
 
-use OpenAI\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Meta\MetaInformation;
 
 interface ResponseHasMetaInformationContract
 {

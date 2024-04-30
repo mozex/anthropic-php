@@ -1,12 +1,12 @@
 <?php
 
-namespace OpenAI\Testing\Resources;
+namespace Anthropic\Testing\Resources;
 
-use OpenAI\Contracts\Resources\ThreadsMessagesContract;
-use OpenAI\Resources\ThreadsMessages;
-use OpenAI\Responses\Threads\Messages\ThreadMessageListResponse;
-use OpenAI\Responses\Threads\Messages\ThreadMessageResponse;
-use OpenAI\Testing\Resources\Concerns\Testable;
+use Anthropic\Contracts\Resources\ThreadsMessagesContract;
+use Anthropic\Resources\ThreadsMessages;
+use Anthropic\Responses\Threads\Messages\ThreadMessageListResponse;
+use Anthropic\Responses\Threads\Messages\ThreadMessageResponse;
+use Anthropic\Testing\Resources\Concerns\Testable;
 
 final class ThreadsMessagesTestResource implements ThreadsMessagesContract
 {

@@ -1,11 +1,11 @@
 <?php
 
-namespace OpenAI\Testing\Resources;
+namespace Anthropic\Testing\Resources;
 
-use OpenAI\Contracts\Resources\EmbeddingsContract;
-use OpenAI\Resources\Embeddings;
-use OpenAI\Responses\Embeddings\CreateResponse;
-use OpenAI\Testing\Resources\Concerns\Testable;
+use Anthropic\Contracts\Resources\EmbeddingsContract;
+use Anthropic\Resources\Embeddings;
+use Anthropic\Responses\Embeddings\CreateResponse;
+use Anthropic\Testing\Resources\Concerns\Testable;
 
 final class EmbeddingsTestResource implements EmbeddingsContract
 {

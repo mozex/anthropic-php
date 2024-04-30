@@ -1,9 +1,9 @@
 <?php
 
+use Anthropic\Responses\Audio\SpeechStreamResponse;
+use Anthropic\Responses\Meta\MetaInformation;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Stream;
-use OpenAI\Responses\Audio\SpeechStreamResponse;
-use OpenAI\Responses\Meta\MetaInformation;
 
 test('from response', function () {
     $response = new Response(

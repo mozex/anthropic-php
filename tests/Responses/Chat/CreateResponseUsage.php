@@ -1,6 +1,6 @@
 <?php
 
-use OpenAI\Responses\Chat\CreateResponseUsage;
+use Anthropic\Responses\Chat\CreateResponseUsage;
 
 test('from', function () {
     $result = CreateResponseUsage::from(chatCompletion()['usage']);

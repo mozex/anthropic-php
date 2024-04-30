@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\Responses\Concerns;
+namespace Anthropic\Responses\Concerns;
 
-use OpenAI\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Meta\MetaInformation;
 
 trait HasMetaInformation
 {

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\ValueObjects\Transporter;
+namespace Anthropic\ValueObjects\Transporter;
 
-use OpenAI\Enums\Transporter\ContentType;
-use OpenAI\ValueObjects\ApiKey;
+use Anthropic\Enums\Transporter\ContentType;
+use Anthropic\ValueObjects\ApiKey;
 
 /**
  * @internal
@@ -58,7 +58,7 @@ final class Headers
     {
         return new self([
             ...$this->headers,
-            'OpenAI-Organization' => $organization,
+            'Anthropic-Organization' => $organization,
         ]);
     }
 

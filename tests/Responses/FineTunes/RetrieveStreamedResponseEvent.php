@@ -1,6 +1,6 @@
 <?php
 
-use OpenAI\Responses\FineTunes\RetrieveStreamedResponseEvent;
+use Anthropic\Responses\FineTunes\RetrieveStreamedResponseEvent;
 
 test('fake', function () {
     $response = RetrieveStreamedResponseEvent::fake();

@@ -1,8 +1,8 @@
 <?php
 
-use OpenAI\Responses\Images\VariationResponse;
-use OpenAI\Responses\Images\VariationResponseData;
-use OpenAI\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Images\VariationResponse;
+use Anthropic\Responses\Images\VariationResponseData;
+use Anthropic\Responses\Meta\MetaInformation;
 
 test('from with url', function () {
     $response = VariationResponse::from(imageVariationWithUrl(), meta());

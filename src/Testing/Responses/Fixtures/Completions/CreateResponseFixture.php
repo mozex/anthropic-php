@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenAI\Testing\Responses\Fixtures\Completions;
+namespace Anthropic\Testing\Responses\Fixtures\Completions;
 
 final class CreateResponseFixture
 {

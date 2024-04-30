@@ -1,7 +1,7 @@
 <?php
 
-use OpenAI\Responses\Assistants\Files\AssistantFileDeleteResponse;
-use OpenAI\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Assistants\Files\AssistantFileDeleteResponse;
+use Anthropic\Responses\Meta\MetaInformation;
 
 test('from', function () {
     $result = AssistantFileDeleteResponse::from(assistantFileDeleteResource(), meta());

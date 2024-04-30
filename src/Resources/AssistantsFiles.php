@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\Resources;
+namespace Anthropic\Resources;
 
-use OpenAI\Contracts\Resources\AssistantsFilesContract;
-use OpenAI\Responses\Assistants\Files\AssistantFileDeleteResponse;
-use OpenAI\Responses\Assistants\Files\AssistantFileListResponse;
-use OpenAI\Responses\Assistants\Files\AssistantFileResponse;
-use OpenAI\ValueObjects\Transporter\Payload;
-use OpenAI\ValueObjects\Transporter\Response;
+use Anthropic\Contracts\Resources\AssistantsFilesContract;
+use Anthropic\Responses\Assistants\Files\AssistantFileDeleteResponse;
+use Anthropic\Responses\Assistants\Files\AssistantFileListResponse;
+use Anthropic\Responses\Assistants\Files\AssistantFileResponse;
+use Anthropic\ValueObjects\Transporter\Payload;
+use Anthropic\ValueObjects\Transporter\Response;
 
 final class AssistantsFiles implements AssistantsFilesContract
 {

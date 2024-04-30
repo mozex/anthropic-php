@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\Responses\Chat;
+namespace Anthropic\Responses\Chat;
 
 final class CreateResponseMessage
 {

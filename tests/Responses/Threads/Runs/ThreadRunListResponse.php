@@ -1,8 +1,8 @@
 <?php
 
-use OpenAI\Responses\Meta\MetaInformation;
-use OpenAI\Responses\Threads\Runs\ThreadRunListResponse;
-use OpenAI\Responses\Threads\Runs\ThreadRunResponse;
+use Anthropic\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Threads\Runs\ThreadRunListResponse;
+use Anthropic\Responses\Threads\Runs\ThreadRunResponse;
 
 test('from', function () {
     $response = ThreadRunListResponse::from(threadRunListResource(), meta());

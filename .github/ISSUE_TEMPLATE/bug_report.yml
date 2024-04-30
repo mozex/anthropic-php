@@ -1,5 +1,5 @@
 name: Bug Report
-description: Report an Issue or Bug with the OpenAI PHP Client
+description: Report an Issue or Bug with the Anthropic PHP Client
 title: "[Bug]: "
 labels: ["bug"]
 body:
@@ -7,8 +7,8 @@ body:
     attributes:
       value: |
         Please fill out the following information to help us resolve your issue.
-        
-        Keep in mind that this package is a PHP wrapper for the OpenAI API. If you have a question about the API itself, please refer to the [OpenAI API Documentation](https://platform.openai.com/docs/introduction) or reach out to the [OpenAI Community Forum](https://community.openai.com/categories).
+
+        Keep in mind that this package is a PHP wrapper for the Anthropic API. If you have a question about the API itself, please refer to the [Anthropic API Documentation](https://docs.anthropic.com/claude/docs).
   - type: textarea
     attributes:
       label: Description
@@ -25,9 +25,9 @@ body:
   - type: input
     id: client-version
     attributes:
-      label: OpenAI PHP Client Version
+      label: Anthropic PHP Client Version
       description: What version of our Package are you running? Please be as specific as possible
-      placeholder: v0.7.10
+      placeholder: v1.0.0
     validations:
       required: true
   - type: input

@@ -1,11 +1,11 @@
 <?php
 
-use OpenAI\Enums\Transporter\ContentType;
-use OpenAI\ValueObjects\ApiKey;
-use OpenAI\ValueObjects\Transporter\BaseUri;
-use OpenAI\ValueObjects\Transporter\Headers;
-use OpenAI\ValueObjects\Transporter\Payload;
-use OpenAI\ValueObjects\Transporter\QueryParams;
+use Anthropic\Enums\Transporter\ContentType;
+use Anthropic\ValueObjects\ApiKey;
+use Anthropic\ValueObjects\Transporter\BaseUri;
+use Anthropic\ValueObjects\Transporter\Headers;
+use Anthropic\ValueObjects\Transporter\Payload;
+use Anthropic\ValueObjects\Transporter\QueryParams;
 
 it('has a method', function () {
     $payload = Payload::create('models', []);

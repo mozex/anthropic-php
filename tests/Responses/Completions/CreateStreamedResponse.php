@@ -1,6 +1,6 @@
 <?php
 
-use OpenAI\Responses\Completions\CreateStreamedResponse;
+use Anthropic\Responses\Completions\CreateStreamedResponse;
 
 test('fake', function () {
     $response = CreateStreamedResponse::fake();

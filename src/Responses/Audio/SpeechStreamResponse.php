@@ -1,12 +1,12 @@
 <?php
 
-namespace OpenAI\Responses\Audio;
+namespace Anthropic\Responses\Audio;
 
+use Anthropic\Contracts\ResponseHasMetaInformationContract;
+use Anthropic\Contracts\ResponseStreamContract;
+use Anthropic\Responses\Meta\MetaInformation;
 use Generator;
 use Http\Discovery\Psr17Factory;
-use OpenAI\Contracts\ResponseHasMetaInformationContract;
-use OpenAI\Contracts\ResponseStreamContract;
-use OpenAI\Responses\Meta\MetaInformation;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -42,7 +42,7 @@ final class SpeechStreamResponse implements ResponseHasMetaInformationContract, 
         $response = $psr17Factory->createResponse()
             ->withBody($psr17Factory->createStream($content ?? (string) file_get_contents(__DIR__.'/../../Testing/Responses/Fixtures/Audio/speech-streamed.mp3')));
 
-        if ($meta instanceof \OpenAI\Responses\Meta\MetaInformation) {
+        if ($meta instanceof \Anthropic\Responses\Meta\MetaInformation) {
             foreach ($meta->toArray() as $key => $value) {
                 $response = $response->withHeader($key, (string) $value);
             }

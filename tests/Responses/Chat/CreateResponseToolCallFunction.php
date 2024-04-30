@@ -1,6 +1,6 @@
 <?php
 
-use OpenAI\Responses\Chat\CreateResponseToolCallFunction;
+use Anthropic\Responses\Chat\CreateResponseToolCallFunction;
 
 test('from', function () {
     $result = CreateResponseToolCallFunction::from(chatCompletionWithToolCalls()['choices'][0]['message']['tool_calls'][0]['function']);

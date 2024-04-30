@@ -1,8 +1,8 @@
 <?php
 
-use OpenAI\Responses\FineTunes\ListEventsResponse;
-use OpenAI\Responses\FineTunes\RetrieveResponseEvent;
-use OpenAI\Responses\Meta\MetaInformation;
+use Anthropic\Responses\FineTunes\ListEventsResponse;
+use Anthropic\Responses\FineTunes\RetrieveResponseEvent;
+use Anthropic\Responses\Meta\MetaInformation;
 
 test('from', function () {
     $response = ListEventsResponse::from(fineTuneListEventsResource(), meta());

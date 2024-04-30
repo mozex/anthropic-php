@@ -1,18 +1,18 @@
 <?php
 
+use Anthropic\Enums\Transporter\ContentType;
+use Anthropic\Exceptions\ErrorException;
+use Anthropic\Exceptions\TransporterException;
+use Anthropic\Exceptions\UnserializableResponse;
+use Anthropic\Transporters\HttpTransporter;
+use Anthropic\ValueObjects\ApiKey;
+use Anthropic\ValueObjects\Transporter\BaseUri;
+use Anthropic\ValueObjects\Transporter\Headers;
+use Anthropic\ValueObjects\Transporter\Payload;
+use Anthropic\ValueObjects\Transporter\QueryParams;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Psr7\Request as Psr7Request;
 use GuzzleHttp\Psr7\Response;
-use OpenAI\Enums\Transporter\ContentType;
-use OpenAI\Exceptions\ErrorException;
-use OpenAI\Exceptions\TransporterException;
-use OpenAI\Exceptions\UnserializableResponse;
-use OpenAI\Transporters\HttpTransporter;
-use OpenAI\ValueObjects\ApiKey;
-use OpenAI\ValueObjects\Transporter\BaseUri;
-use OpenAI\ValueObjects\Transporter\Headers;
-use OpenAI\ValueObjects\Transporter\Payload;
-use OpenAI\ValueObjects\Transporter\QueryParams;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;

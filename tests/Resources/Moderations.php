@@ -1,11 +1,11 @@
 <?php
 
-use OpenAI\Enums\Moderations\Category;
-use OpenAI\Responses\Meta\MetaInformation;
-use OpenAI\Responses\Moderations\CreateResponse;
-use OpenAI\Responses\Moderations\CreateResponseCategory;
-use OpenAI\Responses\Moderations\CreateResponseResult;
-use OpenAI\ValueObjects\Transporter\Response;
+use Anthropic\Enums\Moderations\Category;
+use Anthropic\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Moderations\CreateResponse;
+use Anthropic\Responses\Moderations\CreateResponseCategory;
+use Anthropic\Responses\Moderations\CreateResponseResult;
+use Anthropic\ValueObjects\Transporter\Response;
 
 test('create', closure: function () {
     $client = mockClient('POST', 'moderations', [

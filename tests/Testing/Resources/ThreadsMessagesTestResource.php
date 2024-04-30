@@ -1,9 +1,9 @@
 <?php
 
-use OpenAI\Resources\ThreadsMessages;
-use OpenAI\Responses\Threads\Messages\ThreadMessageListResponse;
-use OpenAI\Responses\Threads\Messages\ThreadMessageResponse;
-use OpenAI\Testing\ClientFake;
+use Anthropic\Resources\ThreadsMessages;
+use Anthropic\Responses\Threads\Messages\ThreadMessageListResponse;
+use Anthropic\Responses\Threads\Messages\ThreadMessageResponse;
+use Anthropic\Testing\ClientFake;
 
 it('records a thread message create request', function () {
     $fake = new ClientFake([

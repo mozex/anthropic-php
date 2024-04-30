@@ -1,7 +1,7 @@
 <?php
 
-use OpenAI\Responses\Meta\MetaInformation;
-use OpenAI\Responses\Threads\ThreadResponse;
+use Anthropic\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Threads\ThreadResponse;
 
 test('from', function () {
     $result = ThreadResponse::from(threadResource(), meta());

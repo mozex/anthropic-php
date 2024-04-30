@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\Resources;
+namespace Anthropic\Resources;
 
-use OpenAI\Contracts\Resources\ThreadsRunsContract;
-use OpenAI\Contracts\Resources\ThreadsRunsStepsContract;
-use OpenAI\Responses\Threads\Runs\ThreadRunListResponse;
-use OpenAI\Responses\Threads\Runs\ThreadRunResponse;
-use OpenAI\ValueObjects\Transporter\Payload;
-use OpenAI\ValueObjects\Transporter\Response;
+use Anthropic\Contracts\Resources\ThreadsRunsContract;
+use Anthropic\Contracts\Resources\ThreadsRunsStepsContract;
+use Anthropic\Responses\Threads\Runs\ThreadRunListResponse;
+use Anthropic\Responses\Threads\Runs\ThreadRunResponse;
+use Anthropic\ValueObjects\Transporter\Payload;
+use Anthropic\ValueObjects\Transporter\Response;
 
 final class ThreadsRuns implements ThreadsRunsContract
 {

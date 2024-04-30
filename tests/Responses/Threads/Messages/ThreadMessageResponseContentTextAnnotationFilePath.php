@@ -1,6 +1,6 @@
 <?php
 
-use OpenAI\Responses\Threads\Messages\ThreadMessageResponseContentTextAnnotationFilePath;
+use Anthropic\Responses\Threads\Messages\ThreadMessageResponseContentTextAnnotationFilePath;
 
 test('from', function () {
     $result = ThreadMessageResponseContentTextAnnotationFilePath::from(threadMessageResource()['content'][0]['text']['annotations'][0]['file_path']);

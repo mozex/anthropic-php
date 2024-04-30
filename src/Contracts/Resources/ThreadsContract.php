@@ -1,10 +1,10 @@
 <?php
 
-namespace OpenAI\Contracts\Resources;
+namespace Anthropic\Contracts\Resources;
 
-use OpenAI\Responses\Threads\Runs\ThreadRunResponse;
-use OpenAI\Responses\Threads\ThreadDeleteResponse;
-use OpenAI\Responses\Threads\ThreadResponse;
+use Anthropic\Responses\Threads\Runs\ThreadRunResponse;
+use Anthropic\Responses\Threads\ThreadDeleteResponse;
+use Anthropic\Responses\Threads\ThreadResponse;
 
 interface ThreadsContract
 {

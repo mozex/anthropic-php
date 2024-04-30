@@ -1,13 +1,13 @@
 <?php
 
-namespace OpenAI\Testing\Resources;
+namespace Anthropic\Testing\Resources;
 
-use OpenAI\Contracts\Resources\FineTuningContract;
-use OpenAI\Resources\FineTuning;
-use OpenAI\Responses\FineTuning\ListJobEventsResponse;
-use OpenAI\Responses\FineTuning\ListJobsResponse;
-use OpenAI\Responses\FineTuning\RetrieveJobResponse;
-use OpenAI\Testing\Resources\Concerns\Testable;
+use Anthropic\Contracts\Resources\FineTuningContract;
+use Anthropic\Resources\FineTuning;
+use Anthropic\Responses\FineTuning\ListJobEventsResponse;
+use Anthropic\Responses\FineTuning\ListJobsResponse;
+use Anthropic\Responses\FineTuning\RetrieveJobResponse;
+use Anthropic\Testing\Resources\Concerns\Testable;
 
 final class FineTuningTestResource implements FineTuningContract
 {

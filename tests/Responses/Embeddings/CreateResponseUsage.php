@@ -1,6 +1,6 @@
 <?php
 
-use OpenAI\Responses\Embeddings\CreateResponseUsage;
+use Anthropic\Responses\Embeddings\CreateResponseUsage;
 
 test('from', function () {
     $result = CreateResponseUsage::from(embeddingList()['usage']);

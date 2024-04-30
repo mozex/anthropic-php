@@ -1,10 +1,10 @@
 <?php
 
-namespace OpenAI\Contracts\Resources;
+namespace Anthropic\Contracts\Resources;
 
-use OpenAI\Responses\Models\DeleteResponse;
-use OpenAI\Responses\Models\ListResponse;
-use OpenAI\Responses\Models\RetrieveResponse;
+use Anthropic\Responses\Models\DeleteResponse;
+use Anthropic\Responses\Models\ListResponse;
+use Anthropic\Responses\Models\RetrieveResponse;
 
 interface ModelsContract
 {

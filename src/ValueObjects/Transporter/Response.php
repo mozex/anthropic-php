@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\ValueObjects\Transporter;
+namespace Anthropic\ValueObjects\Transporter;
 
-use OpenAI\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Meta\MetaInformation;
 
 /**
  * @template-covariant TData of array|string

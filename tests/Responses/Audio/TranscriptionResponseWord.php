@@ -1,6 +1,6 @@
 <?php
 
-use OpenAI\Responses\Audio\TranscriptionResponseWord;
+use Anthropic\Responses\Audio\TranscriptionResponseWord;
 
 test('from', function () {
     $result = TranscriptionResponseWord::from(audioTranscriptionVerboseJson()['words'][0]);

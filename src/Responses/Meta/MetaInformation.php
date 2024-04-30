@@ -1,9 +1,9 @@
 <?php
 
-namespace OpenAI\Responses\Meta;
+namespace Anthropic\Responses\Meta;
 
-use OpenAI\Contracts\MetaInformationContract;
-use OpenAI\Responses\Concerns\ArrayAccessible;
+use Anthropic\Contracts\MetaInformationContract;
+use Anthropic\Responses\Concerns\ArrayAccessible;
 
 /**
  * @implements MetaInformationContract<array{x-request-id?: string, openai-model?: string, openai-organization?: string, openai-processing-ms?: int, openai-version?: string, x-ratelimit-limit-requests?: int, x-ratelimit-limit-tokens?: int, x-ratelimit-remaining-requests?: int, x-ratelimit-remaining-tokens?: int, x-ratelimit-reset-requests?: string, x-ratelimit-reset-tokens?: string}>
@@ -17,7 +17,7 @@ final class MetaInformation implements MetaInformationContract
 
     private function __construct(
         public ?string $requestId,
-        public readonly MetaInformationOpenAI $openai,
+        public readonly MetaInformationAnthropic $anthropic,
         public readonly ?MetaInformationRateLimit $requestLimit,
         public readonly ?MetaInformationRateLimit $tokenLimit,
     ) {
@@ -32,7 +32,7 @@ final class MetaInformation implements MetaInformationContract
 
         $requestId = $headers['x-request-id'][0] ?? null;
 
-        $openai = MetaInformationOpenAI::from([
+        $anthropic = MetaInformationAnthropic::from([
             'model' => $headers['openai-model'][0] ?? null,
             'organization' => $headers['openai-organization'][0] ?? null,
             'version' => $headers['openai-version'][0] ?? null,
@@ -61,7 +61,7 @@ final class MetaInformation implements MetaInformationContract
 
         return new self(
             $requestId,
-            $openai,
+            $anthropic,
             $requestLimit,
             $tokenLimit,
         );
@@ -73,10 +73,10 @@ final class MetaInformation implements MetaInformationContract
     public function toArray(): array
     {
         return array_filter([
-            'openai-model' => $this->openai->model,
-            'openai-organization' => $this->openai->organization,
-            'openai-processing-ms' => $this->openai->processingMs,
-            'openai-version' => $this->openai->version,
+            'openai-model' => $this->anthropic->model,
+            'openai-organization' => $this->anthropic->organization,
+            'openai-processing-ms' => $this->anthropic->processingMs,
+            'openai-version' => $this->anthropic->version,
             'x-ratelimit-limit-requests' => $this->requestLimit->limit ?? null,
             'x-ratelimit-limit-tokens' => $this->tokenLimit->limit ?? null,
             'x-ratelimit-remaining-requests' => $this->requestLimit->remaining ?? null,

@@ -1,20 +1,20 @@
 <?php
 
-namespace OpenAI\Contracts;
+namespace Anthropic\Contracts;
 
-use OpenAI\Contracts\Resources\AssistantsContract;
-use OpenAI\Contracts\Resources\AudioContract;
-use OpenAI\Contracts\Resources\ChatContract;
-use OpenAI\Contracts\Resources\CompletionsContract;
-use OpenAI\Contracts\Resources\EditsContract;
-use OpenAI\Contracts\Resources\EmbeddingsContract;
-use OpenAI\Contracts\Resources\FilesContract;
-use OpenAI\Contracts\Resources\FineTunesContract;
-use OpenAI\Contracts\Resources\FineTuningContract;
-use OpenAI\Contracts\Resources\ImagesContract;
-use OpenAI\Contracts\Resources\ModelsContract;
-use OpenAI\Contracts\Resources\ModerationsContract;
-use OpenAI\Contracts\Resources\ThreadsContract;
+use Anthropic\Contracts\Resources\AssistantsContract;
+use Anthropic\Contracts\Resources\AudioContract;
+use Anthropic\Contracts\Resources\ChatContract;
+use Anthropic\Contracts\Resources\CompletionsContract;
+use Anthropic\Contracts\Resources\EditsContract;
+use Anthropic\Contracts\Resources\EmbeddingsContract;
+use Anthropic\Contracts\Resources\FilesContract;
+use Anthropic\Contracts\Resources\FineTunesContract;
+use Anthropic\Contracts\Resources\FineTuningContract;
+use Anthropic\Contracts\Resources\ImagesContract;
+use Anthropic\Contracts\Resources\ModelsContract;
+use Anthropic\Contracts\Resources\ModerationsContract;
+use Anthropic\Contracts\Resources\ThreadsContract;
 
 interface ClientContract
 {
@@ -51,7 +51,7 @@ interface ClientContract
      * Given a prompt and an instruction, the model will return an edited version of the prompt.
      *
      * @see https://platform.openai.com/docs/api-reference/edits
-     * @deprecated OpenAI has deprecated this endpoint and will stop working by January 4, 2024.
+     * @deprecated Anthropic has deprecated this endpoint and will stop working by January 4, 2024.
      * https://openai.com/blog/gpt-4-api-general-availability#deprecation-of-the-edits-api
      */
     public function edits(): EditsContract;
@@ -81,13 +81,13 @@ interface ClientContract
      * Manage fine-tuning jobs to tailor a model to your specific training data.
      *
      * @see https://platform.openai.com/docs/api-reference/fine-tunes
-     * @deprecated OpenAI has deprecated this endpoint and will stop working by January 4, 2024.
+     * @deprecated Anthropic has deprecated this endpoint and will stop working by January 4, 2024.
      * https://openai.com/blog/gpt-3-5-turbo-fine-tuning-and-api-updates#updated-gpt-3-models
      */
     public function fineTunes(): FineTunesContract;
 
     /**
-     * Given a input text, outputs if the model classifies it as violating OpenAI's content policy.
+     * Given a input text, outputs if the model classifies it as violating Anthropic's content policy.
      *
      * @see https://platform.openai.com/docs/api-reference/moderations
      */

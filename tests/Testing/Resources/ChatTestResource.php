@@ -1,9 +1,9 @@
 <?php
 
-use OpenAI\Resources\Chat;
-use OpenAI\Responses\Chat\CreateResponse;
-use OpenAI\Responses\Chat\CreateStreamedResponse;
-use OpenAI\Testing\ClientFake;
+use Anthropic\Resources\Chat;
+use Anthropic\Responses\Chat\CreateResponse;
+use Anthropic\Responses\Chat\CreateStreamedResponse;
+use Anthropic\Testing\ClientFake;
 
 it('records a chat create request', function () {
     $fake = new ClientFake([

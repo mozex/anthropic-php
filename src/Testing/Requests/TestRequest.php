@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenAI\Testing\Requests;
+namespace Anthropic\Testing\Requests;
 
 final class TestRequest
 {

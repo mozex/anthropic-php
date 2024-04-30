@@ -1,14 +1,14 @@
 <?php
 
-namespace OpenAI\Testing\Resources;
+namespace Anthropic\Testing\Resources;
 
-use OpenAI\Contracts\Resources\FilesContract;
-use OpenAI\Resources\Files;
-use OpenAI\Responses\Files\CreateResponse;
-use OpenAI\Responses\Files\DeleteResponse;
-use OpenAI\Responses\Files\ListResponse;
-use OpenAI\Responses\Files\RetrieveResponse;
-use OpenAI\Testing\Resources\Concerns\Testable;
+use Anthropic\Contracts\Resources\FilesContract;
+use Anthropic\Resources\Files;
+use Anthropic\Responses\Files\CreateResponse;
+use Anthropic\Responses\Files\DeleteResponse;
+use Anthropic\Responses\Files\ListResponse;
+use Anthropic\Responses\Files\RetrieveResponse;
+use Anthropic\Testing\Resources\Concerns\Testable;
 
 final class FilesTestResource implements FilesContract
 {

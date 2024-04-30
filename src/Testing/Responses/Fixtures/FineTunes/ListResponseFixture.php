@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenAI\Testing\Responses\Fixtures\FineTunes;
+namespace Anthropic\Testing\Responses\Fixtures\FineTunes;
 
 final class ListResponseFixture
 {

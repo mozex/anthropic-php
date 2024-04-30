@@ -1,9 +1,9 @@
 <?php
 
-use OpenAI\Responses\Meta\MetaInformation;
-use OpenAI\Responses\Threads\Messages\ThreadMessageResponse;
-use OpenAI\Responses\Threads\Messages\ThreadMessageResponseContentImageFileObject;
-use OpenAI\Responses\Threads\Messages\ThreadMessageResponseContentTextObject;
+use Anthropic\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Threads\Messages\ThreadMessageResponse;
+use Anthropic\Responses\Threads\Messages\ThreadMessageResponseContentImageFileObject;
+use Anthropic\Responses\Threads\Messages\ThreadMessageResponseContentTextObject;
 
 test('from', function () {
     $result = ThreadMessageResponse::from(threadMessageResource(), meta());

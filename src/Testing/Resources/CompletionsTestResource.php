@@ -1,12 +1,12 @@
 <?php
 
-namespace OpenAI\Testing\Resources;
+namespace Anthropic\Testing\Resources;
 
-use OpenAI\Contracts\Resources\CompletionsContract;
-use OpenAI\Resources\Completions;
-use OpenAI\Responses\Completions\CreateResponse;
-use OpenAI\Responses\StreamResponse;
-use OpenAI\Testing\Resources\Concerns\Testable;
+use Anthropic\Contracts\Resources\CompletionsContract;
+use Anthropic\Resources\Completions;
+use Anthropic\Responses\Completions\CreateResponse;
+use Anthropic\Responses\StreamResponse;
+use Anthropic\Testing\Resources\Concerns\Testable;
 
 final class CompletionsTestResource implements CompletionsContract
 {

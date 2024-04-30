@@ -1,9 +1,9 @@
 <?php
 
-use OpenAI\Resources\ThreadsRunsSteps;
-use OpenAI\Responses\Threads\Runs\Steps\ThreadRunStepListResponse;
-use OpenAI\Responses\Threads\Runs\Steps\ThreadRunStepResponse;
-use OpenAI\Testing\ClientFake;
+use Anthropic\Resources\ThreadsRunsSteps;
+use Anthropic\Responses\Threads\Runs\Steps\ThreadRunStepListResponse;
+use Anthropic\Responses\Threads\Runs\Steps\ThreadRunStepResponse;
+use Anthropic\Testing\ClientFake;
 
 it('records a thread run step retrieve request', function () {
     $fake = new ClientFake([

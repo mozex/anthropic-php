@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenAI\Testing\Responses\Fixtures\Assistants\Files;
+namespace Anthropic\Testing\Responses\Fixtures\Assistants\Files;
 
 final class AssistantFileResponseFixture
 {

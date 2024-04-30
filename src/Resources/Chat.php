@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\Resources;
+namespace Anthropic\Resources;
 
-use OpenAI\Contracts\Resources\ChatContract;
-use OpenAI\Responses\Chat\CreateResponse;
-use OpenAI\Responses\Chat\CreateStreamedResponse;
-use OpenAI\Responses\StreamResponse;
-use OpenAI\ValueObjects\Transporter\Payload;
-use OpenAI\ValueObjects\Transporter\Response;
+use Anthropic\Contracts\Resources\ChatContract;
+use Anthropic\Responses\Chat\CreateResponse;
+use Anthropic\Responses\Chat\CreateStreamedResponse;
+use Anthropic\Responses\StreamResponse;
+use Anthropic\ValueObjects\Transporter\Payload;
+use Anthropic\ValueObjects\Transporter\Response;
 
 final class Chat implements ChatContract
 {

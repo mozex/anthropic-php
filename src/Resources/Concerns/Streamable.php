@@ -1,8 +1,8 @@
 <?php
 
-namespace OpenAI\Resources\Concerns;
+namespace Anthropic\Resources\Concerns;
 
-use OpenAI\Exceptions\InvalidArgumentException;
+use Anthropic\Exceptions\InvalidArgumentException;
 
 trait Streamable
 {

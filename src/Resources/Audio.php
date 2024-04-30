@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\Resources;
+namespace Anthropic\Resources;
 
-use OpenAI\Contracts\Resources\AudioContract;
-use OpenAI\Responses\Audio\SpeechStreamResponse;
-use OpenAI\Responses\Audio\TranscriptionResponse;
-use OpenAI\Responses\Audio\TranslationResponse;
-use OpenAI\ValueObjects\Transporter\Payload;
-use OpenAI\ValueObjects\Transporter\Response;
+use Anthropic\Contracts\Resources\AudioContract;
+use Anthropic\Responses\Audio\SpeechStreamResponse;
+use Anthropic\Responses\Audio\TranscriptionResponse;
+use Anthropic\Responses\Audio\TranslationResponse;
+use Anthropic\ValueObjects\Transporter\Payload;
+use Anthropic\ValueObjects\Transporter\Response;
 
 final class Audio implements AudioContract
 {

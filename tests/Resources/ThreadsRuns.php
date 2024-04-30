@@ -1,10 +1,10 @@
 <?php
 
-use OpenAI\Responses\Meta\MetaInformation;
-use OpenAI\Responses\Threads\Runs\ThreadRunListResponse;
-use OpenAI\Responses\Threads\Runs\ThreadRunResponse;
-use OpenAI\Responses\Threads\Runs\ThreadRunResponseToolCodeInterpreter;
-use OpenAI\ValueObjects\Transporter\Response;
+use Anthropic\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Threads\Runs\ThreadRunListResponse;
+use Anthropic\Responses\Threads\Runs\ThreadRunResponse;
+use Anthropic\Responses\Threads\Runs\ThreadRunResponseToolCodeInterpreter;
+use Anthropic\ValueObjects\Transporter\Response;
 
 test('list', function () {
     $client = mockClient('GET', 'threads/thread_agvtHUGezjTCt4SKgQg0NJ2Y/runs', [], Response::from(threadRunListResource(), metaHeaders()));

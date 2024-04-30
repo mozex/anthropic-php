@@ -1,12 +1,12 @@
 <?php
 
-namespace OpenAI\Contracts\Resources;
+namespace Anthropic\Contracts\Resources;
 
-use OpenAI\Responses\FineTunes\ListEventsResponse;
-use OpenAI\Responses\FineTunes\ListResponse;
-use OpenAI\Responses\FineTunes\RetrieveResponse;
-use OpenAI\Responses\FineTunes\RetrieveStreamedResponseEvent;
-use OpenAI\Responses\StreamResponse;
+use Anthropic\Responses\FineTunes\ListEventsResponse;
+use Anthropic\Responses\FineTunes\ListResponse;
+use Anthropic\Responses\FineTunes\RetrieveResponse;
+use Anthropic\Responses\FineTunes\RetrieveStreamedResponseEvent;
+use Anthropic\Responses\StreamResponse;
 
 interface FineTunesContract
 {

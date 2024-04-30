@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\Responses\Audio;
+namespace Anthropic\Responses\Audio;
 
-use OpenAI\Contracts\ResponseContract;
-use OpenAI\Responses\Concerns\ArrayAccessible;
+use Anthropic\Contracts\ResponseContract;
+use Anthropic\Responses\Concerns\ArrayAccessible;
 
 /**
  * @implements ResponseContract<array{word: string, start: float, end: float}>

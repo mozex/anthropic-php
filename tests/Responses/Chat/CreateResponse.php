@@ -1,9 +1,9 @@
 <?php
 
-use OpenAI\Responses\Chat\CreateResponse;
-use OpenAI\Responses\Chat\CreateResponseChoice;
-use OpenAI\Responses\Chat\CreateResponseUsage;
-use OpenAI\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Chat\CreateResponse;
+use Anthropic\Responses\Chat\CreateResponseChoice;
+use Anthropic\Responses\Chat\CreateResponseUsage;
+use Anthropic\Responses\Meta\MetaInformation;
 
 test('from', function () {
     $completion = CreateResponse::from(chatCompletion(), meta());

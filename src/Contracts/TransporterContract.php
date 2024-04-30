@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\Contracts;
+namespace Anthropic\Contracts;
 
-use OpenAI\Exceptions\ErrorException;
-use OpenAI\Exceptions\TransporterException;
-use OpenAI\Exceptions\UnserializableResponse;
-use OpenAI\ValueObjects\Transporter\Payload;
-use OpenAI\ValueObjects\Transporter\Response;
+use Anthropic\Exceptions\ErrorException;
+use Anthropic\Exceptions\TransporterException;
+use Anthropic\Exceptions\UnserializableResponse;
+use Anthropic\ValueObjects\Transporter\Payload;
+use Anthropic\ValueObjects\Transporter\Response;
 use Psr\Http\Message\ResponseInterface;
 
 /**

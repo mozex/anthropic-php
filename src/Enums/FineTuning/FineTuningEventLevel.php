@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenAI\Enums\FineTuning;
+namespace Anthropic\Enums\FineTuning;
 
 enum FineTuningEventLevel: string
 {

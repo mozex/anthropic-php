@@ -1,8 +1,8 @@
 <?php
 
-use OpenAI\Responses\Images\CreateResponse;
-use OpenAI\Responses\Images\CreateResponseData;
-use OpenAI\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Images\CreateResponse;
+use Anthropic\Responses\Images\CreateResponseData;
+use Anthropic\Responses\Meta\MetaInformation;
 
 test('from with url', function () {
     $response = CreateResponse::from(imageCreateWithUrl(), meta());

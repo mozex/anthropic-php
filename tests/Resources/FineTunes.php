@@ -1,16 +1,16 @@
 <?php
 
+use Anthropic\Responses\FineTunes\ListEventsResponse;
+use Anthropic\Responses\FineTunes\ListResponse;
+use Anthropic\Responses\FineTunes\RetrieveResponse;
+use Anthropic\Responses\FineTunes\RetrieveResponseEvent;
+use Anthropic\Responses\FineTunes\RetrieveResponseFile;
+use Anthropic\Responses\FineTunes\RetrieveResponseHyperparams;
+use Anthropic\Responses\FineTunes\RetrieveStreamedResponseEvent;
+use Anthropic\Responses\Meta\MetaInformation;
+use Anthropic\Responses\StreamResponse;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Stream;
-use OpenAI\Responses\FineTunes\ListEventsResponse;
-use OpenAI\Responses\FineTunes\ListResponse;
-use OpenAI\Responses\FineTunes\RetrieveResponse;
-use OpenAI\Responses\FineTunes\RetrieveResponseEvent;
-use OpenAI\Responses\FineTunes\RetrieveResponseFile;
-use OpenAI\Responses\FineTunes\RetrieveResponseHyperparams;
-use OpenAI\Responses\FineTunes\RetrieveStreamedResponseEvent;
-use OpenAI\Responses\Meta\MetaInformation;
-use OpenAI\Responses\StreamResponse;
 
 test('create', function () {
     $client = mockClient('POST', 'fine-tunes', [
@@ -26,7 +26,7 @@ test('create', function () {
         'classification_positive_class' => null,
         'classification_betas' => [],
         'suffix' => null,
-    ], \OpenAI\ValueObjects\Transporter\Response::from(fineTuneResource(), metaHeaders()));
+    ], \Anthropic\ValueObjects\Transporter\Response::from(fineTuneResource(), metaHeaders()));
 
     $result = $client->fineTunes()->create([
         'training_file' => 'file-XjGxS3KTG0uNmNOK362iJua3',
@@ -68,7 +68,7 @@ test('create', function () {
 });
 
 test('list', function () {
-    $client = mockClient('GET', 'fine-tunes', [], \OpenAI\ValueObjects\Transporter\Response::from(fineTuneListResource(), metaHeaders()));
+    $client = mockClient('GET', 'fine-tunes', [], \Anthropic\ValueObjects\Transporter\Response::from(fineTuneListResource(), metaHeaders()));
 
     $result = $client->fineTunes()->list();
 
@@ -82,7 +82,7 @@ test('list', function () {
 });
 
 test('retrieve', function () {
-    $client = mockClient('GET', 'fine-tunes/ft-AF1WoRqd3aJAHsqc9NY7iL8F', [], \OpenAI\ValueObjects\Transporter\Response::from(fineTuneResource(), metaHeaders()));
+    $client = mockClient('GET', 'fine-tunes/ft-AF1WoRqd3aJAHsqc9NY7iL8F', [], \Anthropic\ValueObjects\Transporter\Response::from(fineTuneResource(), metaHeaders()));
 
     $result = $client->fineTunes()->retrieve('ft-AF1WoRqd3aJAHsqc9NY7iL8F');
 
@@ -134,7 +134,7 @@ test('retrieve', function () {
 });
 
 test('cancel', function () {
-    $client = mockClient('POST', 'fine-tunes/ft-AF1WoRqd3aJAHsqc9NY7iL8F/cancel', [], \OpenAI\ValueObjects\Transporter\Response::from([...fineTuneResource(), 'status' => 'cancelled'], metaHeaders()));
+    $client = mockClient('POST', 'fine-tunes/ft-AF1WoRqd3aJAHsqc9NY7iL8F/cancel', [], \Anthropic\ValueObjects\Transporter\Response::from([...fineTuneResource(), 'status' => 'cancelled'], metaHeaders()));
 
     $result = $client->fineTunes()->cancel('ft-AF1WoRqd3aJAHsqc9NY7iL8F');
 
@@ -163,7 +163,7 @@ test('cancel', function () {
 });
 
 test('list events', function () {
-    $client = mockClient('GET', 'fine-tunes/ft-AF1WoRqd3aJAHsqc9NY7iL8F/events', [], \OpenAI\ValueObjects\Transporter\Response::from(fineTuneListEventsResource(), metaHeaders()));
+    $client = mockClient('GET', 'fine-tunes/ft-AF1WoRqd3aJAHsqc9NY7iL8F/events', [], \Anthropic\ValueObjects\Transporter\Response::from(fineTuneListEventsResource(), metaHeaders()));
 
     $result = $client->fineTunes()->listEvents('ft-AF1WoRqd3aJAHsqc9NY7iL8F');
 

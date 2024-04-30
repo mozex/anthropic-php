@@ -1,20 +1,20 @@
 <?php
 
+use Anthropic\Responses\Chat\CreateResponse;
+use Anthropic\Responses\Chat\CreateResponseChoice;
+use Anthropic\Responses\Chat\CreateResponseUsage;
+use Anthropic\Responses\Chat\CreateStreamedResponse;
+use Anthropic\Responses\Chat\CreateStreamedResponseChoice;
+use Anthropic\Responses\Meta\MetaInformation;
+use Anthropic\Responses\StreamResponse;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Stream;
-use OpenAI\Responses\Chat\CreateResponse;
-use OpenAI\Responses\Chat\CreateResponseChoice;
-use OpenAI\Responses\Chat\CreateResponseUsage;
-use OpenAI\Responses\Chat\CreateStreamedResponse;
-use OpenAI\Responses\Chat\CreateStreamedResponseChoice;
-use OpenAI\Responses\Meta\MetaInformation;
-use OpenAI\Responses\StreamResponse;
 
 test('create', function () {
     $client = mockClient('POST', 'chat/completions', [
         'model' => 'gpt-3.5-turbo',
         'messages' => ['role' => 'user', 'content' => 'Hello!'],
-    ], \OpenAI\ValueObjects\Transporter\Response::from(chatCompletion(), metaHeaders()));
+    ], \Anthropic\ValueObjects\Transporter\Response::from(chatCompletion(), metaHeaders()));
 
     $result = $client->chat()->create([
         'model' => 'gpt-3.5-turbo',
@@ -53,7 +53,7 @@ test('create throws an exception if stream option is true', function () {
         'messages' => ['role' => 'user', 'content' => 'Hello!'],
         'stream' => true,
     ]);
-})->throws(OpenAI\Exceptions\InvalidArgumentException::class, 'Stream option is not supported. Please use the createStreamed() method instead.');
+})->throws(Anthropic\Exceptions\InvalidArgumentException::class, 'Stream option is not supported. Please use the createStreamed() method instead.');
 
 test('create streamed', function () {
     $response = new Response(
@@ -117,7 +117,7 @@ test('handles error messages in stream', function () {
     ]);
 
     expect(fn () => $result->getIterator()->current())
-        ->toThrow(function (OpenAI\Exceptions\ErrorException $e) {
+        ->toThrow(function (Anthropic\Exceptions\ErrorException $e) {
             expect($e->getMessage())->toBe('The server had an error while processing your request. Sorry about that!')
                 ->and($e->getErrorMessage())->toBe('The server had an error while processing your request. Sorry about that!')
                 ->and($e->getErrorCode())->toBeNull()

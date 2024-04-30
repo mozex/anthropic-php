@@ -1,10 +1,10 @@
 <?php
 
-use OpenAI\Resources\AssistantsFiles;
-use OpenAI\Responses\Assistants\Files\AssistantFileDeleteResponse;
-use OpenAI\Responses\Assistants\Files\AssistantFileListResponse;
-use OpenAI\Responses\Assistants\Files\AssistantFileResponse;
-use OpenAI\Testing\ClientFake;
+use Anthropic\Resources\AssistantsFiles;
+use Anthropic\Responses\Assistants\Files\AssistantFileDeleteResponse;
+use Anthropic\Responses\Assistants\Files\AssistantFileListResponse;
+use Anthropic\Responses\Assistants\Files\AssistantFileResponse;
+use Anthropic\Testing\ClientFake;
 
 it('records an assistant file create request', function () {
     $fake = new ClientFake([

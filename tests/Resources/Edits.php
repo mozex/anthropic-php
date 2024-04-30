@@ -1,16 +1,16 @@
 <?php
 
-use OpenAI\Responses\Edits\CreateResponse;
-use OpenAI\Responses\Edits\CreateResponseChoice;
-use OpenAI\Responses\Edits\CreateResponseUsage;
-use OpenAI\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Edits\CreateResponse;
+use Anthropic\Responses\Edits\CreateResponseChoice;
+use Anthropic\Responses\Edits\CreateResponseUsage;
+use Anthropic\Responses\Meta\MetaInformation;
 
 test('create', function () {
     $client = mockClient('POST', 'edits', [
         'model' => 'text-davinci-edit-001',
         'input' => 'What day of the wek is it?',
         'instruction' => 'Fix the spelling mistakes',
-    ], \OpenAI\ValueObjects\Transporter\Response::from(edit(), metaHeaders()));
+    ], \Anthropic\ValueObjects\Transporter\Response::from(edit(), metaHeaders()));
 
     $result = $client->edits()->create([
         'model' => 'text-davinci-edit-001',

@@ -1,8 +1,8 @@
 <?php
 
-use OpenAI\Resources\Moderations;
-use OpenAI\Responses\Moderations\CreateResponse;
-use OpenAI\Testing\ClientFake;
+use Anthropic\Resources\Moderations;
+use Anthropic\Responses\Moderations\CreateResponse;
+use Anthropic\Testing\ClientFake;
 
 it('records a moderations create request', function () {
     $fake = new ClientFake([

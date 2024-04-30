@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenAI\Testing\Responses\Fixtures\Edits;
+namespace Anthropic\Testing\Responses\Fixtures\Edits;
 
 final class CreateResponseFixture
 {

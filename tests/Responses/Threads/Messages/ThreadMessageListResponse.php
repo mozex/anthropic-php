@@ -1,8 +1,8 @@
 <?php
 
-use OpenAI\Responses\Meta\MetaInformation;
-use OpenAI\Responses\Threads\Messages\ThreadMessageListResponse;
-use OpenAI\Responses\Threads\Messages\ThreadMessageResponse;
+use Anthropic\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Threads\Messages\ThreadMessageListResponse;
+use Anthropic\Responses\Threads\Messages\ThreadMessageResponse;
 
 test('from', function () {
     $response = ThreadMessageListResponse::from(threadMessageListResource(), meta());

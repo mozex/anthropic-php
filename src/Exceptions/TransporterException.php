@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\Exceptions;
+namespace Anthropic\Exceptions;
 
 use Exception;
 use Psr\Http\Client\ClientExceptionInterface;

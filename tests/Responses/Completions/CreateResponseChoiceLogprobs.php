@@ -1,6 +1,6 @@
 <?php
 
-use OpenAI\Responses\Completions\CreateResponseChoiceLogprobs;
+use Anthropic\Responses\Completions\CreateResponseChoiceLogprobs;
 
 test('from', function () {
     $result = CreateResponseChoiceLogprobs::from(completionWithLogprobs()['choices'][0]['logprobs']);

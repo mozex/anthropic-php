@@ -1,7 +1,7 @@
 <?php
 
-use OpenAI\Responses\Threads\Runs\Steps\ThreadRunStepResponseFunction;
-use OpenAI\Responses\Threads\Runs\Steps\ThreadRunStepResponseFunctionToolCall;
+use Anthropic\Responses\Threads\Runs\Steps\ThreadRunStepResponseFunction;
+use Anthropic\Responses\Threads\Runs\Steps\ThreadRunStepResponseFunctionToolCall;
 
 test('from', function () {
     $result = ThreadRunStepResponseFunctionToolCall::from(threadRunStepWithCodeInterpreterOutputResource()['step_details']['tool_calls'][1]);

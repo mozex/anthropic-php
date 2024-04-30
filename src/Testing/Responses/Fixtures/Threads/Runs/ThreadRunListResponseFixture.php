@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenAI\Testing\Responses\Fixtures\Threads\Runs;
+namespace Anthropic\Testing\Responses\Fixtures\Threads\Runs;
 
 final class ThreadRunListResponseFixture
 {

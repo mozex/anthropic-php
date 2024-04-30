@@ -1,9 +1,9 @@
 <?php
 
-use OpenAI\Responses\Meta\MetaInformation;
-use OpenAI\Responses\Threads\Runs\Steps\ThreadRunStepResponse;
-use OpenAI\Responses\Threads\Runs\Steps\ThreadRunStepResponseMessageCreationStepDetails;
-use OpenAI\Responses\Threads\Runs\Steps\ThreadRunStepResponseToolCallsStepDetails;
+use Anthropic\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Threads\Runs\Steps\ThreadRunStepResponse;
+use Anthropic\Responses\Threads\Runs\Steps\ThreadRunStepResponseMessageCreationStepDetails;
+use Anthropic\Responses\Threads\Runs\Steps\ThreadRunStepResponseToolCallsStepDetails;
 
 test('from', function () {
     $result = ThreadRunStepResponse::from(threadRunStepResource(), meta());

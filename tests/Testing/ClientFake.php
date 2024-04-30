@@ -1,8 +1,8 @@
 <?php
 
-use OpenAI\Resources\Completions;
-use OpenAI\Responses\Completions\CreateResponse;
-use OpenAI\Testing\ClientFake;
+use Anthropic\Resources\Completions;
+use Anthropic\Responses\Completions\CreateResponse;
+use Anthropic\Testing\ClientFake;
 use PHPUnit\Framework\ExpectationFailedException;
 
 it('returns a fake response', function () {
@@ -36,10 +36,10 @@ it('returns fake meta data', function () {
 
     expect($completion->meta())
         ->requestId->toBe('3813fa4fa3f17bdf0d7654f0f49ebab4')
-        ->openai->model->toBe('gpt-3.5-turbo-instruct')
-        ->openai->organization->toBe('org-1234')
-        ->openai->processingMs->toBe(410)
-        ->openai->version->toBe('2020-10-01')
+        ->anthropic->model->toBe('gpt-3.5-turbo-instruct')
+        ->anthropic->organization->toBe('org-1234')
+        ->anthropic->processingMs->toBe(410)
+        ->anthropic->version->toBe('2020-10-01')
         ->requestLimit->limit->toBe(3000)
         ->requestLimit->remaining->toBe(2999)
         ->requestLimit->reset->toBe('20ms')
@@ -50,7 +50,7 @@ it('returns fake meta data', function () {
 
 it('throws fake exceptions', function () {
     $fake = new ClientFake([
-        new \OpenAI\Exceptions\ErrorException([
+        new \Anthropic\Exceptions\ErrorException([
             'message' => 'The model `gpt-1` does not exist',
             'type' => 'invalid_request_error',
             'code' => null,

@@ -1,7 +1,7 @@
 <?php
 
-use OpenAI\Responses\Threads\Messages\ThreadMessageResponseContentText;
-use OpenAI\Responses\Threads\Messages\ThreadMessageResponseContentTextObject;
+use Anthropic\Responses\Threads\Messages\ThreadMessageResponseContentText;
+use Anthropic\Responses\Threads\Messages\ThreadMessageResponseContentTextObject;
 
 test('from', function () {
     $result = ThreadMessageResponseContentTextObject::from(threadMessageResource()['content'][0]);

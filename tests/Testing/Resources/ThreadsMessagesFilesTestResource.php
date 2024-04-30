@@ -1,9 +1,9 @@
 <?php
 
-use OpenAI\Resources\ThreadsMessagesFiles;
-use OpenAI\Responses\Threads\Messages\Files\ThreadMessageFileListResponse;
-use OpenAI\Responses\Threads\Messages\Files\ThreadMessageFileResponse;
-use OpenAI\Testing\ClientFake;
+use Anthropic\Resources\ThreadsMessagesFiles;
+use Anthropic\Responses\Threads\Messages\Files\ThreadMessageFileListResponse;
+use Anthropic\Responses\Threads\Messages\Files\ThreadMessageFileResponse;
+use Anthropic\Testing\ClientFake;
 
 it('records a thread message file retrieve request', function () {
     $fake = new ClientFake([

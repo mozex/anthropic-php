@@ -1,11 +1,11 @@
 <?php
 
-use OpenAI\Resources\FineTunes;
-use OpenAI\Responses\FineTunes\ListEventsResponse;
-use OpenAI\Responses\FineTunes\ListResponse;
-use OpenAI\Responses\FineTunes\RetrieveResponse;
-use OpenAI\Responses\FineTunes\RetrieveStreamedResponseEvent;
-use OpenAI\Testing\ClientFake;
+use Anthropic\Resources\FineTunes;
+use Anthropic\Responses\FineTunes\ListEventsResponse;
+use Anthropic\Responses\FineTunes\ListResponse;
+use Anthropic\Responses\FineTunes\RetrieveResponse;
+use Anthropic\Responses\FineTunes\RetrieveStreamedResponseEvent;
+use Anthropic\Testing\ClientFake;
 
 it('records a fine tunes create request', function () {
     $fake = new ClientFake([

@@ -1,10 +1,10 @@
 <?php
 
-namespace OpenAI\Contracts\Resources;
+namespace Anthropic\Contracts\Resources;
 
-use OpenAI\Responses\FineTuning\ListJobEventsResponse;
-use OpenAI\Responses\FineTuning\ListJobsResponse;
-use OpenAI\Responses\FineTuning\RetrieveJobResponse;
+use Anthropic\Responses\FineTuning\ListJobEventsResponse;
+use Anthropic\Responses\FineTuning\ListJobsResponse;
+use Anthropic\Responses\FineTuning\RetrieveJobResponse;
 
 interface FineTuningContract
 {

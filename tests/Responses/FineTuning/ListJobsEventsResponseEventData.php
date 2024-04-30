@@ -1,6 +1,6 @@
 <?php
 
-use OpenAI\Responses\FineTuning\ListJobEventsResponseEventData;
+use Anthropic\Responses\FineTuning\ListJobEventsResponseEventData;
 
 test('from', function () {
     $result = ListJobEventsResponseEventData::from(fineTuningJobMetricsEventResource()['data']);

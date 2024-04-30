@@ -1,10 +1,10 @@
 <?php
 
-use OpenAI\Responses\Assistants\Files\AssistantFileDeleteResponse;
-use OpenAI\Responses\Assistants\Files\AssistantFileListResponse;
-use OpenAI\Responses\Assistants\Files\AssistantFileResponse;
-use OpenAI\Responses\Meta\MetaInformation;
-use OpenAI\ValueObjects\Transporter\Response;
+use Anthropic\Responses\Assistants\Files\AssistantFileDeleteResponse;
+use Anthropic\Responses\Assistants\Files\AssistantFileListResponse;
+use Anthropic\Responses\Assistants\Files\AssistantFileResponse;
+use Anthropic\Responses\Meta\MetaInformation;
+use Anthropic\ValueObjects\Transporter\Response;
 
 test('list', function () {
     $client = mockClient('GET', 'assistants/asst_SMzoVX8XmCZEg1EbMHoAm8tc/files', [], Response::from(assistantFileListResource(), metaHeaders()));

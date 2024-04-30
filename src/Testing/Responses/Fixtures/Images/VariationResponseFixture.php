@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenAI\Testing\Responses\Fixtures\Images;
+namespace Anthropic\Testing\Responses\Fixtures\Images;
 
 final class VariationResponseFixture
 {

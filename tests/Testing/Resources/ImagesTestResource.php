@@ -1,10 +1,10 @@
 <?php
 
-use OpenAI\Resources\Images;
-use OpenAI\Responses\Images\CreateResponse;
-use OpenAI\Responses\Images\EditResponse;
-use OpenAI\Responses\Images\VariationResponse;
-use OpenAI\Testing\ClientFake;
+use Anthropic\Resources\Images;
+use Anthropic\Responses\Images\CreateResponse;
+use Anthropic\Responses\Images\EditResponse;
+use Anthropic\Responses\Images\VariationResponse;
+use Anthropic\Testing\ClientFake;
 
 it('records a images create request', function () {
     $fake = new ClientFake([

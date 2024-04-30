@@ -2,24 +2,24 @@
 
 declare(strict_types=1);
 
-namespace OpenAI;
+namespace Anthropic;
 
-use OpenAI\Contracts\ClientContract;
-use OpenAI\Contracts\Resources\ThreadsContract;
-use OpenAI\Contracts\TransporterContract;
-use OpenAI\Resources\Assistants;
-use OpenAI\Resources\Audio;
-use OpenAI\Resources\Chat;
-use OpenAI\Resources\Completions;
-use OpenAI\Resources\Edits;
-use OpenAI\Resources\Embeddings;
-use OpenAI\Resources\Files;
-use OpenAI\Resources\FineTunes;
-use OpenAI\Resources\FineTuning;
-use OpenAI\Resources\Images;
-use OpenAI\Resources\Models;
-use OpenAI\Resources\Moderations;
-use OpenAI\Resources\Threads;
+use Anthropic\Contracts\ClientContract;
+use Anthropic\Contracts\Resources\ThreadsContract;
+use Anthropic\Contracts\TransporterContract;
+use Anthropic\Resources\Assistants;
+use Anthropic\Resources\Audio;
+use Anthropic\Resources\Chat;
+use Anthropic\Resources\Completions;
+use Anthropic\Resources\Edits;
+use Anthropic\Resources\Embeddings;
+use Anthropic\Resources\Files;
+use Anthropic\Resources\FineTunes;
+use Anthropic\Resources\FineTuning;
+use Anthropic\Resources\Images;
+use Anthropic\Resources\Models;
+use Anthropic\Resources\Moderations;
+use Anthropic\Resources\Threads;
 
 final class Client implements ClientContract
 {
@@ -116,7 +116,7 @@ final class Client implements ClientContract
      * Manage fine-tuning jobs to tailor a model to your specific training data.
      *
      * @see https://platform.openai.com/docs/api-reference/fine-tunes
-     * @deprecated OpenAI has deprecated this endpoint and will stop working by January 4, 2024.
+     * @deprecated Anthropic has deprecated this endpoint and will stop working by January 4, 2024.
      * https://openai.com/blog/gpt-3-5-turbo-fine-tuning-and-api-updates#updated-gpt-3-models
      */
     public function fineTunes(): FineTunes
@@ -125,7 +125,7 @@ final class Client implements ClientContract
     }
 
     /**
-     * Given a input text, outputs if the model classifies it as violating OpenAI's content policy.
+     * Given a input text, outputs if the model classifies it as violating Anthropic's content policy.
      *
      * @see https://platform.openai.com/docs/api-reference/moderations
      */

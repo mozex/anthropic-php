@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\Resources\Concerns;
+namespace Anthropic\Resources\Concerns;
 
-use OpenAI\Contracts\TransporterContract;
+use Anthropic\Contracts\TransporterContract;
 
 trait Transportable
 {

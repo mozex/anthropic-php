@@ -1,6 +1,6 @@
 <?php
 
-use OpenAI\Responses\Edits\CreateResponseChoice;
+use Anthropic\Responses\Edits\CreateResponseChoice;
 
 test('from', function () {
     $result = CreateResponseChoice::from(edit()['choices'][0]);

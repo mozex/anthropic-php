@@ -1,6 +1,6 @@
 <?php
 
-use OpenAI\Responses\FineTunes\RetrieveResponseHyperparams;
+use Anthropic\Responses\FineTunes\RetrieveResponseHyperparams;
 
 test('from', function () {
     $result = RetrieveResponseHyperparams::from(fineTuneResource()['hyperparams']);

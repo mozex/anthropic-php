@@ -1,10 +1,10 @@
 <?php
 
-namespace OpenAI\Contracts\Resources;
+namespace Anthropic\Contracts\Resources;
 
-use OpenAI\Responses\Images\CreateResponse;
-use OpenAI\Responses\Images\EditResponse;
-use OpenAI\Responses\Images\VariationResponse;
+use Anthropic\Responses\Images\CreateResponse;
+use Anthropic\Responses\Images\EditResponse;
+use Anthropic\Responses\Images\VariationResponse;
 
 interface ImagesContract
 {

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\Responses\Audio;
+namespace Anthropic\Responses\Audio;
 
-use OpenAI\Contracts\ResponseContract;
-use OpenAI\Contracts\ResponseHasMetaInformationContract;
-use OpenAI\Responses\Concerns\ArrayAccessible;
-use OpenAI\Responses\Concerns\HasMetaInformation;
-use OpenAI\Responses\Meta\MetaInformation;
-use OpenAI\Testing\Responses\Concerns\Fakeable;
+use Anthropic\Contracts\ResponseContract;
+use Anthropic\Contracts\ResponseHasMetaInformationContract;
+use Anthropic\Responses\Concerns\ArrayAccessible;
+use Anthropic\Responses\Concerns\HasMetaInformation;
+use Anthropic\Responses\Meta\MetaInformation;
+use Anthropic\Testing\Responses\Concerns\Fakeable;
 
 /**
  * @implements ResponseContract<array{task: ?string, language: ?string, duration: ?float, segments: array<int, array{id: int, seek: int, start: float, end: float, text: string, tokens: array<int, int>, temperature: float, avg_logprob: float, compression_ratio: float, no_speech_prob: float, transient?: bool}>, text: string}>

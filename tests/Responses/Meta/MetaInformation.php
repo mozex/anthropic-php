@@ -1,8 +1,8 @@
 <?php
 
-use OpenAI\Responses\Meta\MetaInformation;
-use OpenAI\Responses\Meta\MetaInformationOpenAI;
-use OpenAI\Responses\Meta\MetaInformationRateLimit;
+use Anthropic\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Meta\MetaInformationAnthropic;
+use Anthropic\Responses\Meta\MetaInformationRateLimit;
 
 test('from response headers', function () {
     $meta = MetaInformation::from((new \GuzzleHttp\Psr7\Response(headers: metaHeaders()))->getHeaders());
@@ -10,11 +10,11 @@ test('from response headers', function () {
     expect($meta)
         ->toBeInstanceOf(MetaInformation::class)
         ->requestId->toBe('3813fa4fa3f17bdf0d7654f0f49ebab4')
-        ->openai->toBeInstanceOf(MetaInformationOpenAI::class)
-        ->openai->model->toBe('gpt-3.5-turbo-instruct')
-        ->openai->organization->toBe('org-1234')
-        ->openai->version->toBe('2020-10-01')
-        ->openai->processingMs->toBe(410)
+        ->anthropic->toBeInstanceOf(MetaInformationAnthropic::class)
+        ->anthropic->model->toBe('gpt-3.5-turbo-instruct')
+        ->anthropic->organization->toBe('org-1234')
+        ->anthropic->version->toBe('2020-10-01')
+        ->anthropic->processingMs->toBe(410)
         ->requestLimit->toBeInstanceOf(MetaInformationRateLimit::class)
         ->requestLimit->limit->toBe(3000)
         ->requestLimit->remaining->toBe(2999)
@@ -42,11 +42,11 @@ test('from azure response headers', function () {
     expect($meta)
         ->toBeInstanceOf(MetaInformation::class)
         ->requestId->toBe('3813fa4fa3f17bdf0d7654f0f49ebab4')
-        ->openai->toBeInstanceOf(MetaInformationOpenAI::class)
-        ->openai->model->toBe('gpt-3.5-turbo-instruct')
-        ->openai->organization->toBeNull()
-        ->openai->version->toBeNull()
-        ->openai->processingMs->toBe(3482)
+        ->anthropic->toBeInstanceOf(MetaInformationAnthropic::class)
+        ->anthropic->model->toBe('gpt-3.5-turbo-instruct')
+        ->anthropic->organization->toBeNull()
+        ->anthropic->version->toBeNull()
+        ->anthropic->processingMs->toBe(3482)
         ->requestLimit->toBeInstanceOf(MetaInformationRateLimit::class)
         ->requestLimit->limit->toBeNull()
         ->requestLimit->remaining->toBe(119)
@@ -78,8 +78,8 @@ test('from azure response headers without processing time', function () {
 
     expect($meta)
         ->toBeInstanceOf(MetaInformation::class)
-        ->openai->toBeInstanceOf(MetaInformationOpenAI::class)
-        ->openai->processingMs->toBeNull();
+        ->anthropic->toBeInstanceOf(MetaInformationAnthropic::class)
+        ->anthropic->processingMs->toBeNull();
 });
 
 test('from response headers in different cases', function () {
@@ -88,11 +88,11 @@ test('from response headers in different cases', function () {
     expect($meta)
         ->toBeInstanceOf(MetaInformation::class)
         ->requestId->toBe('3813fa4fa3f17bdf0d7654f0f49ebab4')
-        ->openai->toBeInstanceOf(MetaInformationOpenAI::class)
-        ->openai->model->toBe('gpt-3.5-turbo-instruct')
-        ->openai->organization->toBe('org-1234')
-        ->openai->version->toBe('2020-10-01')
-        ->openai->processingMs->toBe(410)
+        ->anthropic->toBeInstanceOf(MetaInformationAnthropic::class)
+        ->anthropic->model->toBe('gpt-3.5-turbo-instruct')
+        ->anthropic->organization->toBe('org-1234')
+        ->anthropic->version->toBe('2020-10-01')
+        ->anthropic->processingMs->toBe(410)
         ->requestLimit->toBeNull()
         ->tokenLimit->toBeNull();
 });

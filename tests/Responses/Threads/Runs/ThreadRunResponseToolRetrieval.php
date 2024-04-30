@@ -1,6 +1,6 @@
 <?php
 
-use OpenAI\Responses\Threads\Runs\ThreadRunResponseToolRetrieval;
+use Anthropic\Responses\Threads\Runs\ThreadRunResponseToolRetrieval;
 
 test('from', function () {
     $result = ThreadRunResponseToolRetrieval::from(threadRunWithRetrievalToolResource()['tools'][0]);

@@ -1,25 +1,25 @@
 <?php
 
-namespace OpenAI\Testing;
+namespace Anthropic\Testing;
 
-use OpenAI\Contracts\ClientContract;
-use OpenAI\Contracts\ResponseContract;
-use OpenAI\Contracts\ResponseStreamContract;
-use OpenAI\Responses\StreamResponse;
-use OpenAI\Testing\Requests\TestRequest;
-use OpenAI\Testing\Resources\AssistantsTestResource;
-use OpenAI\Testing\Resources\AudioTestResource;
-use OpenAI\Testing\Resources\ChatTestResource;
-use OpenAI\Testing\Resources\CompletionsTestResource;
-use OpenAI\Testing\Resources\EditsTestResource;
-use OpenAI\Testing\Resources\EmbeddingsTestResource;
-use OpenAI\Testing\Resources\FilesTestResource;
-use OpenAI\Testing\Resources\FineTunesTestResource;
-use OpenAI\Testing\Resources\FineTuningTestResource;
-use OpenAI\Testing\Resources\ImagesTestResource;
-use OpenAI\Testing\Resources\ModelsTestResource;
-use OpenAI\Testing\Resources\ModerationsTestResource;
-use OpenAI\Testing\Resources\ThreadsTestResource;
+use Anthropic\Contracts\ClientContract;
+use Anthropic\Contracts\ResponseContract;
+use Anthropic\Contracts\ResponseStreamContract;
+use Anthropic\Responses\StreamResponse;
+use Anthropic\Testing\Requests\TestRequest;
+use Anthropic\Testing\Resources\AssistantsTestResource;
+use Anthropic\Testing\Resources\AudioTestResource;
+use Anthropic\Testing\Resources\ChatTestResource;
+use Anthropic\Testing\Resources\CompletionsTestResource;
+use Anthropic\Testing\Resources\EditsTestResource;
+use Anthropic\Testing\Resources\EmbeddingsTestResource;
+use Anthropic\Testing\Resources\FilesTestResource;
+use Anthropic\Testing\Resources\FineTunesTestResource;
+use Anthropic\Testing\Resources\FineTuningTestResource;
+use Anthropic\Testing\Resources\ImagesTestResource;
+use Anthropic\Testing\Resources\ModelsTestResource;
+use Anthropic\Testing\Resources\ModerationsTestResource;
+use Anthropic\Testing\Resources\ThreadsTestResource;
 use PHPUnit\Framework\Assert as PHPUnit;
 use Throwable;
 

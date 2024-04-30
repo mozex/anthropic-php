@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\Responses\Threads\Messages;
+namespace Anthropic\Responses\Threads\Messages;
 
-use OpenAI\Contracts\ResponseContract;
-use OpenAI\Contracts\ResponseHasMetaInformationContract;
-use OpenAI\Responses\Concerns\ArrayAccessible;
-use OpenAI\Responses\Concerns\HasMetaInformation;
-use OpenAI\Responses\Meta\MetaInformation;
-use OpenAI\Testing\Responses\Concerns\Fakeable;
+use Anthropic\Contracts\ResponseContract;
+use Anthropic\Contracts\ResponseHasMetaInformationContract;
+use Anthropic\Responses\Concerns\ArrayAccessible;
+use Anthropic\Responses\Concerns\HasMetaInformation;
+use Anthropic\Responses\Meta\MetaInformation;
+use Anthropic\Testing\Responses\Concerns\Fakeable;
 
 /**
  * @implements ResponseContract<array{object: string, data: array<int, array{id: string, object: string, created_at: int, thread_id: string, role: string, content: array<int, array{type: string, image_file: array{file_id: string}}|array{type: string, text: array{value: string, annotations: array<int, array{type: string, text: string, file_citation: array{file_id: string, quote: string}, start_index: int, end_index: int}|array{type: string, text: string, file_path: array{file_id: string}, start_index: int, end_index: int}>}}>, assistant_id: ?string, run_id: ?string, file_ids: array<int, string>, metadata: array<string, string>}>, first_id: ?string, last_id: ?string, has_more: bool}>

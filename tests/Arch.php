@@ -1,68 +1,68 @@
 <?php
 
 test('contracts')
-    ->expect('OpenAI\Contracts')
+    ->expect('Anthropic\Contracts')
     ->toOnlyUse([
-        'OpenAI\ValueObjects',
-        'OpenAI\Exceptions',
-        'OpenAI\Resources',
+        'Anthropic\ValueObjects',
+        'Anthropic\Exceptions',
+        'Anthropic\Resources',
         'Psr\Http\Message\ResponseInterface',
-        'OpenAI\Responses',
+        'Anthropic\Responses',
     ])
     ->toBeInterfaces();
 
 test('enums')
-    ->expect('OpenAI\Enums')
+    ->expect('Anthropic\Enums')
     ->toBeEnums();
 
 test('exceptions')
-    ->expect('OpenAI\Exceptions')
+    ->expect('Anthropic\Exceptions')
     ->toOnlyUse([
         'Psr\Http\Client',
     ])->toImplement(Throwable::class);
 
-test('resources')->expect('OpenAI\Resources')->toOnlyUse([
-    'OpenAI\Contracts',
-    'OpenAI\ValueObjects',
-    'OpenAI\Exceptions',
-    'OpenAI\Responses',
+test('resources')->expect('Anthropic\Resources')->toOnlyUse([
+    'Anthropic\Contracts',
+    'Anthropic\ValueObjects',
+    'Anthropic\Exceptions',
+    'Anthropic\Responses',
 ]);
 
-test('responses')->expect('OpenAI\Responses')->toOnlyUse([
+test('responses')->expect('Anthropic\Responses')->toOnlyUse([
     'Http\Discovery\Psr17Factory',
-    'OpenAI\Enums',
-    'OpenAI\Exceptions\ErrorException',
-    'OpenAI\Contracts',
-    'OpenAI\Testing\Responses\Concerns',
+    'Anthropic\Enums',
+    'Anthropic\Exceptions\ErrorException',
+    'Anthropic\Contracts',
+    'Anthropic\Testing\Responses\Concerns',
     'Psr\Http\Message\ResponseInterface',
     'Psr\Http\Message\StreamInterface',
 ]);
 
-test('value objects')->expect('OpenAI\ValueObjects')->toOnlyUse([
+test('value objects')->expect('Anthropic\ValueObjects')->toOnlyUse([
     'Http\Discovery\Psr17Factory',
     'Http\Message\MultipartStream\MultipartStreamBuilder',
     'Psr\Http\Message\RequestInterface',
     'Psr\Http\Message\StreamInterface',
-    'OpenAI\Enums',
-    'OpenAI\Contracts',
-    'OpenAI\Responses\Meta\MetaInformation',
+    'Anthropic\Enums',
+    'Anthropic\Contracts',
+    'Anthropic\Responses\Meta\MetaInformation',
 ]);
 
-test('client')->expect('OpenAI\Client')->toOnlyUse([
-    'OpenAI\Resources',
-    'OpenAI\Contracts',
+test('client')->expect('Anthropic\Client')->toOnlyUse([
+    'Anthropic\Resources',
+    'Anthropic\Contracts',
 ]);
 
-test('openai')->expect('OpenAI')->toOnlyUse([
+test('openai')->expect('Anthropic')->toOnlyUse([
     'GuzzleHttp\Client',
     'GuzzleHttp\Exception\ClientException',
     'Http\Discovery\Psr17Factory',
     'Http\Discovery\Psr18ClientDiscovery',
     'Http\Message\MultipartStream\MultipartStreamBuilder',
-    'OpenAI\Contracts',
-    'OpenAI\Resources',
+    'Anthropic\Contracts',
+    'Anthropic\Resources',
     'Psr\Http\Client',
     'Psr\Http\Message\RequestInterface',
     'Psr\Http\Message\ResponseInterface',
     'Psr\Http\Message\StreamInterface',
-])->ignoring('OpenAI\Testing');
+])->ignoring('Anthropic\Testing');

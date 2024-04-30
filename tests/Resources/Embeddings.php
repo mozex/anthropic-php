@@ -1,15 +1,15 @@
 <?php
 
-use OpenAI\Responses\Embeddings\CreateResponse;
-use OpenAI\Responses\Embeddings\CreateResponseEmbedding;
-use OpenAI\Responses\Embeddings\CreateResponseUsage;
-use OpenAI\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Embeddings\CreateResponse;
+use Anthropic\Responses\Embeddings\CreateResponseEmbedding;
+use Anthropic\Responses\Embeddings\CreateResponseUsage;
+use Anthropic\Responses\Meta\MetaInformation;
 
 test('create', function () {
     $client = mockClient('POST', 'embeddings', [
         'model' => 'text-similarity-babbage-001',
         'input' => 'The food was delicious and the waiter...',
-    ], \OpenAI\ValueObjects\Transporter\Response::from(embeddingList(), metaHeaders()));
+    ], \Anthropic\ValueObjects\Transporter\Response::from(embeddingList(), metaHeaders()));
 
     $result = $client->embeddings()->create([
         'model' => 'text-similarity-babbage-001',

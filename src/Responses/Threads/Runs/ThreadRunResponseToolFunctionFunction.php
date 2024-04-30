@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\Responses\Threads\Runs;
+namespace Anthropic\Responses\Threads\Runs;
 
-use OpenAI\Contracts\ResponseContract;
-use OpenAI\Responses\Concerns\ArrayAccessible;
-use OpenAI\Testing\Responses\Concerns\Fakeable;
+use Anthropic\Contracts\ResponseContract;
+use Anthropic\Responses\Concerns\ArrayAccessible;
+use Anthropic\Testing\Responses\Concerns\Fakeable;
 
 /**
  * @implements ResponseContract<array{description: string, name: string, parameters: array<string, mixed>}>

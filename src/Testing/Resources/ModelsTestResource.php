@@ -1,13 +1,13 @@
 <?php
 
-namespace OpenAI\Testing\Resources;
+namespace Anthropic\Testing\Resources;
 
-use OpenAI\Contracts\Resources\ModelsContract;
-use OpenAI\Resources\Models;
-use OpenAI\Responses\Models\DeleteResponse;
-use OpenAI\Responses\Models\ListResponse;
-use OpenAI\Responses\Models\RetrieveResponse;
-use OpenAI\Testing\Resources\Concerns\Testable;
+use Anthropic\Contracts\Resources\ModelsContract;
+use Anthropic\Resources\Models;
+use Anthropic\Responses\Models\DeleteResponse;
+use Anthropic\Responses\Models\ListResponse;
+use Anthropic\Responses\Models\RetrieveResponse;
+use Anthropic\Testing\Resources\Concerns\Testable;
 
 final class ModelsTestResource implements ModelsContract
 {

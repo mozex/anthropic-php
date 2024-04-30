@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\ValueObjects\Transporter;
+namespace Anthropic\ValueObjects\Transporter;
 
-use OpenAI\Contracts\StringableContract;
+use Anthropic\Contracts\StringableContract;
 
 /**
  * @internal

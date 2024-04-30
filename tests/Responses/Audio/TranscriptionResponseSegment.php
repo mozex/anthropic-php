@@ -1,6 +1,6 @@
 <?php
 
-use OpenAI\Responses\Audio\TranscriptionResponseSegment;
+use Anthropic\Responses\Audio\TranscriptionResponseSegment;
 
 test('from', function () {
     $result = TranscriptionResponseSegment::from(audioTranscriptionVerboseJson()['segments'][0]);

@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\Resources;
+namespace Anthropic\Resources;
 
-use OpenAI\Contracts\Resources\FilesContract;
-use OpenAI\Responses\Files\CreateResponse;
-use OpenAI\Responses\Files\DeleteResponse;
-use OpenAI\Responses\Files\ListResponse;
-use OpenAI\Responses\Files\RetrieveResponse;
-use OpenAI\ValueObjects\Transporter\Payload;
-use OpenAI\ValueObjects\Transporter\Response;
+use Anthropic\Contracts\Resources\FilesContract;
+use Anthropic\Responses\Files\CreateResponse;
+use Anthropic\Responses\Files\DeleteResponse;
+use Anthropic\Responses\Files\ListResponse;
+use Anthropic\Responses\Files\RetrieveResponse;
+use Anthropic\ValueObjects\Transporter\Payload;
+use Anthropic\ValueObjects\Transporter\Response;
 
 final class Files implements FilesContract
 {

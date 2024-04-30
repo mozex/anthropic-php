@@ -1,13 +1,13 @@
 <?php
 
-namespace OpenAI\Testing\Resources;
+namespace Anthropic\Testing\Resources;
 
-use OpenAI\Contracts\Resources\AudioContract;
-use OpenAI\Resources\Audio;
-use OpenAI\Responses\Audio\SpeechStreamResponse;
-use OpenAI\Responses\Audio\TranscriptionResponse;
-use OpenAI\Responses\Audio\TranslationResponse;
-use OpenAI\Testing\Resources\Concerns\Testable;
+use Anthropic\Contracts\Resources\AudioContract;
+use Anthropic\Resources\Audio;
+use Anthropic\Responses\Audio\SpeechStreamResponse;
+use Anthropic\Responses\Audio\TranscriptionResponse;
+use Anthropic\Responses\Audio\TranslationResponse;
+use Anthropic\Testing\Resources\Concerns\Testable;
 
 final class AudioTestResource implements AudioContract
 {

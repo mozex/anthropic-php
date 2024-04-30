@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use OpenAI\Client;
-use OpenAI\Factory;
+use Anthropic\Client;
+use Anthropic\Factory;
 
 final class Anthropic
 {
@@ -15,7 +15,7 @@ final class Anthropic
         return self::factory()
             ->withApiKey($apiKey)
             ->withOrganization($organization)
-            ->withHttpHeader('OpenAI-Beta', 'assistants=v1')
+            ->withHttpHeader('Anthropic-Beta', 'assistants=v1')
             ->make();
     }
 

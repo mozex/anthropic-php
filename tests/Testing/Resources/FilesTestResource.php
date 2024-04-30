@@ -1,11 +1,11 @@
 <?php
 
-use OpenAI\Resources\Files;
-use OpenAI\Responses\Files\CreateResponse;
-use OpenAI\Responses\Files\DeleteResponse;
-use OpenAI\Responses\Files\ListResponse;
-use OpenAI\Responses\Files\RetrieveResponse;
-use OpenAI\Testing\ClientFake;
+use Anthropic\Resources\Files;
+use Anthropic\Responses\Files\CreateResponse;
+use Anthropic\Responses\Files\DeleteResponse;
+use Anthropic\Responses\Files\ListResponse;
+use Anthropic\Responses\Files\RetrieveResponse;
+use Anthropic\Testing\ClientFake;
 
 it('records a files retrieve request', function () {
     $fake = new ClientFake([

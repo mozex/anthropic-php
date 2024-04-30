@@ -1,8 +1,8 @@
 <?php
 
-use OpenAI\Responses\Files\ListResponse;
-use OpenAI\Responses\Files\RetrieveResponse;
-use OpenAI\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Files\ListResponse;
+use Anthropic\Responses\Files\RetrieveResponse;
+use Anthropic\Responses\Meta\MetaInformation;
 
 test('from', function () {
     $response = ListResponse::from(fileListResource(), meta());

@@ -1,7 +1,7 @@
 <?php
 
-use OpenAI\Responses\Threads\Messages\ThreadMessageResponseContentTextAnnotationFileCitation;
-use OpenAI\Responses\Threads\Messages\ThreadMessageResponseContentTextAnnotationFileCitationObject;
+use Anthropic\Responses\Threads\Messages\ThreadMessageResponseContentTextAnnotationFileCitation;
+use Anthropic\Responses\Threads\Messages\ThreadMessageResponseContentTextAnnotationFileCitationObject;
 
 test('from', function () {
     $result = ThreadMessageResponseContentTextAnnotationFileCitationObject::from(threadMessageResource()['content'][0]['text']['annotations'][1]);

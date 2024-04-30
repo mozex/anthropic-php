@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\Responses\Moderations;
+namespace Anthropic\Responses\Moderations;
 
-use OpenAI\Enums\Moderations\Category;
+use Anthropic\Enums\Moderations\Category;
 
 final class CreateResponseResult
 {

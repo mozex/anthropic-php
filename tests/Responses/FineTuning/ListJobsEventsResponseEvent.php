@@ -1,8 +1,8 @@
 <?php
 
-use OpenAI\Enums\FineTuning\FineTuningEventLevel;
-use OpenAI\Responses\FineTuning\ListJobEventsResponseEvent;
-use OpenAI\Responses\FineTuning\ListJobEventsResponseEventData;
+use Anthropic\Enums\FineTuning\FineTuningEventLevel;
+use Anthropic\Responses\FineTuning\ListJobEventsResponseEvent;
+use Anthropic\Responses\FineTuning\ListJobEventsResponseEventData;
 
 test('from message event', function () {
     $result = ListJobEventsResponseEvent::from(fineTuningJobMessageEventResource());

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\Resources;
+namespace Anthropic\Resources;
 
-use OpenAI\Contracts\Resources\EditsContract;
-use OpenAI\Responses\Edits\CreateResponse;
-use OpenAI\ValueObjects\Transporter\Payload;
-use OpenAI\ValueObjects\Transporter\Response;
+use Anthropic\Contracts\Resources\EditsContract;
+use Anthropic\Responses\Edits\CreateResponse;
+use Anthropic\ValueObjects\Transporter\Payload;
+use Anthropic\ValueObjects\Transporter\Response;
 
 final class Edits implements EditsContract
 {
@@ -20,7 +20,7 @@ final class Edits implements EditsContract
      *
      * @param  array<string, mixed>  $parameters
      *
-     * @deprecated OpenAI has deprecated this endpoint and will stop working by January 4, 2024.
+     * @deprecated Anthropic has deprecated this endpoint and will stop working by January 4, 2024.
      * https://openai.com/blog/gpt-4-api-general-availability#deprecation-of-the-edits-api
      */
     public function create(array $parameters): CreateResponse

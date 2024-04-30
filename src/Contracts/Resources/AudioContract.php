@@ -1,10 +1,10 @@
 <?php
 
-namespace OpenAI\Contracts\Resources;
+namespace Anthropic\Contracts\Resources;
 
-use OpenAI\Responses\Audio\SpeechStreamResponse;
-use OpenAI\Responses\Audio\TranscriptionResponse;
-use OpenAI\Responses\Audio\TranslationResponse;
+use Anthropic\Responses\Audio\SpeechStreamResponse;
+use Anthropic\Responses\Audio\TranscriptionResponse;
+use Anthropic\Responses\Audio\TranslationResponse;
 
 interface AudioContract
 {

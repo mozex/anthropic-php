@@ -1,11 +1,11 @@
 <?php
 
-namespace OpenAI\Testing\Resources\Concerns;
+namespace Anthropic\Testing\Resources\Concerns;
 
-use OpenAI\Contracts\ResponseContract;
-use OpenAI\Contracts\ResponseStreamContract;
-use OpenAI\Testing\ClientFake;
-use OpenAI\Testing\Requests\TestRequest;
+use Anthropic\Contracts\ResponseContract;
+use Anthropic\Contracts\ResponseStreamContract;
+use Anthropic\Testing\ClientFake;
+use Anthropic\Testing\Requests\TestRequest;
 
 trait Testable
 {

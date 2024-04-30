@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\Resources;
+namespace Anthropic\Resources;
 
-use OpenAI\Contracts\Resources\ImagesContract;
-use OpenAI\Responses\Images\CreateResponse;
-use OpenAI\Responses\Images\EditResponse;
-use OpenAI\Responses\Images\VariationResponse;
-use OpenAI\ValueObjects\Transporter\Payload;
-use OpenAI\ValueObjects\Transporter\Response;
+use Anthropic\Contracts\Resources\ImagesContract;
+use Anthropic\Responses\Images\CreateResponse;
+use Anthropic\Responses\Images\EditResponse;
+use Anthropic\Responses\Images\VariationResponse;
+use Anthropic\ValueObjects\Transporter\Payload;
+use Anthropic\ValueObjects\Transporter\Response;
 
 final class Images implements ImagesContract
 {

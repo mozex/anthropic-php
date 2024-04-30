@@ -1,12 +1,12 @@
 <?php
 
-use OpenAI\Responses\Images\CreateResponse;
-use OpenAI\Responses\Images\CreateResponseData;
-use OpenAI\Responses\Images\EditResponse;
-use OpenAI\Responses\Images\EditResponseData;
-use OpenAI\Responses\Images\VariationResponse;
-use OpenAI\Responses\Images\VariationResponseData;
-use OpenAI\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Images\CreateResponse;
+use Anthropic\Responses\Images\CreateResponseData;
+use Anthropic\Responses\Images\EditResponse;
+use Anthropic\Responses\Images\EditResponseData;
+use Anthropic\Responses\Images\VariationResponse;
+use Anthropic\Responses\Images\VariationResponseData;
+use Anthropic\Responses\Meta\MetaInformation;
 
 test('create', function () {
     $client = mockClient('POST', 'images/generations', [
@@ -14,7 +14,7 @@ test('create', function () {
         'n' => 1,
         'size' => '256x256',
         'response_format' => 'url',
-    ], \OpenAI\ValueObjects\Transporter\Response::from(imageCreateWithUrl(), metaHeaders()));
+    ], \Anthropic\ValueObjects\Transporter\Response::from(imageCreateWithUrl(), metaHeaders()));
 
     $result = $client->images()->create([
         'prompt' => 'A cute baby sea otter',
@@ -44,7 +44,7 @@ test('edit', function () {
         'n' => 1,
         'size' => '256x256',
         'response_format' => 'url',
-    ], \OpenAI\ValueObjects\Transporter\Response::from(imageEditWithUrl(), metaHeaders()), validateParams: false);
+    ], \Anthropic\ValueObjects\Transporter\Response::from(imageEditWithUrl(), metaHeaders()), validateParams: false);
 
     $result = $client->images()->edit([
         'image' => fileResourceResource(),
@@ -74,7 +74,7 @@ test('variation', function () {
         'n' => 1,
         'size' => '256x256',
         'response_format' => 'url',
-    ], \OpenAI\ValueObjects\Transporter\Response::from(imageVariationWithUrl(), metaHeaders()), validateParams: false);
+    ], \Anthropic\ValueObjects\Transporter\Response::from(imageVariationWithUrl(), metaHeaders()), validateParams: false);
 
     $result = $client->images()->variation([
         'image' => fileResourceResource(),

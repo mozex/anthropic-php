@@ -1,8 +1,8 @@
 <?php
 
-use OpenAI\Responses\Assistants\AssistantResponse;
-use OpenAI\Responses\Assistants\AssistantResponseToolCodeInterpreter;
-use OpenAI\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Assistants\AssistantResponse;
+use Anthropic\Responses\Assistants\AssistantResponseToolCodeInterpreter;
+use Anthropic\Responses\Meta\MetaInformation;
 
 test('from', function () {
     $result = AssistantResponse::from(assistantWithAllToolsResource(), meta());

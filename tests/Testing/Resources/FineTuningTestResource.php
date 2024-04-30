@@ -1,10 +1,10 @@
 <?php
 
-use OpenAI\Resources\FineTuning;
-use OpenAI\Responses\FineTuning\ListJobEventsResponse;
-use OpenAI\Responses\FineTuning\ListJobsResponse;
-use OpenAI\Responses\FineTuning\RetrieveJobResponse;
-use OpenAI\Testing\ClientFake;
+use Anthropic\Resources\FineTuning;
+use Anthropic\Responses\FineTuning\ListJobEventsResponse;
+use Anthropic\Responses\FineTuning\ListJobsResponse;
+use Anthropic\Responses\FineTuning\RetrieveJobResponse;
+use Anthropic\Testing\ClientFake;
 
 it('records a fine tuning job create request', function () {
     $fake = new ClientFake([

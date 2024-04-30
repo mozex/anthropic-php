@@ -1,6 +1,6 @@
 <?php
 
-use OpenAI\Responses\FineTuning\RetrieveJobResponseError;
+use Anthropic\Responses\FineTuning\RetrieveJobResponseError;
 
 test('from', function () {
     $result = RetrieveJobResponseError::from(fineTuningFailedJobRetrieveResource()['error']);

@@ -33,7 +33,7 @@
     },
     "autoload": {
         "psr-4": {
-            "OpenAI\\": "src/"
+            "Anthropic\\": "src/"
         },
         "files": [
             "src/Anthropic.php"

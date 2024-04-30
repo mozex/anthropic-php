@@ -1,11 +1,11 @@
 <?php
 
-namespace OpenAI\Testing\Resources;
+namespace Anthropic\Testing\Resources;
 
-use OpenAI\Contracts\Resources\ModerationsContract;
-use OpenAI\Resources\Moderations;
-use OpenAI\Responses\Moderations\CreateResponse;
-use OpenAI\Testing\Resources\Concerns\Testable;
+use Anthropic\Contracts\Resources\ModerationsContract;
+use Anthropic\Resources\Moderations;
+use Anthropic\Responses\Moderations\CreateResponse;
+use Anthropic\Testing\Resources\Concerns\Testable;
 
 final class ModerationsTestResource implements ModerationsContract
 {

@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\Resources;
+namespace Anthropic\Resources;
 
-use OpenAI\Contracts\Resources\ModerationsContract;
-use OpenAI\Responses\Moderations\CreateResponse;
-use OpenAI\ValueObjects\Transporter\Payload;
-use OpenAI\ValueObjects\Transporter\Response;
+use Anthropic\Contracts\Resources\ModerationsContract;
+use Anthropic\Responses\Moderations\CreateResponse;
+use Anthropic\ValueObjects\Transporter\Payload;
+use Anthropic\ValueObjects\Transporter\Response;
 
 final class Moderations implements ModerationsContract
 {
     use Concerns\Transportable;
 
     /**
-     * Classifies if text violates OpenAI's Content Policy.
+     * Classifies if text violates Anthropic's Content Policy.
      *
      * @see https://platform.openai.com/docs/api-reference/moderations/create
      *

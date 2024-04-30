@@ -1,6 +1,6 @@
 <?php
 
-use OpenAI\Responses\FineTunes\RetrieveResponseEvent;
+use Anthropic\Responses\FineTunes\RetrieveResponseEvent;
 
 test('from', function () {
     $result = RetrieveResponseEvent::from(fineTuneEventResource());

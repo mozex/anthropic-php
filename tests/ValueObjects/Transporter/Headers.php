@@ -1,8 +1,8 @@
 <?php
 
-use OpenAI\Enums\Transporter\ContentType;
-use OpenAI\ValueObjects\ApiKey;
-use OpenAI\ValueObjects\Transporter\Headers;
+use Anthropic\Enums\Transporter\ContentType;
+use Anthropic\ValueObjects\ApiKey;
+use Anthropic\ValueObjects\Transporter\Headers;
 
 it('can be created from an API Token', function () {
     $headers = Headers::withAuthorization(ApiKey::from('foo'));
@@ -40,7 +40,7 @@ it('can have organization', function () {
     expect($headers->toArray())->toBe([
         'Authorization' => 'Bearer foo',
         'Content-Type' => 'application/json',
-        'OpenAI-Organization' => 'nunomaduro',
+        'Anthropic-Organization' => 'nunomaduro',
     ]);
 });
 

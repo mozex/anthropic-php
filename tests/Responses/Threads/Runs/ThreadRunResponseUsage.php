@@ -1,6 +1,6 @@
 <?php
 
-use OpenAI\Responses\Threads\Runs\ThreadRunResponseUsage;
+use Anthropic\Responses\Threads\Runs\ThreadRunResponseUsage;
 
 test('from', function () {
     $result = ThreadRunResponseUsage::from(threadRunWithUsageResource()['usage']);

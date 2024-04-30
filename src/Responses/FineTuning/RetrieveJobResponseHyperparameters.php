@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\Responses\FineTuning;
+namespace Anthropic\Responses\FineTuning;
 
-use OpenAI\Contracts\ResponseContract;
-use OpenAI\Responses\Concerns\ArrayAccessible;
+use Anthropic\Contracts\ResponseContract;
+use Anthropic\Responses\Concerns\ArrayAccessible;
 
 /**
  * @implements ResponseContract<array{n_epochs: int|string, batch_size: int|string|null, learning_rate_multiplier: float|string|null}>

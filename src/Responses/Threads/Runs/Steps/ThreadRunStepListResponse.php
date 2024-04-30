@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\Responses\Threads\Runs\Steps;
+namespace Anthropic\Responses\Threads\Runs\Steps;
 
-use OpenAI\Contracts\ResponseContract;
-use OpenAI\Contracts\ResponseHasMetaInformationContract;
-use OpenAI\Responses\Concerns\ArrayAccessible;
-use OpenAI\Responses\Concerns\HasMetaInformation;
-use OpenAI\Responses\Meta\MetaInformation;
-use OpenAI\Testing\Responses\Concerns\Fakeable;
+use Anthropic\Contracts\ResponseContract;
+use Anthropic\Contracts\ResponseHasMetaInformationContract;
+use Anthropic\Responses\Concerns\ArrayAccessible;
+use Anthropic\Responses\Concerns\HasMetaInformation;
+use Anthropic\Responses\Meta\MetaInformation;
+use Anthropic\Testing\Responses\Concerns\Fakeable;
 
 /**
  * @implements ResponseContract<array{object: string, data: array<int, array{id: string, object: string, created_at: int, thread_id: string, assistant_id: string, run_id: string, type: string, status: string, step_details: array{type: string, tool_calls: array<int, array{id: string, type: string, code_interpreter: array{input: string, outputs: array<int, array{type: string, image: array{file_id: string}}|array{type: string, logs: string}>}}|array{id: string, type: string, retrieval: array<string, string>}|array{id: string, type: string, function: array{name: string, arguments: string, output: ?string}}>}|array{type: string, message_creation: array{message_id: string}}, last_error: ?array{code: string, message: string}, expires_at: ?int, cancelled_at: ?int, failed_at: ?int, completed_at: ?int, metadata?: array<string, string>}>, first_id: ?string, last_id: ?string, has_more: bool}>

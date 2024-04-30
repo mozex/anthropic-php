@@ -1,12 +1,12 @@
 <?php
 
-namespace OpenAI\Testing\Resources;
+namespace Anthropic\Testing\Resources;
 
-use OpenAI\Contracts\Resources\ChatContract;
-use OpenAI\Resources\Chat;
-use OpenAI\Responses\Chat\CreateResponse;
-use OpenAI\Responses\StreamResponse;
-use OpenAI\Testing\Resources\Concerns\Testable;
+use Anthropic\Contracts\Resources\ChatContract;
+use Anthropic\Resources\Chat;
+use Anthropic\Responses\Chat\CreateResponse;
+use Anthropic\Responses\StreamResponse;
+use Anthropic\Testing\Resources\Concerns\Testable;
 
 final class ChatTestResource implements ChatContract
 {

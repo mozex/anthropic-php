@@ -1,9 +1,9 @@
 <?php
 
-use OpenAI\Resources\ThreadsRuns;
-use OpenAI\Responses\Threads\Runs\ThreadRunListResponse;
-use OpenAI\Responses\Threads\Runs\ThreadRunResponse;
-use OpenAI\Testing\ClientFake;
+use Anthropic\Resources\ThreadsRuns;
+use Anthropic\Responses\Threads\Runs\ThreadRunListResponse;
+use Anthropic\Responses\Threads\Runs\ThreadRunResponse;
+use Anthropic\Testing\ClientFake;
 
 it('records a thread run create request', function () {
     $fake = new ClientFake([

@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://raw.githubusercontent.com/openai-php/client/main/art/example.png" width="600" alt="OpenAI PHP">
+    <img src="https://raw.githubusercontent.com/openai-php/client/main/art/example.png" width="600" alt="Anthropic PHP">
     <p align="center">
         <a href="https://github.com/openai-php/client/actions"><img alt="GitHub Workflow Status (main)" src="https://img.shields.io/github/actions/workflow/status/openai-php/client/tests.yml?branch=main&label=tests&style=round-square"></a>
         <a href="https://packagist.org/packages/openai-php/client"><img alt="Total Downloads" src="https://img.shields.io/packagist/dt/openai-php/client"></a>
@@ -9,7 +9,7 @@
 </p>
 
 ------
-**OpenAI PHP** is a community-maintained PHP API client that allows you to interact with the [Open AI API](https://platform.openai.com/docs/api-reference/introduction). If you or your business relies on this package, it's important to support the developers who have contributed their time and effort to create and maintain this valuable tool:
+**Anthropic PHP** is a community-maintained PHP API client that allows you to interact with the [Open AI API](https://platform.openai.com/docs/api-reference/introduction). If you or your business relies on this package, it's important to support the developers who have contributed their time and effort to create and maintain this valuable tool:
 
 - Nuno Maduro: **[github.com/sponsors/nunomaduro](https://github.com/sponsors/nunomaduro)**
 - Sandro Gehri: **[github.com/sponsors/gehrisandro](https://github.com/sponsors/gehrisandro)**
@@ -45,7 +45,7 @@
 
 > **Requires [PHP 8.1+](https://php.net/releases/)**
 
-First, install OpenAI via the [Composer](https://getcomposer.org/) package manager:
+First, install Anthropic via the [Composer](https://getcomposer.org/) package manager:
 
 ```bash
 composer require openai-php/client
@@ -56,7 +56,7 @@ Ensure that the `php-http/discovery` composer plugin is allowed to run or instal
 composer require guzzlehttp/guzzle
 ```
 
-Then, interact with OpenAI's API:
+Then, interact with Anthropic's API:
 
 ```php
 $yourApiKey = getenv('YOUR_API_KEY');
@@ -842,7 +842,7 @@ foreach($stream as $response){
 
 #### `create`
 
-Classifies if text violates OpenAI's Content Policy.
+Classifies if text violates Anthropic's Content Policy.
 
 ```php
 
@@ -942,7 +942,7 @@ $response->toArray(); // ['created' => 1589478378, data => ['url' => 'https://oa
 
 > **Note:** If you are creating the client manually from the factory. Make sure you provide the necessary header:
 > ```php
-> $factory->withHttpHeader('OpenAI-Beta', 'assistants=v1')
+> $factory->withHttpHeader('Anthropic-Beta', 'assistants=v1')
 > ```
 
 #### `create`
@@ -1652,7 +1652,7 @@ $response->toArray(); // ['object' => 'list', ...]]
 
 ### `Edits` Resource (deprecated)
 
-> OpenAI has deprecated the Edits API and will stop working by January 4, 2024.
+> Anthropic has deprecated the Edits API and will stop working by January 4, 2024.
 > https://openai.com/blog/gpt-4-api-general-availability#deprecation-of-the-edits-api
 
 #### `create`
@@ -1695,10 +1695,10 @@ $meta = $response->meta();
 
 $meta->requestId; // '574a03e2faaf4e9fd703958e4ddc66f5'
 
-$meta->openai->model; // 'gpt-3.5-turbo-instruct'
-$meta->openai->organization; // 'org-jwe45798ASN82s'
-$meta->openai->version; // '2020-10-01'
-$meta->openai->processingMs; // 425
+$meta->anthropic->model; // 'gpt-3.5-turbo-instruct'
+$meta->anthropic->organization; // 'org-jwe45798ASN82s'
+$meta->anthropic->version; // '2020-10-01'
+$meta->anthropic->processingMs; // 425
 
 $meta->requestLimit->limit; // 3000
 $meta->requestLimit->remaining; // 2999
@@ -1740,7 +1740,7 @@ $stream = $client->completions()->createStreamed([
 $stream->meta(); 
 ```
 
-For further details about the rates limits and what to do if you hit them visit the [OpenAI documentation](https://platform.openai.com/docs/guides/rate-limits/rate-limits).
+For further details about the rates limits and what to do if you hit them visit the [Anthropic documentation](https://platform.openai.com/docs/guides/rate-limits/rate-limits).
 
 ## Troubleshooting
 
@@ -1762,17 +1762,17 @@ Anthropic::factory()
 
 ## Testing
 
-The package provides a fake implementation of the `OpenAI\Client` class that allows you to fake the API responses.
+The package provides a fake implementation of the `Anthropic\Client` class that allows you to fake the API responses.
 
-To test your code ensure you swap the `OpenAI\Client` class with the `OpenAI\Testing\ClientFake` class in your test case.
+To test your code ensure you swap the `Anthropic\Client` class with the `Anthropic\Testing\ClientFake` class in your test case.
 
 The fake responses are returned in the order they are provided while creating the fake client.
 
 All responses are having a `fake()` method that allows you to easily create a response object by only providing the parameters relevant for your test case.
 
 ```php
-use OpenAI\Testing\ClientFake;
-use OpenAI\Responses\Completions\CreateResponse;
+use Anthropic\Testing\ClientFake;
+use Anthropic\Responses\Completions\CreateResponse;
 
 $client = new ClientFake([
     CreateResponse::fake([
@@ -1795,8 +1795,8 @@ expect($completion['choices'][0]['text'])->toBe('awesome!');
 In case of a streamed response you can optionally provide a resource holding the fake response data.
 
 ```php
-use OpenAI\Testing\ClientFake;
-use OpenAI\Responses\Chat\CreateStreamedResponse;
+use Anthropic\Testing\ClientFake;
+use Anthropic\Responses\Chat\CreateStreamedResponse;
 
 $client = new ClientFake([
     CreateStreamedResponse::fake(fopen('file.txt', 'r'););
@@ -1843,7 +1843,7 @@ To write tests expecting the API request to fail you can provide a `Throwable` o
 
 ```php
 $client = new ClientFake([
-    new \OpenAI\Exceptions\ErrorException([
+    new \Anthropic\Exceptions\ErrorException([
         'message' => 'The model `gpt-1` does not exist',
         'type' => 'invalid_request_error',
         'code' => null,
@@ -1861,7 +1861,7 @@ $completion = $client->completions()->create([
 
 ### Azure
 
-In order to use the Azure OpenAI Service, it is necessary to construct the client manually using the factory.
+In order to use the Azure Anthropic Service, it is necessary to construct the client manually using the factory.
 
 ```php
 $client = Anthropic::factory()
@@ -1883,4 +1883,4 @@ $result = $client->completions()->create([
 
 ---
 
-OpenAI PHP is an open-sourced software licensed under the **[MIT license](https://opensource.org/licenses/MIT)**.
+Anthropic PHP is an open-sourced software licensed under the **[MIT license](https://opensource.org/licenses/MIT)**.

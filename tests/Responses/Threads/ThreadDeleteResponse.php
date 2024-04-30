@@ -1,7 +1,7 @@
 <?php
 
-use OpenAI\Responses\Meta\MetaInformation;
-use OpenAI\Responses\Threads\ThreadDeleteResponse;
+use Anthropic\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Threads\ThreadDeleteResponse;
 
 test('from', function () {
     $result = ThreadDeleteResponse::from(threadDeleteResource(), meta());

@@ -1,8 +1,8 @@
 <?php
 
-use OpenAI\Responses\Meta\MetaInformation;
-use OpenAI\Responses\Models\ListResponse;
-use OpenAI\Responses\Models\RetrieveResponse;
+use Anthropic\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Models\ListResponse;
+use Anthropic\Responses\Models\RetrieveResponse;
 
 test('from', function () {
     $response = ListResponse::from(modelList(), meta());

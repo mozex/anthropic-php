@@ -1,9 +1,9 @@
 <?php
 
-use OpenAI\Resources\Completions;
-use OpenAI\Responses\Completions\CreateResponse;
-use OpenAI\Responses\Completions\CreateStreamedResponse;
-use OpenAI\Testing\ClientFake;
+use Anthropic\Resources\Completions;
+use Anthropic\Responses\Completions\CreateResponse;
+use Anthropic\Responses\Completions\CreateStreamedResponse;
+use Anthropic\Testing\ClientFake;
 
 it('records a completions create request', function () {
     $fake = new ClientFake([

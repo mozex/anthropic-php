@@ -1,9 +1,9 @@
 <?php
 
-use OpenAI\Responses\Edits\CreateResponse;
-use OpenAI\Responses\Edits\CreateResponseChoice;
-use OpenAI\Responses\Edits\CreateResponseUsage;
-use OpenAI\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Edits\CreateResponse;
+use Anthropic\Responses\Edits\CreateResponseChoice;
+use Anthropic\Responses\Edits\CreateResponseUsage;
+use Anthropic\Responses\Meta\MetaInformation;
 
 test('from', function () {
     $response = CreateResponse::from(edit(), meta());

@@ -1,11 +1,11 @@
 <?php
 
-use OpenAI\Responses\Meta\MetaInformation;
-use OpenAI\Responses\Threads\Runs\ThreadRunResponse;
-use OpenAI\Responses\Threads\Runs\ThreadRunResponseToolCodeInterpreter;
-use OpenAI\Responses\Threads\ThreadDeleteResponse;
-use OpenAI\Responses\Threads\ThreadResponse;
-use OpenAI\ValueObjects\Transporter\Response;
+use Anthropic\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Threads\Runs\ThreadRunResponse;
+use Anthropic\Responses\Threads\Runs\ThreadRunResponseToolCodeInterpreter;
+use Anthropic\Responses\Threads\ThreadDeleteResponse;
+use Anthropic\Responses\Threads\ThreadResponse;
+use Anthropic\ValueObjects\Transporter\Response;
 
 test('create', function () {
     $client = mockClient('POST', 'threads', [], Response::from(threadResource(), metaHeaders()));

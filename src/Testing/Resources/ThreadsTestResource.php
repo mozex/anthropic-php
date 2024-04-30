@@ -1,13 +1,13 @@
 <?php
 
-namespace OpenAI\Testing\Resources;
+namespace Anthropic\Testing\Resources;
 
-use OpenAI\Contracts\Resources\ThreadsContract;
-use OpenAI\Resources\Threads;
-use OpenAI\Responses\Threads\Runs\ThreadRunResponse;
-use OpenAI\Responses\Threads\ThreadDeleteResponse;
-use OpenAI\Responses\Threads\ThreadResponse;
-use OpenAI\Testing\Resources\Concerns\Testable;
+use Anthropic\Contracts\Resources\ThreadsContract;
+use Anthropic\Resources\Threads;
+use Anthropic\Responses\Threads\Runs\ThreadRunResponse;
+use Anthropic\Responses\Threads\ThreadDeleteResponse;
+use Anthropic\Responses\Threads\ThreadResponse;
+use Anthropic\Testing\Resources\Concerns\Testable;
 
 final class ThreadsTestResource implements ThreadsContract
 {

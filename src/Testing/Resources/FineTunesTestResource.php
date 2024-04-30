@@ -1,14 +1,14 @@
 <?php
 
-namespace OpenAI\Testing\Resources;
+namespace Anthropic\Testing\Resources;
 
-use OpenAI\Contracts\Resources\FineTunesContract;
-use OpenAI\Resources\FineTunes;
-use OpenAI\Responses\FineTunes\ListEventsResponse;
-use OpenAI\Responses\FineTunes\ListResponse;
-use OpenAI\Responses\FineTunes\RetrieveResponse;
-use OpenAI\Responses\StreamResponse;
-use OpenAI\Testing\Resources\Concerns\Testable;
+use Anthropic\Contracts\Resources\FineTunesContract;
+use Anthropic\Resources\FineTunes;
+use Anthropic\Responses\FineTunes\ListEventsResponse;
+use Anthropic\Responses\FineTunes\ListResponse;
+use Anthropic\Responses\FineTunes\RetrieveResponse;
+use Anthropic\Responses\StreamResponse;
+use Anthropic\Testing\Resources\Concerns\Testable;
 
 final class FineTunesTestResource implements FineTunesContract
 {

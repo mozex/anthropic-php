@@ -1,6 +1,6 @@
 <?php
 
-use OpenAI\Responses\Completions\CreateResponseUsage;
+use Anthropic\Responses\Completions\CreateResponseUsage;
 
 test('from', function () {
     $result = CreateResponseUsage::from(completion()['usage']);

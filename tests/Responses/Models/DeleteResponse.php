@@ -1,7 +1,7 @@
 <?php
 
-use OpenAI\Responses\Meta\MetaInformation;
-use OpenAI\Responses\Models\DeleteResponse;
+use Anthropic\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Models\DeleteResponse;
 
 test('from', function () {
     $result = DeleteResponse::from(fineTunedModelDeleteResource(), meta());

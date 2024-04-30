@@ -1,11 +1,11 @@
 <?php
 
-namespace OpenAI\Testing\Resources;
+namespace Anthropic\Testing\Resources;
 
-use OpenAI\Contracts\Resources\EditsContract;
-use OpenAI\Resources\Edits;
-use OpenAI\Responses\Edits\CreateResponse;
-use OpenAI\Testing\Resources\Concerns\Testable;
+use Anthropic\Contracts\Resources\EditsContract;
+use Anthropic\Resources\Edits;
+use Anthropic\Responses\Edits\CreateResponse;
+use Anthropic\Testing\Resources\Concerns\Testable;
 
 final class EditsTestResource implements EditsContract
 {

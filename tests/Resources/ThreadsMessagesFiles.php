@@ -1,9 +1,9 @@
 <?php
 
-use OpenAI\Responses\Meta\MetaInformation;
-use OpenAI\Responses\Threads\Messages\Files\ThreadMessageFileListResponse;
-use OpenAI\Responses\Threads\Messages\Files\ThreadMessageFileResponse;
-use OpenAI\ValueObjects\Transporter\Response;
+use Anthropic\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Threads\Messages\Files\ThreadMessageFileListResponse;
+use Anthropic\Responses\Threads\Messages\Files\ThreadMessageFileResponse;
+use Anthropic\ValueObjects\Transporter\Response;
 
 test('list', function () {
     $client = mockClient('GET', 'threads/thread_agvtHUGezjTCt4SKgQg0NJ2Y/messages/msg_KNsDDwE41BUAHhcPNpDkdHWZ/files', [], Response::from(threadMessageFileListResource(), metaHeaders()));

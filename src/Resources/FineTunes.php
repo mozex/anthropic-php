@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\Resources;
+namespace Anthropic\Resources;
 
-use OpenAI\Contracts\Resources\FineTunesContract;
-use OpenAI\Responses\FineTunes\ListEventsResponse;
-use OpenAI\Responses\FineTunes\ListResponse;
-use OpenAI\Responses\FineTunes\RetrieveResponse;
-use OpenAI\Responses\FineTunes\RetrieveStreamedResponseEvent;
-use OpenAI\Responses\StreamResponse;
-use OpenAI\ValueObjects\Transporter\Payload;
-use OpenAI\ValueObjects\Transporter\Response;
+use Anthropic\Contracts\Resources\FineTunesContract;
+use Anthropic\Responses\FineTunes\ListEventsResponse;
+use Anthropic\Responses\FineTunes\ListResponse;
+use Anthropic\Responses\FineTunes\RetrieveResponse;
+use Anthropic\Responses\FineTunes\RetrieveStreamedResponseEvent;
+use Anthropic\Responses\StreamResponse;
+use Anthropic\ValueObjects\Transporter\Payload;
+use Anthropic\ValueObjects\Transporter\Response;
 
 final class FineTunes implements FineTunesContract
 {

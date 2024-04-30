@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenAI\Testing\Responses\Fixtures\Threads;
+namespace Anthropic\Testing\Responses\Fixtures\Threads;
 
 final class ThreadResponseFixture
 {

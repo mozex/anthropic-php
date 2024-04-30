@@ -1,6 +1,6 @@
 <?php
 
-use OpenAI\Responses\Assistants\AssistantResponseToolRetrieval;
+use Anthropic\Responses\Assistants\AssistantResponseToolRetrieval;
 
 test('from', function () {
     $result = AssistantResponseToolRetrieval::from(assistantWithRetrievalToolResource()['tools'][0]);

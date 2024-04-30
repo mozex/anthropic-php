@@ -1,7 +1,7 @@
 <?php
 
-use OpenAI\Enums\Moderations\Category;
-use OpenAI\Responses\Moderations\CreateResponseCategory;
+use Anthropic\Enums\Moderations\Category;
+use Anthropic\Responses\Moderations\CreateResponseCategory;
 
 test('from', function () {
     $category = CreateResponseCategory::from([

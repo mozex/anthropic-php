@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\Responses\Threads\Runs\Steps;
+namespace Anthropic\Responses\Threads\Runs\Steps;
 
-use OpenAI\Contracts\ResponseContract;
-use OpenAI\Responses\Concerns\ArrayAccessible;
-use OpenAI\Testing\Responses\Concerns\Fakeable;
+use Anthropic\Contracts\ResponseContract;
+use Anthropic\Responses\Concerns\ArrayAccessible;
+use Anthropic\Testing\Responses\Concerns\Fakeable;
 
 /**
  * @implements ResponseContract<array{input: string, outputs: array<int, array{type: string, image: array{file_id: string}}|array{type: string, logs: string}>}>
@@ -37,7 +37,7 @@ final class ThreadRunStepResponseCodeInterpreter implements ResponseContract
     public static function from(array $attributes): self
     {
         $outputs = array_map(
-            fn (array $output): \OpenAI\Responses\Threads\Runs\Steps\ThreadRunStepResponseCodeInterpreterOutputImage|\OpenAI\Responses\Threads\Runs\Steps\ThreadRunStepResponseCodeInterpreterOutputLogs => match ($output['type']) {
+            fn (array $output): \Anthropic\Responses\Threads\Runs\Steps\ThreadRunStepResponseCodeInterpreterOutputImage|\Anthropic\Responses\Threads\Runs\Steps\ThreadRunStepResponseCodeInterpreterOutputLogs => match ($output['type']) {
                 'image' => ThreadRunStepResponseCodeInterpreterOutputImage::from($output),
                 'logs' => ThreadRunStepResponseCodeInterpreterOutputLogs::from($output),
             },

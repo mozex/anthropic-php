@@ -1,12 +1,12 @@
 <?php
 
-use OpenAI\Responses\FineTuning\ListJobEventsResponse;
-use OpenAI\Responses\FineTuning\ListJobEventsResponseEvent;
-use OpenAI\Responses\FineTuning\ListJobEventsResponseEventData;
-use OpenAI\Responses\FineTuning\ListJobsResponse;
-use OpenAI\Responses\FineTuning\RetrieveJobResponse;
-use OpenAI\Responses\FineTuning\RetrieveJobResponseHyperparameters;
-use OpenAI\Responses\Meta\MetaInformation;
+use Anthropic\Responses\FineTuning\ListJobEventsResponse;
+use Anthropic\Responses\FineTuning\ListJobEventsResponseEvent;
+use Anthropic\Responses\FineTuning\ListJobEventsResponseEventData;
+use Anthropic\Responses\FineTuning\ListJobsResponse;
+use Anthropic\Responses\FineTuning\RetrieveJobResponse;
+use Anthropic\Responses\FineTuning\RetrieveJobResponseHyperparameters;
+use Anthropic\Responses\Meta\MetaInformation;
 
 test('create job', function () {
     $client = mockClient('POST', 'fine_tuning/jobs', [
@@ -17,7 +17,7 @@ test('create job', function () {
             'n_epochs' => 4,
         ],
         'suffix' => null,
-    ], \OpenAI\ValueObjects\Transporter\Response::from(fineTuningJobCreateResource(), metaHeaders()));
+    ], \Anthropic\ValueObjects\Transporter\Response::from(fineTuningJobCreateResource(), metaHeaders()));
 
     $result = $client->fineTuning()->createJob([
         'training_file' => 'file-abc123',
@@ -51,7 +51,7 @@ test('create job', function () {
 });
 
 test('list jobs', function () {
-    $client = mockClient('GET', 'fine_tuning/jobs', [], \OpenAI\ValueObjects\Transporter\Response::from(fineTuningJobListResource(), metaHeaders()));
+    $client = mockClient('GET', 'fine_tuning/jobs', [], \Anthropic\ValueObjects\Transporter\Response::from(fineTuningJobListResource(), metaHeaders()));
 
     $result = $client->fineTuning()->listJobs();
 
@@ -65,7 +65,7 @@ test('list jobs', function () {
 });
 
 test('list jobs with params', function () {
-    $client = mockClient('GET', 'fine_tuning/jobs', ['limit' => 3], \OpenAI\ValueObjects\Transporter\Response::from(fineTuningJobListResource(), metaHeaders()));
+    $client = mockClient('GET', 'fine_tuning/jobs', ['limit' => 3], \Anthropic\ValueObjects\Transporter\Response::from(fineTuningJobListResource(), metaHeaders()));
 
     $result = $client->fineTuning()->listJobs(['limit' => 3]);
 
@@ -76,7 +76,7 @@ test('list jobs with params', function () {
 });
 
 test('retrieve job', function () {
-    $client = mockClient('GET', 'fine_tuning/jobs/ftjob-AF1WoRqd3aJAHsqc9NY7iL8F', [], \OpenAI\ValueObjects\Transporter\Response::from(fineTuningJobRetrieveResource(), metaHeaders()));
+    $client = mockClient('GET', 'fine_tuning/jobs/ftjob-AF1WoRqd3aJAHsqc9NY7iL8F', [], \Anthropic\ValueObjects\Transporter\Response::from(fineTuningJobRetrieveResource(), metaHeaders()));
 
     $result = $client->fineTuning()->retrieveJob('ftjob-AF1WoRqd3aJAHsqc9NY7iL8F');
 
@@ -106,7 +106,7 @@ test('retrieve job', function () {
 });
 
 test('cancel job', function () {
-    $client = mockClient('POST', 'fine_tuning/jobs/ftjob-AF1WoRqd3aJAHsqc9NY7iL8F/cancel', [], \OpenAI\ValueObjects\Transporter\Response::from([...fineTuningJobRetrieveResource(), 'status' => 'cancelled'], metaHeaders()));
+    $client = mockClient('POST', 'fine_tuning/jobs/ftjob-AF1WoRqd3aJAHsqc9NY7iL8F/cancel', [], \Anthropic\ValueObjects\Transporter\Response::from([...fineTuningJobRetrieveResource(), 'status' => 'cancelled'], metaHeaders()));
 
     $result = $client->fineTuning()->cancelJob('ftjob-AF1WoRqd3aJAHsqc9NY7iL8F');
 
@@ -132,7 +132,7 @@ test('cancel job', function () {
 });
 
 test('list job events', function () {
-    $client = mockClient('GET', 'fine_tuning/jobs/ftjob-AF1WoRqd3aJAHsqc9NY7iL8F/events', [], \OpenAI\ValueObjects\Transporter\Response::from(fineTuningJobListEventsResource(), metaHeaders()));
+    $client = mockClient('GET', 'fine_tuning/jobs/ftjob-AF1WoRqd3aJAHsqc9NY7iL8F/events', [], \Anthropic\ValueObjects\Transporter\Response::from(fineTuningJobListEventsResource(), metaHeaders()));
 
     $result = $client->fineTuning()->listJobEvents('ftjob-AF1WoRqd3aJAHsqc9NY7iL8F');
 
@@ -146,7 +146,7 @@ test('list job events', function () {
         ->object->toBe('fine_tuning.job.event')
         ->id->toBe('ft-event-ddTJfwuMVpfLXseO0Am0Gqjm')
         ->createdAt->toBe(1692407401)
-        ->level->toBe(\OpenAI\Enums\FineTuning\FineTuningEventLevel::Info)
+        ->level->toBe(\Anthropic\Enums\FineTuning\FineTuningEventLevel::Info)
         ->message->toBe('Fine tuning job successfully completed')
         ->data->toBeNull()
         ->type->toBe('message');
@@ -156,7 +156,7 @@ test('list job events', function () {
         ->object->toBe('fine_tuning.job.event')
         ->id->toBe('ftevent-kLPSMIcsqshEUEJVOVBVcHlP')
         ->createdAt->toBe(1692887003)
-        ->level->toBe(\OpenAI\Enums\FineTuning\FineTuningEventLevel::Info)
+        ->level->toBe(\Anthropic\Enums\FineTuning\FineTuningEventLevel::Info)
         ->message->toBe('Step 99/99: training loss=0.11')
         ->data->toBeInstanceOf(ListJobEventsResponseEventData::class)
         ->type->toBe('metrics');
@@ -172,7 +172,7 @@ test('list job events', function () {
 });
 
 test('list job events with params', function () {
-    $client = mockClient('GET', 'fine_tuning/jobs/ftjob-AF1WoRqd3aJAHsqc9NY7iL8F/events', ['limit' => 3], \OpenAI\ValueObjects\Transporter\Response::from(fineTuningJobListEventsResource(), metaHeaders()));
+    $client = mockClient('GET', 'fine_tuning/jobs/ftjob-AF1WoRqd3aJAHsqc9NY7iL8F/events', ['limit' => 3], \Anthropic\ValueObjects\Transporter\Response::from(fineTuningJobListEventsResource(), metaHeaders()));
 
     $result = $client->fineTuning()->listJobEvents('ftjob-AF1WoRqd3aJAHsqc9NY7iL8F', ['limit' => 3]);
 

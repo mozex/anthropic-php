@@ -1,9 +1,9 @@
 <?php
 
-namespace OpenAI\Contracts\Resources;
+namespace Anthropic\Contracts\Resources;
 
-use OpenAI\Responses\Threads\Messages\Files\ThreadMessageFileListResponse;
-use OpenAI\Responses\Threads\Messages\Files\ThreadMessageFileResponse;
+use Anthropic\Responses\Threads\Messages\Files\ThreadMessageFileListResponse;
+use Anthropic\Responses\Threads\Messages\Files\ThreadMessageFileResponse;
 
 interface ThreadsMessagesFilesContract
 {

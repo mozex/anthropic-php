@@ -1,10 +1,10 @@
 <?php
 
-namespace OpenAI\Contracts\Resources;
+namespace Anthropic\Contracts\Resources;
 
-use OpenAI\Responses\Chat\CreateResponse;
-use OpenAI\Responses\Chat\CreateStreamedResponse;
-use OpenAI\Responses\StreamResponse;
+use Anthropic\Responses\Chat\CreateResponse;
+use Anthropic\Responses\Chat\CreateStreamedResponse;
+use Anthropic\Responses\StreamResponse;
 
 interface ChatContract
 {

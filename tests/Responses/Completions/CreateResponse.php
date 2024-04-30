@@ -1,9 +1,9 @@
 <?php
 
-use OpenAI\Responses\Completions\CreateResponse;
-use OpenAI\Responses\Completions\CreateResponseChoice;
-use OpenAI\Responses\Completions\CreateResponseUsage;
-use OpenAI\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Completions\CreateResponse;
+use Anthropic\Responses\Completions\CreateResponseChoice;
+use Anthropic\Responses\Completions\CreateResponseUsage;
+use Anthropic\Responses\Meta\MetaInformation;
 
 test('from', function () {
     $completion = CreateResponse::from(completion(), meta());

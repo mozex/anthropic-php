@@ -1,6 +1,6 @@
 <?php
 
-use OpenAI\Responses\Threads\Runs\Steps\ThreadRunStepResponseCodeInterpreterOutputImageImage;
+use Anthropic\Responses\Threads\Runs\Steps\ThreadRunStepResponseCodeInterpreterOutputImageImage;
 
 test('from', function () {
     $result = ThreadRunStepResponseCodeInterpreterOutputImageImage::from(threadRunStepWithCodeInterpreterOutputResource()['step_details']['tool_calls'][0]['code_interpreter']['outputs'][0]['image']);

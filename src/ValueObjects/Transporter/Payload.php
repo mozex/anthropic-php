@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\ValueObjects\Transporter;
+namespace Anthropic\ValueObjects\Transporter;
 
+use Anthropic\Contracts\Request;
+use Anthropic\Enums\Transporter\ContentType;
+use Anthropic\Enums\Transporter\Method;
+use Anthropic\ValueObjects\ResourceUri;
 use Http\Discovery\Psr17Factory;
 use Http\Message\MultipartStream\MultipartStreamBuilder;
-use OpenAI\Contracts\Request;
-use OpenAI\Enums\Transporter\ContentType;
-use OpenAI\Enums\Transporter\Method;
-use OpenAI\ValueObjects\ResourceUri;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamInterface;
 

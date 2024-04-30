@@ -1,6 +1,6 @@
 <?php
 
-use OpenAI\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Meta\MetaInformation;
 
 function metaHeaders(): array
 {

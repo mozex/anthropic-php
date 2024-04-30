@@ -1,16 +1,16 @@
 <?php
 
-namespace OpenAI;
+namespace Anthropic;
 
+use Anthropic\Transporters\HttpTransporter;
+use Anthropic\ValueObjects\ApiKey;
+use Anthropic\ValueObjects\Transporter\BaseUri;
+use Anthropic\ValueObjects\Transporter\Headers;
+use Anthropic\ValueObjects\Transporter\QueryParams;
 use Closure;
 use Exception;
 use GuzzleHttp\Client as GuzzleClient;
 use Http\Discovery\Psr18ClientDiscovery;
-use OpenAI\Transporters\HttpTransporter;
-use OpenAI\ValueObjects\ApiKey;
-use OpenAI\ValueObjects\Transporter\BaseUri;
-use OpenAI\ValueObjects\Transporter\Headers;
-use OpenAI\ValueObjects\Transporter\QueryParams;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -97,7 +97,7 @@ final class Factory
 
     /**
      * Sets the base URI for the requests.
-     * If no URI is provided the factory will use the default OpenAI API URI.
+     * If no URI is provided the factory will use the default Anthropic API URI.
      */
     public function withBaseUri(string $baseUri): self
     {
@@ -179,7 +179,7 @@ final class Factory
         }
 
         return function (RequestInterface $_): never {
-            throw new Exception('To use stream requests you must provide an stream handler closure via the OpenAI factory.');
+            throw new Exception('To use stream requests you must provide an stream handler closure via the Anthropic factory.');
         };
     }
 }

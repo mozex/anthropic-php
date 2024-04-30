@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenAI\Testing\Responses\Fixtures\Threads\Messages\Files;
+namespace Anthropic\Testing\Responses\Fixtures\Threads\Messages\Files;
 
 final class ThreadMessageFileListResponseFixture
 {

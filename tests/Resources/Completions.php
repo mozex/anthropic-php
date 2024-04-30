@@ -1,20 +1,20 @@
 <?php
 
+use Anthropic\Exceptions\InvalidArgumentException;
+use Anthropic\Responses\Completions\CreateResponse;
+use Anthropic\Responses\Completions\CreateResponseChoice;
+use Anthropic\Responses\Completions\CreateResponseUsage;
+use Anthropic\Responses\Completions\CreateStreamedResponse;
+use Anthropic\Responses\Meta\MetaInformation;
+use Anthropic\Responses\StreamResponse;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Stream;
-use OpenAI\Exceptions\InvalidArgumentException;
-use OpenAI\Responses\Completions\CreateResponse;
-use OpenAI\Responses\Completions\CreateResponseChoice;
-use OpenAI\Responses\Completions\CreateResponseUsage;
-use OpenAI\Responses\Completions\CreateStreamedResponse;
-use OpenAI\Responses\Meta\MetaInformation;
-use OpenAI\Responses\StreamResponse;
 
 test('create', function () {
     $client = mockClient('POST', 'completions', [
         'model' => 'da-vince',
         'prompt' => 'hi',
-    ], \OpenAI\ValueObjects\Transporter\Response::from(completion(), metaHeaders()));
+    ], \Anthropic\ValueObjects\Transporter\Response::from(completion(), metaHeaders()));
 
     $result = $client->completions()->create([
         'model' => 'da-vince',

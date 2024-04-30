@@ -1,6 +1,6 @@
 <?php
 
-use OpenAI\Responses\Images\EditResponseData;
+use Anthropic\Responses\Images\EditResponseData;
 
 test('from with url', function () {
     $response = EditResponseData::from(imageEditWithUrl()['data'][0]);

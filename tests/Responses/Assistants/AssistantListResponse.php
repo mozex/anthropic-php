@@ -1,8 +1,8 @@
 <?php
 
-use OpenAI\Responses\Assistants\AssistantListResponse;
-use OpenAI\Responses\Assistants\AssistantResponse;
-use OpenAI\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Assistants\AssistantListResponse;
+use Anthropic\Responses\Assistants\AssistantResponse;
+use Anthropic\Responses\Meta\MetaInformation;
 
 test('from', function () {
     $response = AssistantListResponse::from(assistantListResource(), meta());

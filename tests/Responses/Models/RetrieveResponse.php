@@ -1,7 +1,7 @@
 <?php
 
-use OpenAI\Responses\Meta\MetaInformation;
-use OpenAI\Responses\Models\RetrieveResponse;
+use Anthropic\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Models\RetrieveResponse;
 
 test('from', function () {
     $result = RetrieveResponse::from(model(), meta());

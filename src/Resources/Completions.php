@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\Resources;
+namespace Anthropic\Resources;
 
-use OpenAI\Contracts\Resources\CompletionsContract;
-use OpenAI\Responses\Completions\CreateResponse;
-use OpenAI\Responses\Completions\CreateStreamedResponse;
-use OpenAI\Responses\StreamResponse;
-use OpenAI\ValueObjects\Transporter\Payload;
-use OpenAI\ValueObjects\Transporter\Response;
+use Anthropic\Contracts\Resources\CompletionsContract;
+use Anthropic\Responses\Completions\CreateResponse;
+use Anthropic\Responses\Completions\CreateStreamedResponse;
+use Anthropic\Responses\StreamResponse;
+use Anthropic\ValueObjects\Transporter\Payload;
+use Anthropic\ValueObjects\Transporter\Response;
 
 final class Completions implements CompletionsContract
 {

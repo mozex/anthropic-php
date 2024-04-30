@@ -1,11 +1,11 @@
 <?php
 
-use OpenAI\Responses\Meta\MetaInformation;
-use OpenAI\Responses\Threads\Messages\ThreadMessageListResponse;
-use OpenAI\Responses\Threads\Messages\ThreadMessageResponse;
-use OpenAI\Responses\Threads\Messages\ThreadMessageResponseContentImageFileObject;
-use OpenAI\Responses\Threads\Messages\ThreadMessageResponseContentTextObject;
-use OpenAI\ValueObjects\Transporter\Response;
+use Anthropic\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Threads\Messages\ThreadMessageListResponse;
+use Anthropic\Responses\Threads\Messages\ThreadMessageResponse;
+use Anthropic\Responses\Threads\Messages\ThreadMessageResponseContentImageFileObject;
+use Anthropic\Responses\Threads\Messages\ThreadMessageResponseContentTextObject;
+use Anthropic\ValueObjects\Transporter\Response;
 
 test('list', function () {
     $client = mockClient('GET', 'threads/thread_agvtHUGezjTCt4SKgQg0NJ2Y/messages', [], Response::from(threadMessageListResource(), metaHeaders()));

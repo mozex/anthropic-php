@@ -1,7 +1,7 @@
 <?php
 
-use OpenAI\Responses\Threads\Runs\ThreadRunResponseRequiredAction;
-use OpenAI\Responses\Threads\Runs\ThreadRunResponseRequiredActionSubmitToolOutputs;
+use Anthropic\Responses\Threads\Runs\ThreadRunResponseRequiredAction;
+use Anthropic\Responses\Threads\Runs\ThreadRunResponseRequiredActionSubmitToolOutputs;
 
 test('from', function () {
     $result = ThreadRunResponseRequiredAction::from(threadRunWithSubmitToolOutputsResource()['required_action']);

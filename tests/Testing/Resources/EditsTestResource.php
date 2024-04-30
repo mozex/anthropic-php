@@ -1,8 +1,8 @@
 <?php
 
-use OpenAI\Resources\Edits;
-use OpenAI\Responses\Edits\CreateResponse;
-use OpenAI\Testing\ClientFake;
+use Anthropic\Resources\Edits;
+use Anthropic\Responses\Edits\CreateResponse;
+use Anthropic\Testing\ClientFake;
 
 it('records a edits create request', function () {
     $fake = new ClientFake([

@@ -1,7 +1,7 @@
 <?php
 
-use OpenAI\Responses\Meta\MetaInformation;
-use OpenAI\Responses\Threads\Messages\Files\ThreadMessageFileResponse;
+use Anthropic\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Threads\Messages\Files\ThreadMessageFileResponse;
 
 test('from', function () {
     $result = ThreadMessageFileResponse::from(threadMessageFileResource(), meta());

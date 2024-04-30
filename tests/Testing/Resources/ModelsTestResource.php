@@ -1,10 +1,10 @@
 <?php
 
-use OpenAI\Resources\Models;
-use OpenAI\Responses\Models\DeleteResponse;
-use OpenAI\Responses\Models\ListResponse;
-use OpenAI\Responses\Models\RetrieveResponse;
-use OpenAI\Testing\ClientFake;
+use Anthropic\Resources\Models;
+use Anthropic\Responses\Models\DeleteResponse;
+use Anthropic\Responses\Models\ListResponse;
+use Anthropic\Responses\Models\RetrieveResponse;
+use Anthropic\Testing\ClientFake;
 
 it('records a model retrieve request', function () {
     $fake = new ClientFake([

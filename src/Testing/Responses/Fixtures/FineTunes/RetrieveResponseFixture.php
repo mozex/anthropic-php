@@ -1,8 +1,8 @@
 <?php
 
-namespace OpenAI\Testing\Responses\Fixtures\FineTunes;
+namespace Anthropic\Testing\Responses\Fixtures\FineTunes;
 
-use OpenAI\Testing\Responses\Fixtures\Files\CreateResponseFixture;
+use Anthropic\Testing\Responses\Fixtures\Files\CreateResponseFixture;
 
 final class RetrieveResponseFixture
 {

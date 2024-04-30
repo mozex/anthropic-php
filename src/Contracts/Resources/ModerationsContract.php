@@ -1,13 +1,13 @@
 <?php
 
-namespace OpenAI\Contracts\Resources;
+namespace Anthropic\Contracts\Resources;
 
-use OpenAI\Responses\Moderations\CreateResponse;
+use Anthropic\Responses\Moderations\CreateResponse;
 
 interface ModerationsContract
 {
     /**
-     * Classifies if text violates OpenAI's Content Policy.
+     * Classifies if text violates Anthropic's Content Policy.
      *
      * @see https://platform.openai.com/docs/api-reference/moderations/create
      *

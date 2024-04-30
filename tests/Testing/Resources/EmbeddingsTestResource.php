@@ -1,8 +1,8 @@
 <?php
 
-use OpenAI\Resources\Embeddings;
-use OpenAI\Responses\Embeddings\CreateResponse;
-use OpenAI\Testing\ClientFake;
+use Anthropic\Resources\Embeddings;
+use Anthropic\Responses\Embeddings\CreateResponse;
+use Anthropic\Testing\ClientFake;
 
 it('records a embeddings create request', function () {
     $fake = new ClientFake([

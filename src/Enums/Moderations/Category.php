@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\Enums\Moderations;
+namespace Anthropic\Enums\Moderations;
 
 enum Category: string
 {

@@ -1,10 +1,10 @@
 <?php
 
-use OpenAI\Resources\Audio;
-use OpenAI\Responses\Audio\SpeechStreamResponse;
-use OpenAI\Responses\Audio\TranscriptionResponse;
-use OpenAI\Responses\Audio\TranslationResponse;
-use OpenAI\Testing\ClientFake;
+use Anthropic\Resources\Audio;
+use Anthropic\Responses\Audio\SpeechStreamResponse;
+use Anthropic\Responses\Audio\TranscriptionResponse;
+use Anthropic\Responses\Audio\TranslationResponse;
+use Anthropic\Testing\ClientFake;
 
 it('records a speech request', function () {
     $fake = new ClientFake([

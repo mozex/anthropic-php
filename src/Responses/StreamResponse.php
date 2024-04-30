@@ -1,12 +1,12 @@
 <?php
 
-namespace OpenAI\Responses;
+namespace Anthropic\Responses;
 
+use Anthropic\Contracts\ResponseHasMetaInformationContract;
+use Anthropic\Contracts\ResponseStreamContract;
+use Anthropic\Exceptions\ErrorException;
+use Anthropic\Responses\Meta\MetaInformation;
 use Generator;
-use OpenAI\Contracts\ResponseHasMetaInformationContract;
-use OpenAI\Contracts\ResponseStreamContract;
-use OpenAI\Exceptions\ErrorException;
-use OpenAI\Responses\Meta\MetaInformation;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 

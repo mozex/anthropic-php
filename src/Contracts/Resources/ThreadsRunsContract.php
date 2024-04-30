@@ -1,9 +1,9 @@
 <?php
 
-namespace OpenAI\Contracts\Resources;
+namespace Anthropic\Contracts\Resources;
 
-use OpenAI\Responses\Threads\Runs\ThreadRunListResponse;
-use OpenAI\Responses\Threads\Runs\ThreadRunResponse;
+use Anthropic\Responses\Threads\Runs\ThreadRunListResponse;
+use Anthropic\Responses\Threads\Runs\ThreadRunResponse;
 
 interface ThreadsRunsContract
 {

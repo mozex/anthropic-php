@@ -1,8 +1,8 @@
 <?php
 
-use OpenAI\Responses\FineTuning\ListJobEventsResponse;
-use OpenAI\Responses\FineTuning\ListJobEventsResponseEvent;
-use OpenAI\Responses\Meta\MetaInformation;
+use Anthropic\Responses\FineTuning\ListJobEventsResponse;
+use Anthropic\Responses\FineTuning\ListJobEventsResponseEvent;
+use Anthropic\Responses\Meta\MetaInformation;
 
 test('from', function () {
     $response = ListJobEventsResponse::from(fineTuningJobListEventsResource(), meta());

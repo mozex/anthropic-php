@@ -1,20 +1,20 @@
 <?php
 
+use Anthropic\Responses\Audio\SpeechStreamResponse;
+use Anthropic\Responses\Audio\TranscriptionResponse;
+use Anthropic\Responses\Audio\TranscriptionResponseSegment;
+use Anthropic\Responses\Audio\TranslationResponse;
+use Anthropic\Responses\Audio\TranslationResponseSegment;
+use Anthropic\Responses\Meta\MetaInformation;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Stream;
-use OpenAI\Responses\Audio\SpeechStreamResponse;
-use OpenAI\Responses\Audio\TranscriptionResponse;
-use OpenAI\Responses\Audio\TranscriptionResponseSegment;
-use OpenAI\Responses\Audio\TranslationResponse;
-use OpenAI\Responses\Audio\TranslationResponseSegment;
-use OpenAI\Responses\Meta\MetaInformation;
 
 test('transcribe to text', function () {
     $client = mockClient('POST', 'audio/transcriptions', [
         'file' => audioFileResource(),
         'model' => 'whisper-1',
         'response_format' => 'text',
-    ], \OpenAI\ValueObjects\Transporter\Response::from(audioTranscriptionText(), metaHeaders()), validateParams: false);
+    ], \Anthropic\ValueObjects\Transporter\Response::from(audioTranscriptionText(), metaHeaders()), validateParams: false);
 
     $result = $client->audio()->transcribe([
         'file' => audioFileResource(),
@@ -39,7 +39,7 @@ test('transcribe to json', function () {
         'file' => audioFileResource(),
         'model' => 'whisper-1',
         'response_format' => 'json',
-    ], \OpenAI\ValueObjects\Transporter\Response::from(audioTranscriptionJson(), metaHeaders()), validateParams: false);
+    ], \Anthropic\ValueObjects\Transporter\Response::from(audioTranscriptionJson(), metaHeaders()), validateParams: false);
 
     $result = $client->audio()->transcribe([
         'file' => audioFileResource(),
@@ -64,7 +64,7 @@ test('transcribe to verbose json', function () {
         'file' => audioFileResource(),
         'model' => 'whisper-1',
         'response_format' => 'verbose_json',
-    ], \OpenAI\ValueObjects\Transporter\Response::from(audioTranscriptionVerboseJson(), metaHeaders()), validateParams: false);
+    ], \Anthropic\ValueObjects\Transporter\Response::from(audioTranscriptionVerboseJson(), metaHeaders()), validateParams: false);
 
     $result = $client->audio()->transcribe([
         'file' => audioFileResource(),
@@ -107,7 +107,7 @@ test('translate to text', function () {
         'file' => audioFileResource(),
         'model' => 'whisper-1',
         'response_format' => 'text',
-    ], \OpenAI\ValueObjects\Transporter\Response::from(audioTranslationText(), metaHeaders()), validateParams: false);
+    ], \Anthropic\ValueObjects\Transporter\Response::from(audioTranslationText(), metaHeaders()), validateParams: false);
 
     $result = $client->audio()->translate([
         'file' => audioFileResource(),
@@ -132,7 +132,7 @@ test('translate to json', function () {
         'file' => audioFileResource(),
         'model' => 'whisper-1',
         'response_format' => 'json',
-    ], \OpenAI\ValueObjects\Transporter\Response::from(audioTranslationJson(), metaHeaders()), validateParams: false);
+    ], \Anthropic\ValueObjects\Transporter\Response::from(audioTranslationJson(), metaHeaders()), validateParams: false);
 
     $result = $client->audio()->translate([
         'file' => audioFileResource(),
@@ -157,7 +157,7 @@ test('translate to verbose json', function () {
         'file' => audioFileResource(),
         'model' => 'whisper-1',
         'response_format' => 'verbose_json',
-    ], \OpenAI\ValueObjects\Transporter\Response::from(audioTranslationVerboseJson(), metaHeaders()), validateParams: false);
+    ], \Anthropic\ValueObjects\Transporter\Response::from(audioTranslationVerboseJson(), metaHeaders()), validateParams: false);
 
     $result = $client->audio()->translate([
         'file' => audioFileResource(),

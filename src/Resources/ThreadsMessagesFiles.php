@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace OpenAI\Resources;
+namespace Anthropic\Resources;
 
-use OpenAI\Contracts\Resources\ThreadsMessagesFilesContract;
-use OpenAI\Responses\Threads\Messages\Files\ThreadMessageFileListResponse;
-use OpenAI\Responses\Threads\Messages\Files\ThreadMessageFileResponse;
-use OpenAI\ValueObjects\Transporter\Payload;
-use OpenAI\ValueObjects\Transporter\Response;
+use Anthropic\Contracts\Resources\ThreadsMessagesFilesContract;
+use Anthropic\Responses\Threads\Messages\Files\ThreadMessageFileListResponse;
+use Anthropic\Responses\Threads\Messages\Files\ThreadMessageFileResponse;
+use Anthropic\ValueObjects\Transporter\Payload;
+use Anthropic\ValueObjects\Transporter\Response;
 
 final class ThreadsMessagesFiles implements ThreadsMessagesFilesContract
 {

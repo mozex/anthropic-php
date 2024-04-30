@@ -1,10 +1,10 @@
 <?php
 
-namespace OpenAI\Contracts\Resources;
+namespace Anthropic\Contracts\Resources;
 
-use OpenAI\Responses\Assistants\AssistantDeleteResponse;
-use OpenAI\Responses\Assistants\AssistantListResponse;
-use OpenAI\Responses\Assistants\AssistantResponse;
+use Anthropic\Responses\Assistants\AssistantDeleteResponse;
+use Anthropic\Responses\Assistants\AssistantListResponse;
+use Anthropic\Responses\Assistants\AssistantResponse;
 
 interface AssistantsContract
 {

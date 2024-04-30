@@ -1,6 +1,6 @@
 <?php
 
-use OpenAI\Responses\Threads\Runs\Steps\ThreadRunStepResponseRetrievalToolCall;
+use Anthropic\Responses\Threads\Runs\Steps\ThreadRunStepResponseRetrievalToolCall;
 
 test('from', function () {
     $result = ThreadRunStepResponseRetrievalToolCall::from(threadRunStepWithCodeInterpreterOutputResource()['step_details']['tool_calls'][2]);

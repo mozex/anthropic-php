@@ -1,7 +1,7 @@
 <?php
 
-use OpenAI\Responses\Threads\Runs\ThreadRunResponseToolFunction;
-use OpenAI\Responses\Threads\Runs\ThreadRunResponseToolFunctionFunction;
+use Anthropic\Responses\Threads\Runs\ThreadRunResponseToolFunction;
+use Anthropic\Responses\Threads\Runs\ThreadRunResponseToolFunctionFunction;
 
 test('from', function () {
     $result = ThreadRunResponseToolFunction::from(threadRunWithSubmitToolOutputsResource()['tools'][0]);

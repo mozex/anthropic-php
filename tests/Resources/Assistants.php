@@ -1,11 +1,11 @@
 <?php
 
-use OpenAI\Responses\Assistants\AssistantDeleteResponse;
-use OpenAI\Responses\Assistants\AssistantListResponse;
-use OpenAI\Responses\Assistants\AssistantResponse;
-use OpenAI\Responses\Assistants\AssistantResponseToolCodeInterpreter;
-use OpenAI\Responses\Meta\MetaInformation;
-use OpenAI\ValueObjects\Transporter\Response;
+use Anthropic\Responses\Assistants\AssistantDeleteResponse;
+use Anthropic\Responses\Assistants\AssistantListResponse;
+use Anthropic\Responses\Assistants\AssistantResponse;
+use Anthropic\Responses\Assistants\AssistantResponseToolCodeInterpreter;
+use Anthropic\Responses\Meta\MetaInformation;
+use Anthropic\ValueObjects\Transporter\Response;
 
 test('list', function () {
     $client = mockClient('GET', 'assistants', [], Response::from(assistantListResource(), metaHeaders()));

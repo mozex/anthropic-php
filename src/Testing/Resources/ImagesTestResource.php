@@ -1,13 +1,13 @@
 <?php
 
-namespace OpenAI\Testing\Resources;
+namespace Anthropic\Testing\Resources;
 
-use OpenAI\Contracts\Resources\ImagesContract;
-use OpenAI\Resources\Images;
-use OpenAI\Responses\Images\CreateResponse;
-use OpenAI\Responses\Images\EditResponse;
-use OpenAI\Responses\Images\VariationResponse;
-use OpenAI\Testing\Resources\Concerns\Testable;
+use Anthropic\Contracts\Resources\ImagesContract;
+use Anthropic\Resources\Images;
+use Anthropic\Responses\Images\CreateResponse;
+use Anthropic\Responses\Images\EditResponse;
+use Anthropic\Responses\Images\VariationResponse;
+use Anthropic\Testing\Resources\Concerns\Testable;
 
 final class ImagesTestResource implements ImagesContract
 {

@@ -1,12 +1,12 @@
 <?php
 
-namespace OpenAI\Testing\Resources;
+namespace Anthropic\Testing\Resources;
 
-use OpenAI\Contracts\Resources\ThreadsRunsContract;
-use OpenAI\Resources\ThreadsRuns;
-use OpenAI\Responses\Threads\Runs\ThreadRunListResponse;
-use OpenAI\Responses\Threads\Runs\ThreadRunResponse;
-use OpenAI\Testing\Resources\Concerns\Testable;
+use Anthropic\Contracts\Resources\ThreadsRunsContract;
+use Anthropic\Resources\ThreadsRuns;
+use Anthropic\Responses\Threads\Runs\ThreadRunListResponse;
+use Anthropic\Responses\Threads\Runs\ThreadRunResponse;
+use Anthropic\Testing\Resources\Concerns\Testable;
 
 final class ThreadsRunsTestResource implements ThreadsRunsContract
 {

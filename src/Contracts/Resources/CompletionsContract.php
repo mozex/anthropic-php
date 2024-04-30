@@ -1,10 +1,10 @@
 <?php
 
-namespace OpenAI\Contracts\Resources;
+namespace Anthropic\Contracts\Resources;
 
-use OpenAI\Responses\Completions\CreateResponse;
-use OpenAI\Responses\Completions\CreateStreamedResponse;
-use OpenAI\Responses\StreamResponse;
+use Anthropic\Responses\Completions\CreateResponse;
+use Anthropic\Responses\Completions\CreateStreamedResponse;
+use Anthropic\Responses\StreamResponse;
 
 interface CompletionsContract
 {

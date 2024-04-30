@@ -1,6 +1,6 @@
 <?php
 
-use OpenAI\Responses\Embeddings\CreateResponseEmbedding;
+use Anthropic\Responses\Embeddings\CreateResponseEmbedding;
 
 test('from', function () {
     $result = CreateResponseEmbedding::from(embedding());

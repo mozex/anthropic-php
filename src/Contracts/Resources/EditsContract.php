@@ -1,8 +1,8 @@
 <?php
 
-namespace OpenAI\Contracts\Resources;
+namespace Anthropic\Contracts\Resources;
 
-use OpenAI\Responses\Edits\CreateResponse;
+use Anthropic\Responses\Edits\CreateResponse;
 
 interface EditsContract
 {
@@ -13,7 +13,7 @@ interface EditsContract
      *
      * @param  array<string, mixed>  $parameters
      *
-     * @deprecated OpenAI has deprecated this endpoint and will stop working by January 4, 2024.
+     * @deprecated Anthropic has deprecated this endpoint and will stop working by January 4, 2024.
      * https://openai.com/blog/gpt-4-api-general-availability#deprecation-of-the-edits-api
      */
     public function create(array $parameters): CreateResponse;

@@ -1,6 +1,6 @@
 <?php
 
-use OpenAI\Responses\Threads\Runs\Steps\ThreadRunStepResponseMessageCreation;
+use Anthropic\Responses\Threads\Runs\Steps\ThreadRunStepResponseMessageCreation;
 
 test('from', function () {
     $result = ThreadRunStepResponseMessageCreation::from(threadRunStepResource()['step_details']['message_creation']);

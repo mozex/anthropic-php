@@ -1,11 +1,11 @@
 <?php
 
-use OpenAI\Responses\Meta\MetaInformation;
-use OpenAI\Responses\Threads\Runs\ThreadRunResponse;
-use OpenAI\Responses\Threads\Runs\ThreadRunResponseToolCodeInterpreter;
-use OpenAI\Responses\Threads\Runs\ThreadRunResponseToolFunction;
-use OpenAI\Responses\Threads\Runs\ThreadRunResponseToolRetrieval;
-use OpenAI\Responses\Threads\Runs\ThreadRunResponseUsage;
+use Anthropic\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Threads\Runs\ThreadRunResponse;
+use Anthropic\Responses\Threads\Runs\ThreadRunResponseToolCodeInterpreter;
+use Anthropic\Responses\Threads\Runs\ThreadRunResponseToolFunction;
+use Anthropic\Responses\Threads\Runs\ThreadRunResponseToolRetrieval;
+use Anthropic\Responses\Threads\Runs\ThreadRunResponseUsage;
 
 test('from', function () {
     $result = ThreadRunResponse::from(threadRunResource(), meta());
