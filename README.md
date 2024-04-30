@@ -60,7 +60,7 @@ Then, interact with OpenAI's API:
 
 ```php
 $yourApiKey = getenv('YOUR_API_KEY');
-$client = OpenAI::client($yourApiKey);
+$client = Anthropic::client($yourApiKey);
 
 $result = $client->chat()->create([
     'model' => 'gpt-4',
@@ -77,7 +77,7 @@ If necessary, it is possible to configure and create a separate client.
 ```php
 $yourApiKey = getenv('YOUR_API_KEY');
 
-$client = OpenAI::factory()
+$client = Anthropic::factory()
     ->withApiKey($yourApiKey)
     ->withOrganization('your-organization') // default: null
     ->withBaseUri('openai.example.com/v1') // default: api.openai.com/v1
@@ -1751,8 +1751,9 @@ You may run into a timeout when sending requests to the API. The default timeout
 You can increase the timeout by configuring the HTTP client and passing in to the factory.
 
 This example illustrates how to increase the timeout using Guzzle.
+
 ```php
-OpenAI::factory()
+Anthropic::factory()
     ->withApiKey($apiKey)
     ->withOrganization($organization)
     ->withHttpClient(new \GuzzleHttp\Client(['timeout' => $timeout]))
@@ -1863,7 +1864,7 @@ $completion = $client->completions()->create([
 In order to use the Azure OpenAI Service, it is necessary to construct the client manually using the factory.
 
 ```php
-$client = OpenAI::factory()
+$client = Anthropic::factory()
     ->withBaseUri('{your-resource-name}.openai.azure.com/openai/deployments/{deployment-id}')
     ->withHttpHeader('api-key', '{your-api-key}')
     ->withQueryParam('api-version', '{version}')

@@ -5,7 +5,7 @@ declare(strict_types=1);
 use OpenAI\Client;
 use OpenAI\Factory;
 
-final class OpenAI
+final class Anthropic
 {
     /**
      * Creates a new Open AI Client with the given API token.

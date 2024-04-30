@@ -1,15 +1,12 @@
 {
-    "name": "openai-php/client",
-    "description": "OpenAI PHP is a supercharged PHP API client that allows you to interact with the Open AI API",
-    "keywords": ["php", "openai", "sdk", "codex", "GPT-3", "DALL-E", "api", "client", "natural", "language", "processing"],
+    "name": "mozex/anthropic-php",
+    "description": "Anthropic PHP is a supercharged community-maintained PHP API client that allows you to interact with Anthropic API.",
+    "keywords": ["php", "anthropic", "sdk", "claude", "Claude-3-Opus", "Claude-3-Sonnet", "Claude-3-Haiku", "api", "client", "natural", "language", "processing"],
     "license": "MIT",
     "authors": [
         {
-            "name": "Nuno Maduro",
-            "email": "enunomaduro@gmail.com"
-        },
-        {
-            "name": "Sandro Gehri"
+            "name": "Mozex",
+            "email": "mozex@alphorld.com"
         }
     ],
     "require": {
@@ -39,7 +36,7 @@
             "OpenAI\\": "src/"
         },
         "files": [
-            "src/OpenAI.php"
+            "src/Anthropic.php"
         ]
     },
     "autoload-dev": {

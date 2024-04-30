@@ -47,7 +47,7 @@ test('create', function () {
 });
 
 test('create throws an exception if stream option is true', function () {
-    OpenAI::client('foo')->completions()->create([
+    Anthropic::client('foo')->completions()->create([
         'model' => 'da-vince',
         'prompt' => 'hi',
         'stream' => true,

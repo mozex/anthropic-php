@@ -48,7 +48,7 @@ test('create', function () {
 });
 
 test('create throws an exception if stream option is true', function () {
-    OpenAI::client('foo')->chat()->create([
+    Anthropic::client('foo')->chat()->create([
         'model' => 'gpt-3.5-turbo',
         'messages' => ['role' => 'user', 'content' => 'Hello!'],
         'stream' => true,
