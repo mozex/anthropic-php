@@ -62,7 +62,7 @@ Then, interact with Anthropic's API:
 $yourApiKey = getenv('YOUR_API_KEY');
 $client = Anthropic::client($yourApiKey);
 
-$result = $client->chat()->create([
+$result = $client->message()->create([
     'model' => 'gpt-4',
     'messages' => [
         ['role' => 'user', 'content' => 'Hello!'],
@@ -1802,7 +1802,7 @@ $client = new ClientFake([
     CreateStreamedResponse::fake(fopen('file.txt', 'r'););
 ]);
 
-$completion = $client->chat()->createStreamed([
+$completion = $client->message()->createStreamed([
         'model' => 'gpt-3.5-turbo',
         'messages' => [
             ['role' => 'user', 'content' => 'Hello!'],

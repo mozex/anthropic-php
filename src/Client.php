@@ -6,7 +6,7 @@ namespace Anthropic;
 
 use Anthropic\Contracts\ClientContract;
 use Anthropic\Contracts\TransporterContract;
-use Anthropic\Resources\Chat;
+use Anthropic\Resources\Message;
 use Anthropic\Resources\Completions;
 
 final class Client implements ClientContract
@@ -35,8 +35,8 @@ final class Client implements ClientContract
      *
      * @see https://docs.anthropic.com/claude/reference/messages_post
      */
-    public function chat(): Chat
+    public function message(): Message
     {
-        return new Chat($this->transporter);
+        return new Message($this->transporter);
     }
 }

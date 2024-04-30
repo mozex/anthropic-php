@@ -6,12 +6,12 @@ use Anthropic\Responses\Chat\CreateResponse;
 use Anthropic\Responses\Chat\CreateStreamedResponse;
 use Anthropic\Responses\StreamResponse;
 
-interface ChatContract
+interface MessageContract
 {
     /**
      * Creates a completion for the chat message
      *
-     * @see https://platform.openai.com/docs/api-reference/chat/create
+     * @see https://docs.anthropic.com/claude/reference/messages_post
      *
      * @param  array<string, mixed>  $parameters
      */
@@ -20,7 +20,7 @@ interface ChatContract
     /**
      * Creates a streamed completion for the chat message
      *
-     * @see https://platform.openai.com/docs/api-reference/chat/create
+     * @see https://docs.anthropic.com/claude/reference/messages-streaming
      *
      * @param  array<string, mixed>  $parameters
      * @return StreamResponse<CreateStreamedResponse>

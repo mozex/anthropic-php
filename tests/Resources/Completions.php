@@ -11,7 +11,7 @@ use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Stream;
 
 test('create', function () {
-    $client = mockClient('POST', 'completions', [
+    $client = mockClient('POST', 'complete', [
         'model' => 'da-vince',
         'prompt' => 'hi',
     ], \Anthropic\ValueObjects\Transporter\Response::from(completion(), metaHeaders()));
@@ -60,7 +60,7 @@ test('create streamed', function () {
         headers: metaHeaders(),
     );
 
-    $client = mockStreamClient('POST', 'completions', [
+    $client = mockStreamClient('POST', 'complete', [
         'model' => 'gpt-3.5-turbo-instruct',
         'prompt' => 'hi',
         'stream' => true,

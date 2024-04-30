@@ -2,7 +2,7 @@
 
 namespace Anthropic\Contracts;
 
-use Anthropic\Contracts\Resources\ChatContract;
+use Anthropic\Contracts\Resources\MessageContract;
 use Anthropic\Contracts\Resources\CompletionsContract;
 
 interface ClientContract
@@ -20,5 +20,5 @@ interface ClientContract
      *
      * @see https://docs.anthropic.com/claude/reference/messages_post
      */
-    public function chat(): ChatContract;
+    public function message(): MessageContract;
 }

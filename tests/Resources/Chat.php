@@ -11,12 +11,12 @@ use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Stream;
 
 test('create', function () {
-    $client = mockClient('POST', 'chat/completions', [
+    $client = mockClient('POST', 'messages', [
         'model' => 'gpt-3.5-turbo',
         'messages' => ['role' => 'user', 'content' => 'Hello!'],
     ], \Anthropic\ValueObjects\Transporter\Response::from(chatCompletion(), metaHeaders()));
 
-    $result = $client->chat()->create([
+    $result = $client->message()->create([
         'model' => 'gpt-3.5-turbo',
         'messages' => ['role' => 'user', 'content' => 'Hello!'],
     ]);
@@ -48,7 +48,7 @@ test('create', function () {
 });
 
 test('create throws an exception if stream option is true', function () {
-    Anthropic::client('foo')->chat()->create([
+    Anthropic::client('foo')->message()->create([
         'model' => 'gpt-3.5-turbo',
         'messages' => ['role' => 'user', 'content' => 'Hello!'],
         'stream' => true,
@@ -61,13 +61,13 @@ test('create streamed', function () {
         headers: metaHeaders(),
     );
 
-    $client = mockStreamClient('POST', 'chat/completions', [
+    $client = mockStreamClient('POST', 'messages', [
         'model' => 'gpt-3.5-turbo',
         'messages' => ['role' => 'user', 'content' => 'Hello!'],
         'stream' => true,
     ], $response);
 
-    $result = $client->chat()->createStreamed([
+    $result = $client->message()->createStreamed([
         'model' => 'gpt-3.5-turbo',
         'messages' => ['role' => 'user', 'content' => 'Hello!'],
     ]);
@@ -105,13 +105,13 @@ test('handles error messages in stream', function () {
         body: new Stream(chatCompletionStreamError())
     );
 
-    $client = mockStreamClient('POST', 'chat/completions', [
+    $client = mockStreamClient('POST', 'messages', [
         'model' => 'gpt-3.5-turbo',
         'messages' => ['role' => 'user', 'content' => 'Hello!'],
         'stream' => true,
     ], $response);
 
-    $result = $client->chat()->createStreamed([
+    $result = $client->message()->createStreamed([
         'model' => 'gpt-3.5-turbo',
         'messages' => ['role' => 'user', 'content' => 'Hello!'],
     ]);

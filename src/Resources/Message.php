@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Anthropic\Resources;
 
-use Anthropic\Contracts\Resources\ChatContract;
+use Anthropic\Contracts\Resources\MessageContract;
 use Anthropic\Responses\Chat\CreateResponse;
 use Anthropic\Responses\Chat\CreateStreamedResponse;
 use Anthropic\Responses\StreamResponse;
 use Anthropic\ValueObjects\Transporter\Payload;
 use Anthropic\ValueObjects\Transporter\Response;
 
-final class Chat implements ChatContract
+final class Message implements MessageContract
 {
     use Concerns\Streamable;
     use Concerns\Transportable;
@@ -19,7 +19,7 @@ final class Chat implements ChatContract
     /**
      * Creates a completion for the chat message
      *
-     * @see https://platform.openai.com/docs/api-reference/chat/create
+     * @see https://docs.anthropic.com/claude/reference/messages_post
      *
      * @param  array<string, mixed>  $parameters
      */
@@ -27,9 +27,9 @@ final class Chat implements ChatContract
     {
         $this->ensureNotStreamed($parameters);
 
-        $payload = Payload::create('chat/completions', $parameters);
+        $payload = Payload::create('messages', $parameters);
 
-        /** @var Response<array{id: string, object: string, created: int, model: string, system_fingerprint?: string, choices: array<int, array{index: int, message: array{role: string, content: ?string, function_call: ?array{name: string, arguments: string}, tool_calls: ?array<int, array{id: string, type: string, function: array{name: string, arguments: string}}>}, finish_reason: string|null}>, usage: array{prompt_tokens: int, completion_tokens: int|null, total_tokens: int}}> $response */
+        /** @var Response<array{id: string, type: string, role: string, model: string, stop_sequence: string|null, usage: array{input_tokens: int, output_tokens: int}, content: array<int, array{type: string, text: string}>, stop_reason: string}> $response */
         $response = $this->transporter->requestObject($payload);
 
         return CreateResponse::from($response->data(), $response->meta());
@@ -38,7 +38,7 @@ final class Chat implements ChatContract
     /**
      * Creates a streamed completion for the chat message
      *
-     * @see https://platform.openai.com/docs/api-reference/chat/create
+     * @see https://docs.anthropic.com/claude/reference/messages-streaming
      *
      * @param  array<string, mixed>  $parameters
      * @return StreamResponse<CreateStreamedResponse>
@@ -47,7 +47,7 @@ final class Chat implements ChatContract
     {
         $parameters = $this->setStreamParameter($parameters);
 
-        $payload = Payload::create('chat/completions', $parameters);
+        $payload = Payload::create('messages', $parameters);
 
         $response = $this->transporter->requestStream($payload);
 

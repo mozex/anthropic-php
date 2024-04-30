@@ -9,7 +9,7 @@ use Anthropic\Responses\StreamResponse;
 use Anthropic\Testing\Requests\TestRequest;
 use Anthropic\Testing\Resources\AssistantsTestResource;
 use Anthropic\Testing\Resources\AudioTestResource;
-use Anthropic\Testing\Resources\ChatTestResource;
+use Anthropic\Testing\Resources\MessageTestResource;
 use Anthropic\Testing\Resources\CompletionsTestResource;
 use Anthropic\Testing\Resources\EditsTestResource;
 use Anthropic\Testing\Resources\EmbeddingsTestResource;
@@ -136,9 +136,9 @@ class ClientFake implements ClientContract
         return new CompletionsTestResource($this);
     }
 
-    public function chat(): ChatTestResource
+    public function message(): MessageTestResource
     {
-        return new ChatTestResource($this);
+        return new MessageTestResource($this);
     }
 
     public function embeddings(): EmbeddingsTestResource

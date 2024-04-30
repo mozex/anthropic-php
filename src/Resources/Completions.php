@@ -19,7 +19,7 @@ final class Completions implements CompletionsContract
     /**
      * Creates a completion for the provided prompt and parameters
      *
-     * @see https://platform.openai.com/docs/api-reference/completions/create-completion
+     * @see https://docs.anthropic.com/claude/reference/complete_post
      *
      * @param  array<string, mixed>  $parameters
      */
@@ -27,9 +27,9 @@ final class Completions implements CompletionsContract
     {
         $this->ensureNotStreamed($parameters);
 
-        $payload = Payload::create('completions', $parameters);
+        $payload = Payload::create('complete', $parameters);
 
-        /** @var Response<array{id: string, object: string, created: int, model: string, choices: array<int, array{text: string, index: int, logprobs: array{tokens: array<int, string>, token_logprobs: array<int, float>, top_logprobs: array<int, string>|null, text_offset: array<int, int>}|null, finish_reason: string}>, usage: array{prompt_tokens: int, completion_tokens: int, total_tokens: int}}> $response */
+        /** @var Response<array{type: string, id: string, completion: string, stop_reason: string, model: string, stop: string, log_id: string}> $response */
         $response = $this->transporter->requestObject($payload);
 
         return CreateResponse::from($response->data(), $response->meta());
@@ -38,7 +38,7 @@ final class Completions implements CompletionsContract
     /**
      * Creates a streamed completion for the provided prompt and parameters
      *
-     * @see https://platform.openai.com/docs/api-reference/completions/create-completion
+     * @see https://docs.anthropic.com/claude/reference/streaming
      *
      * @param  array<string, mixed>  $parameters
      * @return StreamResponse<CreateStreamedResponse>
@@ -47,7 +47,7 @@ final class Completions implements CompletionsContract
     {
         $parameters = $this->setStreamParameter($parameters);
 
-        $payload = Payload::create('completions', $parameters);
+        $payload = Payload::create('complete', $parameters);
 
         $response = $this->transporter->requestStream($payload);
 

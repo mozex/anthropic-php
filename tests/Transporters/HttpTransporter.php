@@ -110,7 +110,7 @@ test('request object server user errors', function () {
 });
 
 test('request object server errors', function () {
-    $payload = Payload::create('completions', ['model' => 'gpt-4']);
+    $payload = Payload::create('complete', ['model' => 'gpt-4']);
 
     $response = new Response(401, ['Content-Type' => 'application/json'], json_encode([
         'error' => [
@@ -136,7 +136,7 @@ test('request object server errors', function () {
 });
 
 test('error code may be null', function () {
-    $payload = Payload::create('completions', ['model' => 'gpt-42']);
+    $payload = Payload::create('complete', ['model' => 'gpt-42']);
 
     $response = new Response(404, ['Content-Type' => 'application/json; charset=utf-8'], json_encode([
         'error' => [
@@ -162,7 +162,7 @@ test('error code may be null', function () {
 });
 
 test('error code may be integer', function () {
-    $payload = Payload::create('completions', ['model' => 'gpt-42']);
+    $payload = Payload::create('complete', ['model' => 'gpt-42']);
 
     $response = new Response(404, ['Content-Type' => 'application/json; charset=utf-8'], json_encode([
         'error' => [
@@ -214,7 +214,7 @@ test('error type may be null', function () {
 });
 
 test('error message may be an array', function () {
-    $payload = Payload::create('completions', ['model' => 'gpt-4']);
+    $payload = Payload::create('complete', ['model' => 'gpt-4']);
 
     $response = new Response(404, ['Content-Type' => 'application/json; charset=utf-8'], json_encode([
         'error' => [
@@ -243,7 +243,7 @@ test('error message may be an array', function () {
 });
 
 test('error message may be empty', function () {
-    $payload = Payload::create('completions', ['model' => 'gpt-4']);
+    $payload = Payload::create('complete', ['model' => 'gpt-4']);
 
     $response = new Response(404, ['Content-Type' => 'application/json; charset=utf-8'], json_encode([
         'error' => [
@@ -269,7 +269,7 @@ test('error message may be empty', function () {
 });
 
 test('error message may be empty and code is an integer', function () {
-    $payload = Payload::create('completions', ['model' => 'gpt-4']);
+    $payload = Payload::create('complete', ['model' => 'gpt-4']);
 
     $response = new Response(404, ['Content-Type' => 'application/json; charset=utf-8'], json_encode([
         'error' => [
@@ -295,7 +295,7 @@ test('error message may be empty and code is an integer', function () {
 });
 
 test('error message and code may be empty', function () {
-    $payload = Payload::create('completions', ['model' => 'gpt-4']);
+    $payload = Payload::create('complete', ['model' => 'gpt-4']);
 
     $response = new Response(404, ['Content-Type' => 'application/json; charset=utf-8'], json_encode([
         'error' => [
@@ -480,7 +480,7 @@ test('request content server errors', function () {
 });
 
 test('request stream', function () {
-    $payload = Payload::create('completions', []);
+    $payload = Payload::create('complete', []);
 
     $response = new Response(200, [], json_encode([
         'qdwq',
@@ -494,7 +494,7 @@ test('request stream', function () {
                 ->and($request->getUri())
                 ->getHost()->toBe('api.openai.com')
                 ->getScheme()->toBe('https')
-                ->getPath()->toBe('/v1/completions');
+                ->getPath()->toBe('/v1/complete');
 
             return true;
         })->andReturn($response);
@@ -506,7 +506,7 @@ test('request stream', function () {
 });
 
 test('request stream server errors', function () {
-    $payload = Payload::create('completions', []);
+    $payload = Payload::create('complete', []);
 
     $response = new Response(401, ['Content-Type' => 'application/json; charset=utf-8'], json_encode([
         'error' => [
