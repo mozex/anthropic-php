@@ -6,49 +6,46 @@ namespace Anthropic\Responses\Completions;
 
 use Anthropic\Contracts\ResponseContract;
 use Anthropic\Responses\Concerns\ArrayAccessible;
-use Anthropic\Testing\Responses\Concerns\FakeableForStreamedResponse;
+use Anthropic\Testing\Responses\Concerns\Completions\FakeableForStreamedResponse;
 
 /**
- * @implements ResponseContract<array{id: string, object: string, created: int, model: string, choices: array<int, array{text: string, index: int, logprobs: array{tokens: array<int, string>, token_logprobs: array<int, float>, top_logprobs: array<int, string>|null, text_offset: array<int, int>}|null, finish_reason: string|null}>}>
+ * @implements ResponseContract<array{type: string, id: string, completion: string, stop_reason: string|null, model: string, stop: string|null, log_id: string}>
  */
 final class CreateStreamedResponse implements ResponseContract
 {
     /**
-     * @use ArrayAccessible<array{id: string, object: string, created: int, model: string, choices: array<int, array{text: string, index: int, logprobs: array{tokens: array<int, string>, token_logprobs: array<int, float>, top_logprobs: array<int, string>|null, text_offset: array<int, int>}|null, finish_reason: string|null}>}>
+     * @use ArrayAccessible<array{type: string, id: string, completion: string, stop_reason: string|null, model: string, stop: string|null, log_id: string}>
      */
     use ArrayAccessible;
 
     use FakeableForStreamedResponse;
 
-    /**
-     * @param  array<int, CreateResponseChoice>  $choices
-     */
     private function __construct(
+        public readonly string $type,
         public readonly string $id,
-        public readonly string $object,
-        public readonly int $created,
+        public readonly string $completion,
+        public readonly ?string $stop_reason,
         public readonly string $model,
-        public readonly array $choices,
+        public readonly ?string $stop,
+        public readonly string $log_id,
     ) {
     }
 
     /**
      * Acts as static factory, and returns a new Response instance.
      *
-     * @param  array{id: string, object: string, created: int, model: string, choices: array<int, array{text: string, index: int, logprobs: array{tokens: array<int, string>, token_logprobs: array<int, float>, top_logprobs: array<int, string>|null, text_offset: array<int, int>}|null, finish_reason: string}>, usage?: array{prompt_tokens: int, completion_tokens: int|null, total_tokens: int}}  $attributes
+     * @param  array{type: string, id: string, completion: string, stop_reason: string|null, model: string, stop: string|null, log_id: string}  $attributes
      */
     public static function from(array $attributes): self
     {
-        $choices = array_map(fn (array $result): CreateResponseChoice => CreateResponseChoice::from(
-            $result
-        ), $attributes['choices']);
-
         return new self(
+            $attributes['type'],
             $attributes['id'],
-            $attributes['object'],
-            $attributes['created'],
+            $attributes['completion'],
+            $attributes['stop_reason'],
             $attributes['model'],
-            $choices,
+            $attributes['stop'],
+            $attributes['log_id'],
         );
     }
 
@@ -58,14 +55,13 @@ final class CreateStreamedResponse implements ResponseContract
     public function toArray(): array
     {
         return [
+            'type' => $this->type,
             'id' => $this->id,
-            'object' => $this->object,
-            'created' => $this->created,
+            'completion' => $this->completion,
+            'stop_reason' => $this->stop_reason,
             'model' => $this->model,
-            'choices' => array_map(
-                static fn (CreateResponseChoice $result): array => $result->toArray(),
-                $this->choices,
-            ),
+            'stop' => $this->stop,
+            'log_id' => $this->log_id,
         ];
     }
 }
