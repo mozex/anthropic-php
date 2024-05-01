@@ -11,11 +11,11 @@ final class ErrorException extends Exception
     /**
      * Creates a new Exception instance.
      *
-     * @param  array{message: string|array<int, string>, type: ?string, code: string|int|null}  $contents
+     * @param  array{type: ?string, message: string|array<int, string>}  $contents
      */
     public function __construct(private readonly array $contents)
     {
-        $message = ($contents['message'] ?: (string) $this->contents['code']) ?: 'Unknown error';
+        $message = $contents['message'] ?: 'Unknown error';
 
         if (is_array($message)) {
             $message = implode(PHP_EOL, $message);
@@ -38,13 +38,5 @@ final class ErrorException extends Exception
     public function getErrorType(): ?string
     {
         return $this->contents['type'];
-    }
-
-    /**
-     * Returns the error code.
-     */
-    public function getErrorCode(): string|int|null
-    {
-        return $this->contents['code'];
     }
 }
