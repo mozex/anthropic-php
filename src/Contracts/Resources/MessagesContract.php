@@ -2,11 +2,11 @@
 
 namespace Anthropic\Contracts\Resources;
 
-use Anthropic\Responses\Chat\CreateResponse;
-use Anthropic\Responses\Chat\CreateStreamedResponse;
-use Anthropic\Responses\StreamResponse;
+use Anthropic\Responses\Messages\CreateResponse;
+use Anthropic\Responses\Messages\CreateStreamedResponse;
+use Anthropic\Responses\Messages\StreamResponse;
 
-interface MessageContract
+interface MessagesContract
 {
     /**
      * Creates a completion for the chat message

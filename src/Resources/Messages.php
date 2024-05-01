@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Anthropic\Resources;
 
-use Anthropic\Contracts\Resources\MessageContract;
-use Anthropic\Responses\Chat\CreateResponse;
-use Anthropic\Responses\Chat\CreateStreamedResponse;
-use Anthropic\Responses\StreamResponse;
+use Anthropic\Contracts\Resources\MessagesContract;
+use Anthropic\Responses\Messages\CreateResponse;
+use Anthropic\Responses\Messages\CreateStreamedResponse;
+use Anthropic\Responses\Messages\StreamResponse;
 use Anthropic\ValueObjects\Transporter\Payload;
 use Anthropic\ValueObjects\Transporter\Response;
 
-final class Message implements MessageContract
+final class Messages implements MessagesContract
 {
     use Concerns\Streamable;
     use Concerns\Transportable;
@@ -29,7 +29,7 @@ final class Message implements MessageContract
 
         $payload = Payload::create('messages', $parameters);
 
-        /** @var Response<array{id: string, type: string, role: string, model: string, stop_sequence: string|null, usage: array{input_tokens: int, output_tokens: int}, content: array<int, array{type: string, text: string}>, stop_reason: string}> $response */
+        /** @var Response<array{id: string, type: string, role: string, model: string, stop_sequence: string|null, usage: array{input_tokens: int, output_tokens: int}, content: array<int, array{type: string, text: string|null}>, stop_reason: string}> $response */
         $response = $this->transporter->requestObject($payload);
 
         return CreateResponse::from($response->data(), $response->meta());

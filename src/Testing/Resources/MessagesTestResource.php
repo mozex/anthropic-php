@@ -2,19 +2,19 @@
 
 namespace Anthropic\Testing\Resources;
 
-use Anthropic\Contracts\Resources\MessageContract;
-use Anthropic\Resources\Message;
-use Anthropic\Responses\Chat\CreateResponse;
-use Anthropic\Responses\StreamResponse;
+use Anthropic\Contracts\Resources\MessagesContract;
+use Anthropic\Resources\Messages;
+use Anthropic\Responses\Messages\CreateResponse;
+use Anthropic\Responses\Messages\StreamResponse;
 use Anthropic\Testing\Resources\Concerns\Testable;
 
-final class MessageTestResource implements MessageContract
+final class MessagesTestResource implements MessagesContract
 {
     use Testable;
 
     protected function resource(): string
     {
-        return Message::class;
+        return Messages::class;
     }
 
     public function create(array $parameters): CreateResponse

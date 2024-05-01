@@ -11,12 +11,6 @@ it('may create a client', function () {
     expect($anthropic)->toBeInstanceOf(Client::class);
 });
 
-it('sets organization when provided', function () {
-    $anthropic = Anthropic::client('foo', 'nunomaduro');
-
-    expect($anthropic)->toBeInstanceOf(Client::class);
-});
-
 it('may create a client via factory', function () {
     $anthropic = Anthropic::factory()
         ->withApiKey('foo')
@@ -35,7 +29,7 @@ it('sets a custom client via factory', function () {
 
 it('sets a custom base url via factory', function () {
     $anthropic = Anthropic::factory()
-        ->withBaseUri('https://openai.example.com/v1')
+        ->withBaseUri('https://anthropic.example.com/v1')
         ->make();
 
     expect($anthropic)->toBeInstanceOf(Client::class);

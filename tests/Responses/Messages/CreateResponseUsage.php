@@ -1,14 +1,13 @@
 <?php
 
-use Anthropic\Responses\Chat\CreateResponseUsage;
+use Anthropic\Responses\Messages\CreateResponseUsage;
 
 test('from', function () {
     $result = CreateResponseUsage::from(chatCompletion()['usage']);
 
     expect($result)
-        ->promptTokens->toBe(9)
-        ->completionTokens->toBe(12)
-        ->totalTokens->toBe(21);
+        ->inputTokens->toBe(10)
+        ->outputTokens->toBe(20);
 });
 
 test('to array', function () {

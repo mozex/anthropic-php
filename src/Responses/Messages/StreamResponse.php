@@ -1,6 +1,6 @@
 <?php
 
-namespace Anthropic\Responses;
+namespace Anthropic\Responses\Messages;
 
 use Anthropic\Contracts\ResponseHasMetaInformationContract;
 use Anthropic\Contracts\ResponseStreamContract;
@@ -43,15 +43,27 @@ final class StreamResponse implements ResponseHasMetaInformationContract, Respon
 
             $data = trim(substr($line, strlen('data:')));
 
-            if ($data === '[DONE]') {
-                break;
-            }
-
-            /** @var array{error?: array{message: string|array<int, string>, type: string, code: string}} $response */
+            /** @var array{error?: array{type: ?string, message: string|array<int, string>}} $response */
             $response = json_decode($data, true, flags: JSON_THROW_ON_ERROR);
 
             if (isset($response['error'])) {
                 throw new ErrorException($response['error']);
+            }
+
+            if (! isset($response['type'])) {
+                continue;
+            }
+
+            if ($response['type'] === 'message_stop') {
+                break;
+            }
+
+            if (! in_array($response['type'], [
+                'message_start',
+                'message_delta',
+                'content_block_delta',
+            ])) {
+                continue;
             }
 
             yield $this->responseClass::from($response);

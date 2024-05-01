@@ -62,7 +62,7 @@ Then, interact with Anthropic's API:
 $yourApiKey = getenv('YOUR_API_KEY');
 $client = Anthropic::client($yourApiKey);
 
-$result = $client->message()->create([
+$result = $client->messages()->create([
     'model' => 'gpt-4',
     'messages' => [
         ['role' => 'user', 'content' => 'Hello!'],
@@ -80,7 +80,7 @@ $yourApiKey = getenv('YOUR_API_KEY');
 $client = Anthropic::factory()
     ->withApiKey($yourApiKey)
     ->withOrganization('your-organization') // default: null
-    ->withBaseUri('openai.example.com/v1') // default: api.openai.com/v1
+    ->withBaseUri('openai.example.com/v1') // default: api.anthropic.com/v1
     ->withHttpClient($client = new \GuzzleHttp\Client([])) // default: HTTP client found using PSR-18 HTTP Client Discovery
     ->withHttpHeader('X-My-Header', 'foo')
     ->withQueryParam('my-param', 'bar')
@@ -1796,13 +1796,13 @@ In case of a streamed response you can optionally provide a resource holding the
 
 ```php
 use Anthropic\Testing\ClientFake;
-use Anthropic\Responses\Chat\CreateStreamedResponse;
+use Anthropic\Responses\Messages\CreateStreamedResponse;
 
 $client = new ClientFake([
     CreateStreamedResponse::fake(fopen('file.txt', 'r'););
 ]);
 
-$completion = $client->message()->createStreamed([
+$completion = $client->messages()->createStreamed([
         'model' => 'gpt-3.5-turbo',
         'messages' => [
             ['role' => 'user', 'content' => 'Hello!'],
