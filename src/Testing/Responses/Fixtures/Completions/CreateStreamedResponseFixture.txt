@@ -1,11 +1,27 @@
-data: {"id": "cmpl-6ynJi2uZZnKntnEZreDcjGyoPbVAn", "object": "text_completion", "created": 1679430847, "choices": [{"text": " everyone", "index": 0, "logprobs": null, "finish_reason": null}], "model": "gpt-3.5-turbo-instruct"}
-data: {"id": "cmpl-6ynJi2uZZnKntnEZreDcjGyoPbVAn", "object": "text_completion", "created": 1679430847, "choices": [{"text": "!", "index": 0, "logprobs": null, "finish_reason": null}], "model": "gpt-3.5-turbo-instruct"}
-data: {"id": "cmpl-6ynJi2uZZnKntnEZreDcjGyoPbVAn", "object": "text_completion", "created": 1679430847, "choices": [{"text": "\n", "index": 0, "logprobs": null, "finish_reason": null}], "model": "gpt-3.5-turbo-instruct"}
-data: {"id": "cmpl-6ynJi2uZZnKntnEZreDcjGyoPbVAn", "object": "text_completion", "created": 1679430847, "choices": [{"text": "\n", "index": 0, "logprobs": null, "finish_reason": null}], "model": "gpt-3.5-turbo-instruct"}
-data: {"id": "cmpl-6ynJi2uZZnKntnEZreDcjGyoPbVAn", "object": "text_completion", "created": 1679430847, "choices": [{"text": "This", "index": 0, "logprobs": null, "finish_reason": null}], "model": "gpt-3.5-turbo-instruct"}
-data: {"id": "cmpl-6ynJi2uZZnKntnEZreDcjGyoPbVAn", "object": "text_completion", "created": 1679430847, "choices": [{"text": " is", "index": 0, "logprobs": null, "finish_reason": null}], "model": "gpt-3.5-turbo-instruct"}
-data: {"id": "cmpl-6ynJi2uZZnKntnEZreDcjGyoPbVAn", "object": "text_completion", "created": 1679430847, "choices": [{"text": " a", "index": 0, "logprobs": null, "finish_reason": null}], "model": "gpt-3.5-turbo-instruct"}
-data: {"id": "cmpl-6ynJi2uZZnKntnEZreDcjGyoPbVAn", "object": "text_completion", "created": 1679430847, "choices": [{"text": " fake", "index": 0, "logprobs": null, "finish_reason": null}], "model": "gpt-3.5-turbo-instruct"}
-data: {"id": "cmpl-6ynJi2uZZnKntnEZreDcjGyoPbVAn", "object": "text_completion", "created": 1679430847, "choices": [{"text": " completion", "index": 0, "logprobs": null, "finish_reason": null}], "model": "gpt-3.5-turbo-instruct"}
-data: {"id": "cmpl-6ynJi2uZZnKntnEZreDcjGyoPbVAn", "object": "text_completion", "created": 1679430847, "choices": [{"text": " response.", "index": 0, "logprobs": null, "finish_reason": "length"}], "model": "gpt-3.5-turbo-instruct"}
-data: [DONE]
+event: completion
+data: {"type":"completion","id":"compl_01U8ZMthep4UrANhFshPMUFK","completion":" Hello","stop_reason":null,"model":"claude-2.1","stop":null,"log_id":"compl_01U8ZMthep4UrANhFshPMUFK"      }
+
+event: completion
+data: {"type":"completion","id":"compl_01U8ZMthep4UrANhFshPMUFK","completion":"!","stop_reason":null,"model":"claude-2.1","stop":null,"log_id":"compl_01U8ZMthep4UrANhFshPMUFK"  }
+
+event: ping
+data: {"type": "ping"}
+
+event: completion
+data: {"type":"completion","id":"compl_01U8ZMthep4UrANhFshPMUFK","completion":" My","stop_reason":null,"model":"claude-2.1","stop":null,"log_id":"compl_01U8ZMthep4UrANhFshPMUFK"     }
+
+event: completion
+data: {"type":"completion","id":"compl_01U8ZMthep4UrANhFshPMUFK","completion":" name","stop_reason":null,"model":"claude-2.1","stop":null,"log_id":"compl_01U8ZMthep4UrANhFshPMUFK"        }
+
+event: completion
+data: {"type":"completion","id":"compl_01U8ZMthep4UrANhFshPMUFK","completion":" is","stop_reason":null,"model":"claude-2.1","stop":null,"log_id":"compl_01U8ZMthep4UrANhFshPMUFK"   }
+
+event: completion
+data: {"type":"completion","id":"compl_01U8ZMthep4UrANhFshPMUFK","completion":" Claude","stop_reason":null,"model":"claude-2.1","stop":null,"log_id":"compl_01U8ZMthep4UrANhFshPMUFK"          }
+
+event: completion
+data: {"type":"completion","id":"compl_01U8ZMthep4UrANhFshPMUFK","completion":".","stop_reason":null,"model":"claude-2.1","stop":null,"log_id":"compl_01U8ZMthep4UrANhFshPMUFK"           }
+
+event: completion
+data: {"type":"completion","id":"compl_01U8ZMthep4UrANhFshPMUFK","completion":"","stop_reason":"stop_sequence","model":"claude-2.1","stop":"\n\nHuman:","log_id":"compl_01U8ZMthep4UrANhFshPMUFK"               }
+

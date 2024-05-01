@@ -5,7 +5,7 @@ namespace Anthropic\Testing\Resources;
 use Anthropic\Contracts\Resources\CompletionsContract;
 use Anthropic\Resources\Completions;
 use Anthropic\Responses\Completions\CreateResponse;
-use Anthropic\Responses\StreamResponse;
+use Anthropic\Responses\Completions\StreamResponse;
 use Anthropic\Testing\Resources\Concerns\Testable;
 
 final class CompletionsTestResource implements CompletionsContract

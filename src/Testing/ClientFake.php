@@ -5,21 +5,10 @@ namespace Anthropic\Testing;
 use Anthropic\Contracts\ClientContract;
 use Anthropic\Contracts\ResponseContract;
 use Anthropic\Contracts\ResponseStreamContract;
-use Anthropic\Responses\StreamResponse;
+use Anthropic\Responses\Messages\StreamResponse;
 use Anthropic\Testing\Requests\TestRequest;
-use Anthropic\Testing\Resources\AssistantsTestResource;
-use Anthropic\Testing\Resources\AudioTestResource;
-use Anthropic\Testing\Resources\MessageTestResource;
 use Anthropic\Testing\Resources\CompletionsTestResource;
-use Anthropic\Testing\Resources\EditsTestResource;
-use Anthropic\Testing\Resources\EmbeddingsTestResource;
-use Anthropic\Testing\Resources\FilesTestResource;
-use Anthropic\Testing\Resources\FineTunesTestResource;
-use Anthropic\Testing\Resources\FineTuningTestResource;
-use Anthropic\Testing\Resources\ImagesTestResource;
-use Anthropic\Testing\Resources\ModelsTestResource;
-use Anthropic\Testing\Resources\ModerationsTestResource;
-use Anthropic\Testing\Resources\ThreadsTestResource;
+use Anthropic\Testing\Resources\MessagesTestResource;
 use PHPUnit\Framework\Assert as PHPUnit;
 use Throwable;
 
@@ -136,63 +125,8 @@ class ClientFake implements ClientContract
         return new CompletionsTestResource($this);
     }
 
-    public function message(): MessageTestResource
+    public function messages(): MessagesTestResource
     {
-        return new MessageTestResource($this);
-    }
-
-    public function embeddings(): EmbeddingsTestResource
-    {
-        return new EmbeddingsTestResource($this);
-    }
-
-    public function audio(): AudioTestResource
-    {
-        return new AudioTestResource($this);
-    }
-
-    public function edits(): EditsTestResource
-    {
-        return new EditsTestResource($this);
-    }
-
-    public function files(): FilesTestResource
-    {
-        return new FilesTestResource($this);
-    }
-
-    public function models(): ModelsTestResource
-    {
-        return new ModelsTestResource($this);
-    }
-
-    public function fineTunes(): FineTunesTestResource
-    {
-        return new FineTunesTestResource($this);
-    }
-
-    public function fineTuning(): FineTuningTestResource
-    {
-        return new FineTuningTestResource($this);
-    }
-
-    public function moderations(): ModerationsTestResource
-    {
-        return new ModerationsTestResource($this);
-    }
-
-    public function images(): ImagesTestResource
-    {
-        return new ImagesTestResource($this);
-    }
-
-    public function assistants(): AssistantsTestResource
-    {
-        return new AssistantsTestResource($this);
-    }
-
-    public function threads(): ThreadsTestResource
-    {
-        return new ThreadsTestResource($this);
+        return new MessagesTestResource($this);
     }
 }
