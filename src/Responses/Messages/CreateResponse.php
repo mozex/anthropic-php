@@ -25,7 +25,7 @@ final class CreateResponse implements ResponseContract, ResponseHasMetaInformati
     use HasMetaInformation;
 
     /**
-     * @param  array<int, CreateResponseContent>  $contents
+     * @param  array<int, CreateResponseContent>  $content
      */
     private function __construct(
         public readonly string $id,
