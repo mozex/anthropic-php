@@ -6,6 +6,9 @@ namespace Anthropic\Responses\Messages;
 
 final class CreateStreamedResponseMessage
 {
+    /**
+     * @param  array<int, string>  $content
+     */
     private function __construct(
         public readonly ?string $id,
         public readonly ?string $type,
@@ -18,7 +21,7 @@ final class CreateStreamedResponseMessage
     }
 
     /**
-     * @param  array{id: string, type: string, role: string, content: array, model: string, stop_reason: string|null, stop_sequence:string|null}  $attributes
+     * @param  array{id?: string, type?: string, role?: string, content?: array<int, string>, model?: string, stop_reason?: string|null, stop_sequence?:string|null}  $attributes
      */
     public static function from(array $attributes): self
     {
@@ -34,7 +37,7 @@ final class CreateStreamedResponseMessage
     }
 
     /**
-     * @return array{id: string|null, type: string|null, role: string|null, content: array|null, model: string|null, stop_reason: string|null, stop_sequence:string|null}
+     * @return array{id: string|null, type: string|null, role: string|null, content: array<int, string>|null, model: string|null, stop_reason: string|null, stop_sequence:string|null}
      */
     public function toArray(): array
     {
