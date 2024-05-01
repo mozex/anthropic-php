@@ -36,7 +36,7 @@ final class Headers
     public static function withAuthorization(ApiKey $apiKey): self
     {
         return new self([
-            'Authorization' => "Bearer {$apiKey->toString()}",
+            'x-api-key' => $apiKey->toString(),
         ]);
     }
 
@@ -48,17 +48,6 @@ final class Headers
         return new self([
             ...$this->headers,
             'Content-Type' => $contentType->value.$suffix,
-        ]);
-    }
-
-    /**
-     * Creates a new Headers value object, with the given organization, and the existing headers.
-     */
-    public function withOrganization(string $organization): self
-    {
-        return new self([
-            ...$this->headers,
-            'Anthropic-Organization' => $organization,
         ]);
     }
 
