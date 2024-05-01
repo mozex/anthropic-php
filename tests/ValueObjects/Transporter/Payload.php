@@ -10,7 +10,7 @@ use Anthropic\ValueObjects\Transporter\QueryParams;
 it('has a method', function () {
     $payload = Payload::create('models', []);
 
-    $baseUri = BaseUri::from('api.openai.com/v1');
+    $baseUri = BaseUri::from('api.anthropic.com/v1');
     $headers = Headers::withAuthorization(ApiKey::from('foo'))->withContentType(ContentType::JSON);
     $queryParams = QueryParams::create();
 
@@ -20,7 +20,7 @@ it('has a method', function () {
 it('has a uri', function () {
     $payload = Payload::list('models');
 
-    $baseUri = BaseUri::from('api.openai.com/v1');
+    $baseUri = BaseUri::from('api.anthropic.com/v1');
     $headers = Headers::withAuthorization(ApiKey::from('foo'))->withContentType(ContentType::JSON);
     $queryParams = QueryParams::create()
         ->withParam('foo', 'bar')
@@ -28,7 +28,7 @@ it('has a uri', function () {
 
     $uri = $payload->toRequest($baseUri, $headers, $queryParams)->getUri();
 
-    expect($uri->getHost())->toBe('api.openai.com')
+    expect($uri->getHost())->toBe('api.anthropic.com')
         ->and($uri->getScheme())->toBe('https')
         ->and($uri->getPath())->toBe('/v1/models')
         ->and($uri->getQuery())->toBe('foo=bar&baz=qux');
@@ -37,7 +37,7 @@ it('has a uri', function () {
 test('get verb does not have a body', function () {
     $payload = Payload::list('models');
 
-    $baseUri = BaseUri::from('api.openai.com/v1');
+    $baseUri = BaseUri::from('api.anthropic.com/v1');
     $headers = Headers::withAuthorization(ApiKey::from('foo'))->withContentType(ContentType::JSON);
     $queryParams = QueryParams::create();
 
@@ -49,7 +49,7 @@ test('post verb has a body', function () {
         'name' => 'test',
     ]);
 
-    $baseUri = BaseUri::from('api.openai.com/v1');
+    $baseUri = BaseUri::from('api.anthropic.com/v1');
     $headers = Headers::withAuthorization(ApiKey::from('foo'))->withContentType(ContentType::JSON);
     $queryParams = QueryParams::create();
 
