@@ -54,6 +54,7 @@ $yourApiKey = getenv('YOUR_API_KEY');
 
 $client = Anthropic::factory()
     ->withApiKey($yourApiKey)
+    ->withHttpHeader('anthropic-version', '2023-06-01')
     ->withBaseUri('anthropic.example.com/v1') // default: api.anthropic.com/v1
     ->withHttpClient($client = new \GuzzleHttp\Client([])) // default: HTTP client found using PSR-18 HTTP Client Discovery
     ->withHttpHeader('X-My-Header', 'foo')
@@ -283,7 +284,7 @@ This example illustrates how to increase the timeout using Guzzle.
 ```php
 Anthropic::factory()
     ->withApiKey($apiKey)
-    ->withOrganization($organization)
+    ->withHttpHeader('anthropic-version', '2023-06-01')
     ->withHttpClient(new \GuzzleHttp\Client(['timeout' => $timeout]))
     ->make();
 ```
