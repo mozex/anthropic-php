@@ -5,58 +5,47 @@ declare(strict_types=1);
 namespace Anthropic\Responses\Completions;
 
 use Anthropic\Contracts\ResponseContract;
-use Anthropic\Contracts\ResponseHasMetaInformationContract;
 use Anthropic\Responses\Concerns\ArrayAccessible;
-use Anthropic\Responses\Concerns\HasMetaInformation;
-use Anthropic\Responses\Meta\MetaInformation;
-use Anthropic\Testing\Responses\Concerns\Fakeable;
+use Anthropic\Testing\Responses\Concerns\Completions\Fakeable;
 
 /**
- * @implements ResponseContract<array{id: string, object: string, created: int, model: string, choices: array<int, array{text: string, index: int, logprobs: array{tokens: array<int, string>, token_logprobs: array<int, float>, top_logprobs: array<int, string>|null, text_offset: array<int, int>}|null, finish_reason: string|null}>, usage: array{prompt_tokens: int, completion_tokens: int|null, total_tokens: int}}>
+ * @implements ResponseContract<array{type: string, id: string, completion: string, stop_reason: string, model: string, stop: string, log_id: string}>
  */
-final class CreateResponse implements ResponseContract, ResponseHasMetaInformationContract
+final class CreateResponse implements ResponseContract
 {
     /**
-     * @use ArrayAccessible<array{id: string, object: string, created: int, model: string, choices: array<int, array{text: string, index: int, logprobs: array{tokens: array<int, string>, token_logprobs: array<int, float>, top_logprobs: array<int, string>|null, text_offset: array<int, int>}|null, finish_reason: string|null}>, usage: array{prompt_tokens: int, completion_tokens: int|null, total_tokens: int}}>
+     * @use ArrayAccessible<array{type: string, id: string, completion: string, stop_reason: string, model: string, stop: string, log_id: string}>
      */
     use ArrayAccessible;
 
     use Fakeable;
-    use HasMetaInformation;
 
-    /**
-     * @param  array<int, CreateResponseChoice>  $choices
-     */
     private function __construct(
+        public readonly string $type,
         public readonly string $id,
-        public readonly string $object,
-        public readonly int $created,
+        public readonly string $completion,
+        public readonly string $stop_reason,
         public readonly string $model,
-        public readonly array $choices,
-        public readonly CreateResponseUsage $usage,
-        private readonly MetaInformation $meta,
+        public readonly string $stop,
+        public readonly string $log_id,
     ) {
     }
 
     /**
      * Acts as static factory, and returns a new Response instance.
      *
-     * @param  array{id: string, object: string, created: int, model: string, choices: array<int, array{text: string, index: int, logprobs: array{tokens: array<int, string>, token_logprobs: array<int, float>, top_logprobs: array<int, string>|null, text_offset: array<int, int>}|null, finish_reason: string}>, usage: array{prompt_tokens: int, completion_tokens: int|null, total_tokens: int}}  $attributes
+     * @param  array{type: string, id: string, completion: string, stop_reason: string, model: string, stop: string, log_id: string}  $attributes
      */
-    public static function from(array $attributes, MetaInformation $meta): self
+    public static function from(array $attributes): self
     {
-        $choices = array_map(fn (array $result): CreateResponseChoice => CreateResponseChoice::from(
-            $result
-        ), $attributes['choices']);
-
         return new self(
+            $attributes['type'],
             $attributes['id'],
-            $attributes['object'],
-            $attributes['created'],
+            $attributes['completion'],
+            $attributes['stop_reason'],
             $attributes['model'],
-            $choices,
-            CreateResponseUsage::from($attributes['usage']),
-            $meta,
+            $attributes['stop'],
+            $attributes['log_id'],
         );
     }
 
@@ -66,15 +55,13 @@ final class CreateResponse implements ResponseContract, ResponseHasMetaInformati
     public function toArray(): array
     {
         return [
+            'type' => $this->type,
             'id' => $this->id,
-            'object' => $this->object,
-            'created' => $this->created,
+            'completion' => $this->completion,
+            'stop_reason' => $this->stop_reason,
             'model' => $this->model,
-            'choices' => array_map(
-                static fn (CreateResponseChoice $result): array => $result->toArray(),
-                $this->choices,
-            ),
-            'usage' => $this->usage->toArray(),
+            'stop' => $this->stop,
+            'log_id' => $this->log_id,
         ];
     }
 }
