@@ -107,7 +107,7 @@ test('request object server user errors', function () {
 });
 
 test('request object server errors', function () {
-    $payload = Payload::create('complete', ['model' => 'gpt-4']);
+    $payload = Payload::create('complete', ['model' => 'claude-2.1']);
 
     $response = new Response(401, ['Content-Type' => 'application/json'], json_encode([
         'error' => [
@@ -153,7 +153,7 @@ test('error type may be null', function () {
 });
 
 test('error message may be an array', function () {
-    $payload = Payload::create('complete', ['model' => 'gpt-4']);
+    $payload = Payload::create('complete', ['model' => 'claude-2.1']);
 
     $response = new Response(404, ['Content-Type' => 'application/json; charset=utf-8'], json_encode([
         'error' => [
@@ -179,7 +179,7 @@ test('error message may be an array', function () {
 });
 
 test('error message may be empty', function () {
-    $payload = Payload::create('complete', ['model' => 'gpt-4']);
+    $payload = Payload::create('complete', ['model' => 'claude-2.1']);
 
     $response = new Response(404, ['Content-Type' => 'application/json; charset=utf-8'], json_encode([
         'error' => [
