@@ -5,6 +5,7 @@
 ------
 **Anthropic PHP** is a community-maintained PHP API client that allows you to interact with the [Anthropic API](https://docs.anthropic.com/claude/docs/intro-to-claude). This package is based on the excellent work of [Nuno Maduro](https://github.com/nunomaduro) and [Sandro Gehri](https://github.com/gehrisandro).
 
+> **Note:** If you want to use the **Anthropic PHP** in Laravel, take a look at the [mozex/anthropic-laravel](https://github.com/mozex/anthropic-laravel) repository.
 
 ## Table of Contents
 - [Support Us](#support-us)
