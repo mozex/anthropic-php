@@ -17,7 +17,7 @@ final class Messages implements MessagesContract
     use Concerns\Transportable;
 
     /**
-     * Creates a completion for the chat message
+     * Creates a completion for structured list of input messages
      *
      * @see https://docs.anthropic.com/claude/reference/messages_post
      *
@@ -36,7 +36,7 @@ final class Messages implements MessagesContract
     }
 
     /**
-     * Creates a streamed completion for the chat message
+     * Creates a streamed completion for structured list of input messages
      *
      * @see https://docs.anthropic.com/claude/reference/messages-streaming
      *

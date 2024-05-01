@@ -13,7 +13,7 @@ test('from first chunk', function () {
 });
 
 test('from content chunk', function () {
-    $result = CreateStreamedResponseDelta::from(chatCompletionStreamContentChunk()['delta']);
+    $result = CreateStreamedResponseDelta::from(messagesCompletionStreamContentChunk()['delta']);
 
     expect($result)
         ->type->toBe('text_delta')
@@ -23,7 +23,7 @@ test('from content chunk', function () {
 });
 
 test('from last chunk', function () {
-    $result = CreateStreamedResponseDelta::from(chatCompletionStreamLastChunk()['delta']);
+    $result = CreateStreamedResponseDelta::from(messagesCompletionStreamLastChunk()['delta']);
 
     expect($result)
         ->type->toBeNull()
@@ -45,7 +45,7 @@ test('to array from first chunk', function () {
 });
 
 test('to array for a content chunk', function () {
-    $result = CreateStreamedResponseDelta::from(chatCompletionStreamContentChunk()['delta']);
+    $result = CreateStreamedResponseDelta::from(messagesCompletionStreamContentChunk()['delta']);
 
     expect($result->toArray())
         ->toBe([
@@ -57,7 +57,7 @@ test('to array for a content chunk', function () {
 });
 
 test('to array from last chunk', function () {
-    $result = CreateStreamedResponseDelta::from(chatCompletionStreamLastChunk()['delta']);
+    $result = CreateStreamedResponseDelta::from(messagesCompletionStreamLastChunk()['delta']);
 
     expect($result->toArray())
         ->toBe([

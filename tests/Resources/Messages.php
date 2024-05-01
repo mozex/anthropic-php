@@ -16,7 +16,7 @@ test('create', function () {
     $client = mockClient('POST', 'messages', [
         'model' => 'claude-3-haiku-20240307',
         'messages' => ['role' => 'user', 'content' => 'Hello!'],
-    ], \Anthropic\ValueObjects\Transporter\Response::from(chatCompletion(), metaHeaders()));
+    ], \Anthropic\ValueObjects\Transporter\Response::from(messagesCompletion(), metaHeaders()));
 
     $result = $client->messages()->create([
         'model' => 'claude-3-haiku-20240307',
@@ -58,7 +58,7 @@ test('create throws an exception if stream option is true', function () {
 test('create streamed', function () {
     $response = new Response(
         headers: metaHeaders(),
-        body: new Stream(chatCompletionStream()),
+        body: new Stream(messagesCompletionStream()),
     );
 
     $client = mockStreamClient('POST', 'messages', [
@@ -96,7 +96,7 @@ test('create streamed', function () {
 
 test('handles error messages in stream', function () {
     $response = new Response(
-        body: new Stream(chatCompletionStreamError())
+        body: new Stream(messagesCompletionStreamError())
     );
 
     $client = mockStreamClient('POST', 'messages', [

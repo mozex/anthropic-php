@@ -3,7 +3,7 @@
 use Anthropic\Responses\Messages\CreateResponseUsage;
 
 test('from', function () {
-    $result = CreateResponseUsage::from(chatCompletion()['usage']);
+    $result = CreateResponseUsage::from(messagesCompletion()['usage']);
 
     expect($result)
         ->inputTokens->toBe(10)
@@ -11,8 +11,8 @@ test('from', function () {
 });
 
 test('to array', function () {
-    $result = CreateResponseUsage::from(chatCompletion()['usage']);
+    $result = CreateResponseUsage::from(messagesCompletion()['usage']);
 
     expect($result->toArray())
-        ->toBe(chatCompletion()['usage']);
+        ->toBe(messagesCompletion()['usage']);
 });

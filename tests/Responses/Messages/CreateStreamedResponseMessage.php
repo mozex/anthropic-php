@@ -3,7 +3,7 @@
 use Anthropic\Responses\Messages\CreateStreamedResponseMessage;
 
 test('from first chunk', function () {
-    $result = CreateStreamedResponseMessage::from(chatCompletionStreamFirstChunk()['message']);
+    $result = CreateStreamedResponseMessage::from(messagesCompletionStreamFirstChunk()['message']);
 
     expect($result)
         ->id->toBe('msg_01YS82gyNJHzAN1xVt2ymmTN')
@@ -29,7 +29,7 @@ test('from content chunk', function () {
 });
 
 test('to array from first chunk', function () {
-    $result = CreateStreamedResponseMessage::from(chatCompletionStreamFirstChunk()['message']);
+    $result = CreateStreamedResponseMessage::from(messagesCompletionStreamFirstChunk()['message']);
 
     expect($result->toArray())
         ->toBe([

@@ -3,7 +3,7 @@
 use Anthropic\Responses\Messages\CreateResponseContent;
 
 test('from', function () {
-    $result = CreateResponseContent::from(chatCompletion()['content'][0]);
+    $result = CreateResponseContent::from(messagesCompletion()['content'][0]);
 
     expect($result)
         ->type->toBe('text')
@@ -11,8 +11,8 @@ test('from', function () {
 });
 
 test('to array', function () {
-    $result = CreateResponseContent::from(chatCompletion()['content'][0]);
+    $result = CreateResponseContent::from(messagesCompletion()['content'][0]);
 
     expect($result->toArray())
-        ->toBe(chatCompletion()['content'][0]);
+        ->toBe(messagesCompletion()['content'][0]);
 });

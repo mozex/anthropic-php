@@ -6,7 +6,7 @@ use Anthropic\Responses\Messages\CreateResponseUsage;
 use Anthropic\Responses\Meta\MetaInformation;
 
 test('from', function () {
-    $completion = CreateResponse::from(chatCompletion(), meta());
+    $completion = CreateResponse::from(messagesCompletion(), meta());
 
     expect($completion)
         ->toBeInstanceOf(CreateResponse::class)
@@ -23,7 +23,7 @@ test('from', function () {
 });
 
 test('as array accessible', function () {
-    $completion = CreateResponse::from(chatCompletion(), meta());
+    $completion = CreateResponse::from(messagesCompletion(), meta());
 
     expect(isset($completion['id']))->toBeTrue();
 
@@ -31,11 +31,11 @@ test('as array accessible', function () {
 });
 
 test('to array', function () {
-    $completion = CreateResponse::from(chatCompletion(), meta());
+    $completion = CreateResponse::from(messagesCompletion(), meta());
 
     expect($completion->toArray())
         ->toBeArray()
-        ->toBe(chatCompletion());
+        ->toBe(messagesCompletion());
 });
 
 test('fake', function () {

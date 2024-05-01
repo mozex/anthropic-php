@@ -3,7 +3,7 @@
 /**
  * @return array<string, mixed>
  */
-function chatCompletion(): array
+function messagesCompletion(): array
 {
     return [
         'id' => 'msg_019hiOHAEXQwq1PTeETNEBWe',
@@ -25,7 +25,7 @@ function chatCompletion(): array
     ];
 }
 
-function chatCompletionStreamFirstChunk(): array
+function messagesCompletionStreamFirstChunk(): array
 {
     return [
         'type' => 'message_start',
@@ -45,7 +45,7 @@ function chatCompletionStreamFirstChunk(): array
     ];
 }
 
-function chatCompletionStreamLastChunk(): array
+function messagesCompletionStreamLastChunk(): array
 {
     return [
         'type' => 'message_delta',
@@ -59,7 +59,7 @@ function chatCompletionStreamLastChunk(): array
     ];
 }
 
-function chatCompletionStreamContentChunk(): array
+function messagesCompletionStreamContentChunk(): array
 {
     return [
         'type' => 'content_block_delta',
@@ -74,7 +74,7 @@ function chatCompletionStreamContentChunk(): array
 /**
  * @return resource
  */
-function chatCompletionStream()
+function messagesCompletionStream()
 {
     return fopen(__DIR__.'/Streams/MessagesCompletionCreate.txt', 'r');
 }
@@ -82,7 +82,7 @@ function chatCompletionStream()
 /**
  * @return resource
  */
-function chatCompletionStreamError()
+function messagesCompletionStreamError()
 {
     return fopen(__DIR__.'/Streams/MessagesCompletionCreateError.txt', 'r');
 }

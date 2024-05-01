@@ -3,7 +3,7 @@
 use Anthropic\Responses\Messages\CreateStreamedResponseUsage;
 
 test('from first chunk', function () {
-    $result = CreateStreamedResponseUsage::from(chatCompletionStreamFirstChunk()['message']['usage']);
+    $result = CreateStreamedResponseUsage::from(messagesCompletionStreamFirstChunk()['message']['usage']);
 
     expect($result)
         ->inputTokens->toBe(10)
@@ -19,7 +19,7 @@ test('from content chunk', function () {
 });
 
 test('from last chunk', function () {
-    $result = CreateStreamedResponseUsage::from(chatCompletionStreamLastChunk()['usage']);
+    $result = CreateStreamedResponseUsage::from(messagesCompletionStreamLastChunk()['usage']);
 
     expect($result)
         ->inputTokens->toBeNull()
@@ -27,10 +27,10 @@ test('from last chunk', function () {
 });
 
 test('to array from first chunk', function () {
-    $result = CreateStreamedResponseUsage::from(chatCompletionStreamFirstChunk()['message']['usage']);
+    $result = CreateStreamedResponseUsage::from(messagesCompletionStreamFirstChunk()['message']['usage']);
 
     expect($result->toArray())
-        ->toBe(chatCompletionStreamFirstChunk()['message']['usage']);
+        ->toBe(messagesCompletionStreamFirstChunk()['message']['usage']);
 });
 
 test('to array for a content chunk', function () {
@@ -44,11 +44,11 @@ test('to array for a content chunk', function () {
 });
 
 test('to array from last chunk', function () {
-    $result = CreateStreamedResponseUsage::from(chatCompletionStreamLastChunk()['usage']);
+    $result = CreateStreamedResponseUsage::from(messagesCompletionStreamLastChunk()['usage']);
 
     expect($result->toArray())
         ->toBe([
             'input_tokens' => null,
-            'output_tokens' => chatCompletionStreamLastChunk()['usage']['output_tokens'],
+            'output_tokens' => messagesCompletionStreamLastChunk()['usage']['output_tokens'],
         ]);
 });

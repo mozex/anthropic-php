@@ -6,7 +6,7 @@ use Anthropic\Responses\Messages\CreateStreamedResponseMessage;
 use Anthropic\Responses\Messages\CreateStreamedResponseUsage;
 
 test('from first chunk', function () {
-    $completion = CreateStreamedResponse::from(chatCompletionStreamFirstChunk());
+    $completion = CreateStreamedResponse::from(messagesCompletionStreamFirstChunk());
 
     expect($completion)
         ->toBeInstanceOf(CreateStreamedResponse::class)
@@ -21,7 +21,7 @@ test('from first chunk', function () {
 });
 
 test('from content chunk', function () {
-    $completion = CreateStreamedResponse::from(chatCompletionStreamContentChunk());
+    $completion = CreateStreamedResponse::from(messagesCompletionStreamContentChunk());
 
     expect($completion)
         ->toBeInstanceOf(CreateStreamedResponse::class)
@@ -36,7 +36,7 @@ test('from content chunk', function () {
 });
 
 test('from last chunk', function () {
-    $completion = CreateStreamedResponse::from(chatCompletionStreamLastChunk());
+    $completion = CreateStreamedResponse::from(messagesCompletionStreamLastChunk());
 
     expect($completion)
         ->toBeInstanceOf(CreateStreamedResponse::class)
@@ -53,13 +53,13 @@ test('from last chunk', function () {
 });
 
 test('as array accessible', function () {
-    $completion = CreateStreamedResponse::from(chatCompletionStreamFirstChunk());
+    $completion = CreateStreamedResponse::from(messagesCompletionStreamFirstChunk());
 
     expect($completion['message']['id'])->toBe('msg_01YS82gyNJHzAN1xVt2ymmTN');
 });
 
 test('to array', function () {
-    $completion = CreateStreamedResponse::from(chatCompletionStreamFirstChunk());
+    $completion = CreateStreamedResponse::from(messagesCompletionStreamFirstChunk());
 
     expect($completion->toArray())
         ->toBeArray()
@@ -96,7 +96,7 @@ test('fake', function () {
 });
 
 test('fake with override', function () {
-    $response = CreateStreamedResponse::fake(chatCompletionStream());
+    $response = CreateStreamedResponse::fake(messagesCompletionStream());
 
     expect($response->getIterator()->current())
         ->message->id->toBe('msg_1nZdL29xx5MUA1yADyHTEsnR8uuvGzszyY');

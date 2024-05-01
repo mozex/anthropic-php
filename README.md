@@ -116,7 +116,7 @@ foreach($stream as $response){
 
 #### `create`
 
-Creates a completion for the chat message.
+Creates a completion for structured list of input messages.
 
 ```php
 $response = $client->messages()->create([
@@ -147,7 +147,7 @@ $response->toArray(); // ['id' => 'msg_01BSy0WCV7QR2adFBauynAX7', ...]
 
 #### `create streamed`
 
-Creates a streamed completion for the chat message.
+Creates a streamed completion for structured list of input messages.
 
 ```php
 $stream = $client->messages()->createStreamed([

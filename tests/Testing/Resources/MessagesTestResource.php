@@ -5,7 +5,7 @@ use Anthropic\Responses\Messages\CreateResponse;
 use Anthropic\Responses\Messages\CreateStreamedResponse;
 use Anthropic\Testing\ClientFake;
 
-it('records a chat create request', function () {
+it('records a messages create request', function () {
     $fake = new ClientFake([
         CreateResponse::fake(),
     ]);

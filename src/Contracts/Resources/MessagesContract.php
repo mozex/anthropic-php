@@ -9,7 +9,7 @@ use Anthropic\Responses\Messages\StreamResponse;
 interface MessagesContract
 {
     /**
-     * Creates a completion for the chat message
+     * Creates a completion for structured list of input messages
      *
      * @see https://docs.anthropic.com/claude/reference/messages_post
      *
@@ -18,7 +18,7 @@ interface MessagesContract
     public function create(array $parameters): CreateResponse;
 
     /**
-     * Creates a streamed completion for the chat message
+     * Creates a streamed completion for structured list of input messages
      *
      * @see https://docs.anthropic.com/claude/reference/messages-streaming
      *
