@@ -5,7 +5,8 @@ namespace Anthropic\Testing;
 use Anthropic\Contracts\ClientContract;
 use Anthropic\Contracts\ResponseContract;
 use Anthropic\Contracts\ResponseStreamContract;
-use Anthropic\Responses\Messages\StreamResponse;
+use Anthropic\Responses\Completions\StreamResponse as CompletionsStreamResponse;
+use Anthropic\Responses\Messages\StreamResponse as MessagesStreamResponse;
 use Anthropic\Testing\Requests\TestRequest;
 use Anthropic\Testing\Resources\CompletionsTestResource;
 use Anthropic\Testing\Resources\MessagesTestResource;
@@ -20,7 +21,7 @@ class ClientFake implements ClientContract
     private array $requests = [];
 
     /**
-     * @param  array<array-key, ResponseContract|StreamResponse|string>  $responses
+     * @param  array<array-key, ResponseContract|CompletionsStreamResponse|MessagesStreamResponse|string>  $responses
      */
     public function __construct(protected array $responses = [])
     {
