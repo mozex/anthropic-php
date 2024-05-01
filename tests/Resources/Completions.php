@@ -2,53 +2,36 @@
 
 use Anthropic\Exceptions\InvalidArgumentException;
 use Anthropic\Responses\Completions\CreateResponse;
-use Anthropic\Responses\Completions\CreateResponseChoice;
-use Anthropic\Responses\Completions\CreateResponseUsage;
 use Anthropic\Responses\Completions\CreateStreamedResponse;
-use Anthropic\Responses\Meta\MetaInformation;
-use Anthropic\Responses\StreamResponse;
+use Anthropic\Responses\Completions\StreamResponse;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Stream;
 
 test('create', function () {
     $client = mockClient('POST', 'complete', [
-        'model' => 'da-vince',
+        'model' => 'claude-2.1',
         'prompt' => 'hi',
     ], \Anthropic\ValueObjects\Transporter\Response::from(completion(), metaHeaders()));
 
     $result = $client->completions()->create([
-        'model' => 'da-vince',
+        'model' => 'claude-2.1',
         'prompt' => 'hi',
     ]);
 
     expect($result)
         ->toBeInstanceOf(CreateResponse::class)
-        ->id->toBe('cmpl-5uS6a68SwurhqAqLBpZtibIITICna')
-        ->object->toBe('text_completion')
-        ->created->toBe(1664136088)
-        ->model->toBe('davinci')
-        ->choices->toBeArray()->toHaveCount(1)
-        ->choices->each->toBeInstanceOf(CreateResponseChoice::class)
-        ->usage->toBeInstanceOf(CreateResponseUsage::class);
-
-    expect($result->choices[0])
-        ->text->toBe("el, she elaborates more on the Corruptor's role, suggesting K")
-        ->index->toBe(0)
-        ->logprobs->toBe(null)
-        ->finishReason->toBe('length');
-
-    expect($result->usage)
-        ->promptTokens->toBe(1)
-        ->completionTokens->toBe(16)
-        ->totalTokens->toBe(17);
-
-    expect($result->meta())
-        ->toBeInstanceOf(MetaInformation::class);
+        ->type->toBe('completion')
+        ->id->toBe('compl_01Sb5nmX365bQaWJ3jDfSgqB')
+        ->completion->toBe(' Hello!')
+        ->stop_reason->toBe('stop_sequence')
+        ->model->toBe('claude-2.1')
+        ->stop->toBe('\n\nHuman:')
+        ->log_id->toBe('compl_01Sb5nmX365bQaWJ3jDfSgqB');
 });
 
 test('create throws an exception if stream option is true', function () {
     Anthropic::client('foo')->completions()->create([
-        'model' => 'da-vince',
+        'model' => 'claude-2.1',
         'prompt' => 'hi',
         'stream' => true,
     ]);
@@ -61,13 +44,13 @@ test('create streamed', function () {
     );
 
     $client = mockStreamClient('POST', 'complete', [
-        'model' => 'gpt-3.5-turbo-instruct',
+        'model' => 'claude-2.1',
         'prompt' => 'hi',
         'stream' => true,
     ], $response);
 
     $result = $client->completions()->createStreamed([
-        'model' => 'gpt-3.5-turbo-instruct',
+        'model' => 'claude-2.1',
         'prompt' => 'hi',
     ]);
 
@@ -80,20 +63,11 @@ test('create streamed', function () {
 
     expect($result->getIterator()->current())
         ->toBeInstanceOf(CreateStreamedResponse::class)
-        ->id->toBe('cmpl-6wcyFqMKXiZffiydSfWHhjcgsf3KD')
-        ->object->toBe('text_completion')
-        ->created->toBe(1679430847)
-        ->model->toBe('gpt-3.5-turbo-instruct')
-        ->choices->toBeArray()->toHaveCount(1)
-        ->choices->each->toBeInstanceOf(CreateResponseChoice::class)
-        ->usage->toBeNull();
-
-    expect($result->getIterator()->current()->choices[0])
-        ->text->toBe('!')
-        ->index->toBe(0)
-        ->logprobs->toBe(null)
-        ->finishReason->toBeNull();
-
-    expect($result->meta())
-        ->toBeInstanceOf(MetaInformation::class);
+        ->type->toBe('completion')
+        ->id->toBe('compl_01GS5bBdxpspiwnHYoCVk9Di')
+        ->completion->toBe(' AI')
+        ->stop_reason->toBeNull()
+        ->model->toBe('claude-2.1')
+        ->stop->toBeNull()
+        ->log_id->toBe('compl_01GS5bBdxpspiwnHYoCVk9Di');
 });
