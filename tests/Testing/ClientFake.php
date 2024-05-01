@@ -8,44 +8,16 @@ use PHPUnit\Framework\ExpectationFailedException;
 it('returns a fake response', function () {
     $fake = new ClientFake([
         CreateResponse::fake([
-            'choices' => [
-                [
-                    'text' => 'awesome!',
-                ],
-            ],
+            'completion' => 'awesome!',
         ]),
     ]);
 
     $completion = $fake->completions()->create([
-        'model' => 'gpt-3.5-turbo-instruct',
+        'model' => 'claude-2.1',
         'prompt' => 'PHP is ',
     ]);
 
-    expect($completion['choices'][0]['text'])->toBe('awesome!');
-});
-
-it('returns fake meta data', function () {
-    $fake = new ClientFake([
-        CreateResponse::fake(),
-    ]);
-
-    $completion = $fake->completions()->create([
-        'model' => 'gpt-3.5-turbo-instruct',
-        'prompt' => 'PHP is ',
-    ]);
-
-    expect($completion->meta())
-        ->requestId->toBe('3813fa4fa3f17bdf0d7654f0f49ebab4')
-        ->anthropic->model->toBe('gpt-3.5-turbo-instruct')
-        ->anthropic->organization->toBe('org-1234')
-        ->anthropic->processingMs->toBe(410)
-        ->anthropic->version->toBe('2020-10-01')
-        ->requestLimit->limit->toBe(3000)
-        ->requestLimit->remaining->toBe(2999)
-        ->requestLimit->reset->toBe('20ms')
-        ->tokenLimit->limit->toBe(250000)
-        ->tokenLimit->remaining->toBe(249989)
-        ->tokenLimit->reset->toBe('2ms');
+    expect($completion['completion'])->toBe('awesome!');
 });
 
 it('throws fake exceptions', function () {
@@ -53,12 +25,11 @@ it('throws fake exceptions', function () {
         new \Anthropic\Exceptions\ErrorException([
             'message' => 'The model `gpt-1` does not exist',
             'type' => 'invalid_request_error',
-            'code' => null,
         ]),
     ]);
 
     $fake->completions()->create([
-        'model' => 'gpt-3.5-turbo-instruct',
+        'model' => 'claude-2.1',
         'prompt' => 'PHP is ',
     ]);
 })->expectExceptionMessage('The model `gpt-1` does not exist');
@@ -69,12 +40,12 @@ it('throws an exception if there is no more fake response', function () {
     ]);
 
     $fake->completions()->create([
-        'model' => 'gpt-3.5-turbo-instruct',
+        'model' => 'claude-2.1',
         'prompt' => 'PHP is ',
     ]);
 
     $fake->completions()->create([
-        'model' => 'gpt-3.5-turbo-instruct',
+        'model' => 'claude-2.1',
         'prompt' => 'PHP is ',
     ]);
 })->expectExceptionMessage('No fake responses left');
@@ -87,7 +58,7 @@ it('allows to add more responses', function () {
     ]);
 
     $completion = $fake->completions()->create([
-        'model' => 'gpt-3.5-turbo-instruct',
+        'model' => 'claude-2.1',
         'prompt' => 'PHP is ',
     ]);
 
@@ -101,7 +72,7 @@ it('allows to add more responses', function () {
     ]);
 
     $completion = $fake->completions()->create([
-        'model' => 'gpt-3.5-turbo-instruct',
+        'model' => 'claude-2.1',
         'prompt' => 'PHP is ',
     ]);
 
@@ -115,13 +86,13 @@ it('asserts a request was sent', function () {
     ]);
 
     $fake->completions()->create([
-        'model' => 'gpt-3.5-turbo-instruct',
+        'model' => 'claude-2.1',
         'prompt' => 'PHP is ',
     ]);
 
     $fake->assertSent(Completions::class, function ($method, $parameters) {
         return $method === 'create' &&
-            $parameters['model'] === 'gpt-3.5-turbo-instruct' &&
+            $parameters['model'] === 'claude-2.1' &&
             $parameters['prompt'] === 'PHP is ';
     });
 });
@@ -133,7 +104,7 @@ it('throws an exception if a request was not sent', function () {
 
     $fake->assertSent(Completions::class, function ($method, $parameters) {
         return $method === 'create' &&
-            $parameters['model'] === 'gpt-3.5-turbo-instruct' &&
+            $parameters['model'] === 'claude-2.1' &&
             $parameters['prompt'] === 'PHP is ';
     });
 })->expectException(ExpectationFailedException::class);
@@ -144,13 +115,13 @@ it('asserts a request was sent on the resource', function () {
     ]);
 
     $fake->completions()->create([
-        'model' => 'gpt-3.5-turbo-instruct',
+        'model' => 'claude-2.1',
         'prompt' => 'PHP is ',
     ]);
 
     $fake->completions()->assertSent(function ($method, $parameters) {
         return $method === 'create' &&
-            $parameters['model'] === 'gpt-3.5-turbo-instruct' &&
+            $parameters['model'] === 'claude-2.1' &&
             $parameters['prompt'] === 'PHP is ';
     });
 });
@@ -162,12 +133,12 @@ it('asserts a request was sent n times', function () {
     ]);
 
     $fake->completions()->create([
-        'model' => 'gpt-3.5-turbo-instruct',
+        'model' => 'claude-2.1',
         'prompt' => 'PHP is ',
     ]);
 
     $fake->completions()->create([
-        'model' => 'gpt-3.5-turbo-instruct',
+        'model' => 'claude-2.1',
         'prompt' => 'PHP is ',
     ]);
 
@@ -181,7 +152,7 @@ it('throws an exception if a request was not sent n times', function () {
     ]);
 
     $fake->completions()->create([
-        'model' => 'gpt-3.5-turbo-instruct',
+        'model' => 'claude-2.1',
         'prompt' => 'PHP is ',
     ]);
 
@@ -200,7 +171,7 @@ it('throws an exception if an unexpected request was sent', function () {
     ]);
 
     $fake->completions()->create([
-        'model' => 'gpt-3.5-turbo-instruct',
+        'model' => 'claude-2.1',
         'prompt' => 'PHP is ',
     ]);
 
@@ -227,7 +198,7 @@ it('throws an exception if any request was sent when non was expected', function
     ]);
 
     $fake->completions()->create([
-        'model' => 'gpt-3.5-turbo-instruct',
+        'model' => 'claude-2.1',
         'prompt' => 'PHP is ',
     ]);
 
