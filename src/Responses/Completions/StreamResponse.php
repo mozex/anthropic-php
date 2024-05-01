@@ -41,15 +41,11 @@ final class StreamResponse implements ResponseStreamContract
 
             $data = trim(substr($line, strlen('data:')));
 
-            /** @var array{error?: array{type: ?string, message: string|array<int, string>}} $response */
+            /** @var array{type: string, error?: array{type: ?string, message: string|array<int, string>}} $response */
             $response = json_decode($data, true, flags: JSON_THROW_ON_ERROR);
 
             if (isset($response['error'])) {
                 throw new ErrorException($response['error']);
-            }
-
-            if (! isset($response['type'])) {
-                continue;
             }
 
             if ($response['type'] !== 'completion') {
