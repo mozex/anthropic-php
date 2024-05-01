@@ -18,7 +18,7 @@ function mockClient(string $method, string $resource, array $params, Response|Re
         ->shouldReceive($methodName)
         ->once()
         ->withArgs(function (Payload $payload) use ($validateParams, $method, $resource, $params) {
-            $baseUri = BaseUri::from('api.openai.com/v1');
+            $baseUri = BaseUri::from('api.anthropic.com/v1');
             $headers = Headers::withAuthorization(ApiKey::from('foo'));
             $queryParams = QueryParams::create();
 

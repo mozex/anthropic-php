@@ -53,7 +53,7 @@ test('client')->expect('Anthropic\Client')->toOnlyUse([
     'Anthropic\Contracts',
 ]);
 
-test('openai')->expect('Anthropic')->toOnlyUse([
+test('anthropic')->expect('Anthropic')->toOnlyUse([
     'GuzzleHttp\Client',
     'GuzzleHttp\Exception\ClientException',
     'Http\Discovery\Psr17Factory',
@@ -66,3 +66,7 @@ test('openai')->expect('Anthropic')->toOnlyUse([
     'Psr\Http\Message\ResponseInterface',
     'Psr\Http\Message\StreamInterface',
 ])->ignoring('Anthropic\Testing');
+
+arch('Not debugging statements are left in our code.')
+    ->expect(['dd', 'ddd', 'dump', 'ray', 'die', 'var_dump', 'print_r'])
+    ->each->not->toBeUsed();
