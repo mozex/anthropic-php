@@ -1,0 +1,57 @@
+event: completion
+data: {"type":"completion","id":"compl_01GS5bBdxpspiwnHYoCVk9Di","completion":" AI","stop_reason":null,"model":"claude-2.1","stop":null,"log_id":"compl_01GS5bBdxpspiwnHYoCVk9Di"             }
+
+event: completion
+data: {"type":"completion","id":"compl_01GS5bBdxpspiwnHYoCVk9Di","completion":" refers","stop_reason":null,"model":"claude-2.1","stop":null,"log_id":"compl_01GS5bBdxpspiwnHYoCVk9Di"   }
+
+event: ping
+data: {"type": "ping"}
+
+event: completion
+data: {"type":"completion","id":"compl_01GS5bBdxpspiwnHYoCVk9Di","completion":" to","stop_reason":null,"model":"claude-2.1","stop":null,"log_id":"compl_01GS5bBdxpspiwnHYoCVk9Di"  }
+
+event: completion
+data: {"type":"completion","id":"compl_01GS5bBdxpspiwnHYoCVk9Di","completion":" the","stop_reason":null,"model":"claude-2.1","stop":null,"log_id":"compl_01GS5bBdxpspiwnHYoCVk9Di" }
+
+event: completion
+data: {"type":"completion","id":"compl_01GS5bBdxpspiwnHYoCVk9Di","completion":" ability","stop_reason":null,"model":"claude-2.1","stop":null,"log_id":"compl_01GS5bBdxpspiwnHYoCVk9Di"       }
+
+event: completion
+data: {"type":"completion","id":"compl_01GS5bBdxpspiwnHYoCVk9Di","completion":" of","stop_reason":null,"model":"claude-2.1","stop":null,"log_id":"compl_01GS5bBdxpspiwnHYoCVk9Di"     }
+
+event: completion
+data: {"type":"completion","id":"compl_01GS5bBdxpspiwnHYoCVk9Di","completion":" machines","stop_reason":null,"model":"claude-2.1","stop":null,"log_id":"compl_01GS5bBdxpspiwnHYoCVk9Di"  }
+
+event: completion
+data: {"type":"completion","id":"compl_01GS5bBdxpspiwnHYoCVk9Di","completion":" to","stop_reason":null,"model":"claude-2.1","stop":null,"log_id":"compl_01GS5bBdxpspiwnHYoCVk9Di"        }
+
+event: completion
+data: {"type":"completion","id":"compl_01GS5bBdxpspiwnHYoCVk9Di","completion":" perform","stop_reason":null,"model":"claude-2.1","stop":null,"log_id":"compl_01GS5bBdxpspiwnHYoCVk9Di"     }
+
+event: completion
+data: {"type":"completion","id":"compl_01GS5bBdxpspiwnHYoCVk9Di","completion":" tasks","stop_reason":null,"model":"claude-2.1","stop":null,"log_id":"compl_01GS5bBdxpspiwnHYoCVk9Di"  }
+
+event: completion
+data: {"type":"completion","id":"compl_01GS5bBdxpspiwnHYoCVk9Di","completion":" that","stop_reason":null,"model":"claude-2.1","stop":null,"log_id":"compl_01GS5bBdxpspiwnHYoCVk9Di" }
+
+event: completion
+data: {"type":"completion","id":"compl_01GS5bBdxpspiwnHYoCVk9Di","completion":" woul","stop_reason":null,"model":"claude-2.1","stop":null,"log_id":"compl_01GS5bBdxpspiwnHYoCVk9Di"            }
+
+event: completion
+data: {"type":"completion","id":"compl_01GS5bBdxpspiwnHYoCVk9Di","completion":"d otherwise","stop_reason":null,"model":"claude-2.1","stop":null,"log_id":"compl_01GS5bBdxpspiwnHYoCVk9Di"               }
+
+event: completion
+data: {"type":"completion","id":"compl_01GS5bBdxpspiwnHYoCVk9Di","completion":" require","stop_reason":null,"model":"claude-2.1","stop":null,"log_id":"compl_01GS5bBdxpspiwnHYoCVk9Di"     }
+
+event: completion
+data: {"type":"completion","id":"compl_01GS5bBdxpspiwnHYoCVk9Di","completion":" human","stop_reason":null,"model":"claude-2.1","stop":null,"log_id":"compl_01GS5bBdxpspiwnHYoCVk9Di"     }
+
+event: completion
+data: {"type":"completion","id":"compl_01GS5bBdxpspiwnHYoCVk9Di","completion":" intelligence","stop_reason":null,"model":"claude-2.1","stop":null,"log_id":"compl_01GS5bBdxpspiwnHYoCVk9Di"  }
+
+event: completion
+data: {"type":"completion","id":"compl_01GS5bBdxpspiwnHYoCVk9Di","completion":".","stop_reason":null,"model":"claude-2.1","stop":null,"log_id":"compl_01GS5bBdxpspiwnHYoCVk9Di"            }
+
+event: completion
+data: {"type":"completion","id":"compl_01GS5bBdxpspiwnHYoCVk9Di","completion":"","stop_reason":"stop_sequence","model":"claude-2.1","stop":"\n\nHuman:","log_id":"compl_01GS5bBdxpspiwnHYoCVk9Di"             }
+
