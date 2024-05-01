@@ -7,6 +7,7 @@
 
 
 ## Table of Contents
+- [Support Us](#support-us)
 - [Get Started](#get-started)
 - [Usage](#usage)
   - [Completions Resource](#completions-resource)
@@ -14,6 +15,19 @@
 - [Meta Information](#meta-information)
 - [Troubleshooting](#troubleshooting)
 - [Testing](#testing)
+- [Changelog](#changelog)
+- [Contributing](#contributing)
+- [Security Vulnerabilities](#security-vulnerabilities)
+- [Credits](#credits)
+- [License](#license)
+
+## Support us
+
+Creating and maintaining open-source projects requires significant time and effort. Your support will help enhance the project and enable further contributions to the PHP community.
+
+Sponsorship can be made through the [GitHub Sponsors](https://github.com/sponsors/mozex) program. Just click the "**[Sponsor](https://github.com/sponsors/mozex)**" button at the top of this repository. Any amount is greatly appreciated, even a contribution as small as $1 can make a big difference and will go directly towards developing and improving this package.
+
+Thank you for considering sponsoring. Your support truly makes a difference!
 
 ## Get Started
 
@@ -384,6 +398,23 @@ $completion = $client->completions()->create([
 ]);
 ```
 
----
+## Changelog
 
-Anthropic PHP is an open-sourced software licensed under the **[MIT license](https://opensource.org/licenses/MIT)**.
+Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
+
+## Contributing
+
+Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
+
+## Security Vulnerabilities
+
+Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
+
+## Credits
+
+- [Mozex](https://github.com/mozex)
+- [All Contributors](../../contributors)
+
+## License
+
+The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
