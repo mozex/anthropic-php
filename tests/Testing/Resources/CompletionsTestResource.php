@@ -11,13 +11,13 @@ it('records a completions create request', function () {
     ]);
 
     $fake->completions()->create([
-        'model' => 'gpt-3.5-turbo-instruct',
+        'model' => 'claude-2.1',
         'prompt' => 'PHP is ',
     ]);
 
     $fake->assertSent(Completions::class, function ($method, $parameters) {
         return $method === 'create' &&
-            $parameters['model'] === 'gpt-3.5-turbo-instruct' &&
+            $parameters['model'] === 'claude-2.1' &&
             $parameters['prompt'] === 'PHP is ';
     });
 });
@@ -28,13 +28,13 @@ it('records a streamed completions create request', function () {
     ]);
 
     $fake->completions()->createStreamed([
-        'model' => 'gpt-3.5-turbo-instruct',
+        'model' => 'claude-2.1',
         'prompt' => 'PHP is ',
     ]);
 
     $fake->assertSent(Completions::class, function ($method, $parameters) {
         return $method === 'createStreamed' &&
-            $parameters['model'] === 'gpt-3.5-turbo-instruct' &&
+            $parameters['model'] === 'claude-2.1' &&
             $parameters['prompt'] === 'PHP is ';
     });
 });
