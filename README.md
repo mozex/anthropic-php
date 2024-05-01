@@ -14,8 +14,6 @@
 - [Meta Information](#meta-information)
 - [Troubleshooting](#troubleshooting)
 - [Testing](#testing)
-- [Services](#services)
-  - [Azure](#azure)
 
 ## Get Started
 
