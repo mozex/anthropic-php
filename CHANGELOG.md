@@ -1,14 +1,11 @@
 # Changelog
-All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](http://keepachangelog.com/)
-and this project adheres to [Semantic Versioning](http://semver.org/).
+All notable changes to `anthropic-php` will be documented in this file.
 
-## v1.0.1 (2024-05-01)
+## 1.0.1 - 2024-05-01
 
-### Fixed
 - fix client fake types
 
-## v1.0.0 (2024-05-01)
-### Added
+## 1.0.0 - 2024-05-01
+
 - Initial Release
