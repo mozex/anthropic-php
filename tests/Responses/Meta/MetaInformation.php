@@ -1,7 +1,6 @@
 <?php
 
 use Anthropic\Responses\Meta\MetaInformation;
-use Anthropic\Responses\Meta\MetaInformationAnthropic;
 use Anthropic\Responses\Meta\MetaInformationRateLimit;
 
 test('from response headers', function () {
@@ -9,25 +8,20 @@ test('from response headers', function () {
 
     expect($meta)
         ->toBeInstanceOf(MetaInformation::class)
-        ->requestId->toBe('3813fa4fa3f17bdf0d7654f0f49ebab4')
-        ->anthropic->toBeInstanceOf(MetaInformationAnthropic::class)
-        ->anthropic->model->toBe('gpt-3.5-turbo-instruct')
-        ->anthropic->organization->toBe('org-1234')
-        ->anthropic->version->toBe('2020-10-01')
-        ->anthropic->processingMs->toBe(410)
+        ->requestId->toBe('02c10373f63cf2954851197d75c0adab')
         ->requestLimit->toBeInstanceOf(MetaInformationRateLimit::class)
-        ->requestLimit->limit->toBe(3000)
-        ->requestLimit->remaining->toBe(2999)
-        ->requestLimit->reset->toBe('20ms')
+        ->requestLimit->limit->toBe(5)
+        ->requestLimit->remaining->toBe(4)
+        ->requestLimit->reset->toBe('2024-04-30T15:56:17Z')
         ->tokenLimit->toBeInstanceOf(MetaInformationRateLimit::class)
-        ->tokenLimit->limit->toBe(250000)
-        ->tokenLimit->remaining->toBe(249989)
-        ->tokenLimit->reset->toBe('2ms');
+        ->tokenLimit->limit->toBe(25000)
+        ->tokenLimit->remaining->toBe(25000)
+        ->tokenLimit->reset->toBe('2024-04-30T15:56:17Z');
 });
 
-test('from response headers without "x-request-id"', function () {
+test('from response headers without "request-id"', function () {
     $headers = metaHeaders();
-    unset($headers['x-request-id']);
+    unset($headers['request-id']);
 
     $meta = MetaInformation::from($headers);
 
@@ -36,71 +30,26 @@ test('from response headers without "x-request-id"', function () {
         ->requestId->toBeNull();
 });
 
-test('from azure response headers', function () {
-    $meta = MetaInformation::from((new \GuzzleHttp\Psr7\Response(headers: metaHeadersFromAzure()))->getHeaders());
-
-    expect($meta)
-        ->toBeInstanceOf(MetaInformation::class)
-        ->requestId->toBe('3813fa4fa3f17bdf0d7654f0f49ebab4')
-        ->anthropic->toBeInstanceOf(MetaInformationAnthropic::class)
-        ->anthropic->model->toBe('gpt-3.5-turbo-instruct')
-        ->anthropic->organization->toBeNull()
-        ->anthropic->version->toBeNull()
-        ->anthropic->processingMs->toBe(3482)
-        ->requestLimit->toBeInstanceOf(MetaInformationRateLimit::class)
-        ->requestLimit->limit->toBeNull()
-        ->requestLimit->remaining->toBe(119)
-        ->requestLimit->reset->toBeNull()
-        ->tokenLimit->toBeInstanceOf(MetaInformationRateLimit::class)
-        ->tokenLimit->limit->toBeNull()
-        ->tokenLimit->remaining->toBe(119968)
-        ->tokenLimit->reset->toBeNull();
-});
-
-test('from azure response headers without rate limit headers ', function () {
-    $headers = metaHeadersFromAzure();
-    unset($headers['x-ratelimit-remaining-requests']);
-    unset($headers['x-ratelimit-remaining-tokens']);
-
-    $meta = MetaInformation::from((new \GuzzleHttp\Psr7\Response(headers: $headers))->getHeaders());
-
-    expect($meta)
-        ->toBeInstanceOf(MetaInformation::class)
-        ->requestLimit->toBeNull()
-        ->tokenLimit->toBeNull();
-});
-
-test('from azure response headers without processing time', function () {
-    $headers = metaHeadersFromAzure();
-    unset($headers['openai-processing-ms']);
-
-    $meta = MetaInformation::from((new \GuzzleHttp\Psr7\Response(headers: $headers))->getHeaders());
-
-    expect($meta)
-        ->toBeInstanceOf(MetaInformation::class)
-        ->anthropic->toBeInstanceOf(MetaInformationAnthropic::class)
-        ->anthropic->processingMs->toBeNull();
-});
-
 test('from response headers in different cases', function () {
     $meta = MetaInformation::from((new \GuzzleHttp\Psr7\Response(headers: metaHeadersWithDifferentCases()))->getHeaders());
 
     expect($meta)
         ->toBeInstanceOf(MetaInformation::class)
-        ->requestId->toBe('3813fa4fa3f17bdf0d7654f0f49ebab4')
-        ->anthropic->toBeInstanceOf(MetaInformationAnthropic::class)
-        ->anthropic->model->toBe('gpt-3.5-turbo-instruct')
-        ->anthropic->organization->toBe('org-1234')
-        ->anthropic->version->toBe('2020-10-01')
-        ->anthropic->processingMs->toBe(410)
-        ->requestLimit->toBeNull()
-        ->tokenLimit->toBeNull();
+        ->requestId->toBe('02c10373f63cf2954851197d75c0adab')
+        ->requestLimit->toBeInstanceOf(MetaInformationRateLimit::class)
+        ->requestLimit->limit->toBe(5)
+        ->requestLimit->remaining->toBe(4)
+        ->requestLimit->reset->toBe('2024-04-30T15:56:17Z')
+        ->tokenLimit->toBeInstanceOf(MetaInformationRateLimit::class)
+        ->tokenLimit->limit->toBe(25000)
+        ->tokenLimit->remaining->toBe(25000)
+        ->tokenLimit->reset->toBe('2024-04-30T15:56:17Z');
 });
 
 test('as array accessible', function () {
     $meta = MetaInformation::from(metaHeaders());
 
-    expect($meta['x-request-id'])->toBe('3813fa4fa3f17bdf0d7654f0f49ebab4');
+    expect($meta['request-id'])->toBe('02c10373f63cf2954851197d75c0adab');
 });
 
 test('to array', function () {
@@ -109,30 +58,12 @@ test('to array', function () {
     expect($meta->toArray())
         ->toBeArray()
         ->toBe([
-            'openai-model' => 'gpt-3.5-turbo-instruct',
-            'openai-organization' => 'org-1234',
-            'openai-processing-ms' => 410,
-            'openai-version' => '2020-10-01',
-            'x-ratelimit-limit-requests' => 3000,
-            'x-ratelimit-limit-tokens' => 250000,
-            'x-ratelimit-remaining-requests' => 2999,
-            'x-ratelimit-remaining-tokens' => 249989,
-            'x-ratelimit-reset-requests' => '20ms',
-            'x-ratelimit-reset-tokens' => '2ms',
-            'x-request-id' => '3813fa4fa3f17bdf0d7654f0f49ebab4',
-        ]);
-});
-
-test('to array from azure', function () {
-    $meta = MetaInformation::from(metaHeadersFromAzure());
-
-    expect($meta->toArray())
-        ->toBeArray()
-        ->toBe([
-            'openai-model' => 'gpt-3.5-turbo-instruct',
-            'openai-processing-ms' => 3482,
-            'x-ratelimit-remaining-requests' => 119,
-            'x-ratelimit-remaining-tokens' => 119968,
-            'x-request-id' => '3813fa4fa3f17bdf0d7654f0f49ebab4',
+            'anthropic-ratelimit-requests-limit' => 5,
+            'anthropic-ratelimit-tokens-limit' => 25000,
+            'anthropic-ratelimit-requests-remaining' => 4,
+            'anthropic-ratelimit-tokens-remaining' => 25000,
+            'anthropic-ratelimit-requests-reset' => '2024-04-30T15:56:17Z',
+            'anthropic-ratelimit-tokens-reset' => '2024-04-30T15:56:17Z',
+            'request-id' => '02c10373f63cf2954851197d75c0adab',
         ]);
 });
