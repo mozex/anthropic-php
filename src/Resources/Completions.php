@@ -7,7 +7,7 @@ namespace Anthropic\Resources;
 use Anthropic\Contracts\Resources\CompletionsContract;
 use Anthropic\Responses\Completions\CreateResponse;
 use Anthropic\Responses\Completions\CreateStreamedResponse;
-use Anthropic\Responses\StreamResponse;
+use Anthropic\Responses\Completions\StreamResponse;
 use Anthropic\ValueObjects\Transporter\Payload;
 use Anthropic\ValueObjects\Transporter\Response;
 
@@ -32,7 +32,7 @@ final class Completions implements CompletionsContract
         /** @var Response<array{type: string, id: string, completion: string, stop_reason: string, model: string, stop: string, log_id: string}> $response */
         $response = $this->transporter->requestObject($payload);
 
-        return CreateResponse::from($response->data(), $response->meta());
+        return CreateResponse::from($response->data());
     }
 
     /**

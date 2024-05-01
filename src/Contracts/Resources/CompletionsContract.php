@@ -4,7 +4,7 @@ namespace Anthropic\Contracts\Resources;
 
 use Anthropic\Responses\Completions\CreateResponse;
 use Anthropic\Responses\Completions\CreateStreamedResponse;
-use Anthropic\Responses\StreamResponse;
+use Anthropic\Responses\Completions\StreamResponse;
 
 interface CompletionsContract
 {
