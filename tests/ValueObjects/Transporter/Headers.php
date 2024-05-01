@@ -8,7 +8,7 @@ it('can be created from an API Token', function () {
     $headers = Headers::withAuthorization(ApiKey::from('foo'));
 
     expect($headers->toArray())->toBe([
-        'Authorization' => 'Bearer foo',
+        'x-api-key' => 'foo',
     ]);
 });
 
@@ -17,7 +17,7 @@ it('can have content/type', function () {
         ->withContentType(ContentType::JSON);
 
     expect($headers->toArray())->toBe([
-        'Authorization' => 'Bearer foo',
+        'x-api-key' => 'foo',
         'Content-Type' => 'application/json',
     ]);
 });
@@ -27,20 +27,8 @@ it('can have content/type with suffix', function () {
         ->withContentType(ContentType::MULTIPART, '; boundary=---XYZ');
 
     expect($headers->toArray())->toBe([
-        'Authorization' => 'Bearer foo',
+        'x-api-key' => 'foo',
         'Content-Type' => 'multipart/form-data; boundary=---XYZ',
-    ]);
-});
-
-it('can have organization', function () {
-    $headers = Headers::withAuthorization(ApiKey::from('foo'))
-        ->withContentType(ContentType::JSON)
-        ->withOrganization('nunomaduro');
-
-    expect($headers->toArray())->toBe([
-        'Authorization' => 'Bearer foo',
-        'Content-Type' => 'application/json',
-        'Anthropic-Organization' => 'nunomaduro',
     ]);
 });
 
@@ -50,7 +38,7 @@ it('can have custom header', function () {
         ->withCustomHeader('X-Foo', 'bar');
 
     expect($headers->toArray())->toBe([
-        'Authorization' => 'Bearer foo',
+        'x-api-key' => 'foo',
         'Content-Type' => 'application/json',
         'X-Foo' => 'bar',
     ]);
