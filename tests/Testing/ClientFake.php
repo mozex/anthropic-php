@@ -23,8 +23,8 @@ it('returns a fake response', function () {
 it('throws fake exceptions', function () {
     $fake = new ClientFake([
         new \Anthropic\Exceptions\ErrorException([
-            'message' => 'The model `gpt-1` does not exist',
-            'type' => 'invalid_request_error',
+            'message' => 'Overloaded',
+            'type' => 'overloaded_error',
         ]),
     ]);
 
@@ -32,7 +32,7 @@ it('throws fake exceptions', function () {
         'model' => 'claude-2.1',
         'prompt' => 'PHP is ',
     ]);
-})->expectExceptionMessage('The model `gpt-1` does not exist');
+})->expectExceptionMessage('Overloaded');
 
 it('throws an exception if there is no more fake response', function () {
     $fake = new ClientFake([
