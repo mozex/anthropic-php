@@ -9,12 +9,12 @@ use Anthropic\Responses\Concerns\ArrayAccessible;
 use Anthropic\Testing\Responses\Concerns\Messages\FakeableForStreamedResponse;
 
 /**
- * @implements ResponseContract<array{type: string, index: int|null, delta: array{type: string|null, text: string|null, stop_reason: string|null, stop_sequence: string|null}, message: array{id: string|null, type: string|null, role: string|null, content: array|null, model: string|null, stop_reason: string|null, stop_sequence:string|null}, usage: array{input_tokens: int, output_tokens: int}}>
+ * @implements ResponseContract<array{type: string, index: int|null, delta: array{type: string|null, text: string|null, stop_reason: string|null, stop_sequence: string|null}, message: array{id: string|null, type: string|null, role: string|null, content: array<int, string>|null, model: string|null, stop_reason: string|null, stop_sequence:string|null}, usage: array{input_tokens: int|null, output_tokens: int|null}}>
  */
 final class CreateStreamedResponse implements ResponseContract
 {
     /**
-     * @use ArrayAccessible<array{type: string, index: int|null, delta: array{type: string|null, text: string|null, stop_reason: string|null, stop_sequence: string|null}, message: array{id: string|null, type: string|null, role: string|null, content: array|null, model: string|null, stop_reason: string|null, stop_sequence:string|null}, usage: array{input_tokens: int, output_tokens: int}}>
+     * @use ArrayAccessible<array{type: string, index: int|null, delta: array{type: string|null, text: string|null, stop_reason: string|null, stop_sequence: string|null}, message: array{id: string|null, type: string|null, role: string|null, content: array<int, string>|null, model: string|null, stop_reason: string|null, stop_sequence:string|null}, usage: array{input_tokens: int|null, output_tokens: int|null}}>
      */
     use ArrayAccessible;
 
@@ -32,7 +32,7 @@ final class CreateStreamedResponse implements ResponseContract
     /**
      * Acts as static factory, and returns a new Response instance.
      *
-     * @param  array{type: string, index?: int, delta?: array{type: string, text: string|null, stop_reason?: string, stop_sequence?:string|null}, usage?: array{output_tokens: int}, message?: array{id: string, type: string, role: string, content: array, model: string, stop_reason: string|null, stop_sequence:string|null, usage: array{input_tokens: int, output_tokens: int}}}  $attributes
+     * @param  array{type: string, index?: int, delta?: array{type: string, text: string|null, stop_reason?: string, stop_sequence?:string|null}, usage?: array{output_tokens: int}, message?: array{id: string, type: string, role: string, content: array<int, string>, model: string, stop_reason: string|null, stop_sequence:string|null, usage?: array{input_tokens: int, output_tokens: int}}}  $attributes
      */
     public static function from(array $attributes): self
     {
