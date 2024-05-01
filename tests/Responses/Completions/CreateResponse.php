@@ -1,33 +1,29 @@
 <?php
 
 use Anthropic\Responses\Completions\CreateResponse;
-use Anthropic\Responses\Completions\CreateResponseChoice;
-use Anthropic\Responses\Completions\CreateResponseUsage;
-use Anthropic\Responses\Meta\MetaInformation;
 
 test('from', function () {
-    $completion = CreateResponse::from(completion(), meta());
+    $completion = CreateResponse::from(completion());
 
     expect($completion)
         ->toBeInstanceOf(CreateResponse::class)
-        ->id->toBe('cmpl-5uS6a68SwurhqAqLBpZtibIITICna')
-        ->object->toBe('text_completion')
-        ->created->toBe(1664136088)
-        ->model->toBe('davinci')
-        ->choices->toBeArray()->toHaveCount(1)
-        ->choices->each->toBeInstanceOf(CreateResponseChoice::class)
-        ->usage->toBeInstanceOf(CreateResponseUsage::class)
-        ->meta()->toBeInstanceOf(MetaInformation::class);
+        ->type->toBe('completion')
+        ->id->toBe('compl_01Sb5nmX365bQaWJ3jDfSgqB')
+        ->completion->toBe(' Hello!')
+        ->stop_reason->toBe('stop_sequence')
+        ->model->toBe('claude-2.1')
+        ->stop->toBe('\n\nHuman:')
+        ->log_id->toBe('compl_01Sb5nmX365bQaWJ3jDfSgqB');
 });
 
 test('as array accessible', function () {
-    $completion = CreateResponse::from(completion(), meta());
+    $completion = CreateResponse::from(completion());
 
-    expect($completion['id'])->toBe('cmpl-5uS6a68SwurhqAqLBpZtibIITICna');
+    expect($completion['id'])->toBe('compl_01Sb5nmX365bQaWJ3jDfSgqB');
 });
 
 test('to array', function () {
-    $completion = CreateResponse::from(completion(), meta());
+    $completion = CreateResponse::from(completion());
 
     expect($completion->toArray())
         ->toBeArray()
@@ -38,33 +34,28 @@ test('fake', function () {
     $response = CreateResponse::fake();
 
     expect($response)
-        ->id->toBe('cmpl-uqkvlQyYK7bGYrRHQ0eXlWi7');
+        ->id->toBe('compl_01Sb5nmX365bQaWJ3jDfSgqB');
 });
 
 test('fake with override', function () {
     $response = CreateResponse::fake([
-        'id' => 'cmpl-1234',
-        'choices' => [
-            [
-                'text' => 'awesome!',
-            ],
-        ],
+        'id' => 'compl_1234',
+        'completion' => 'awesome!',
     ]);
 
     expect($response)
-        ->id->toBe('cmpl-1234')
-        ->and($response->choices[0])
-        ->text->toBe('awesome!')
-        ->index->toBe(0);
+        ->type->toBe('completion')
+        ->id->toBe('compl_1234')
+        ->completion->toBe('awesome!');
 });
 
 test('fake can not add inexistent properties', function () {
     $response = CreateResponse::fake([
-        'id' => 'cmpl-1234',
+        'id' => 'compl_1234',
         'something' => 'else',
     ]);
 
     expect($response)
-        ->id->toBe('cmpl-1234')
+        ->id->toBe('compl_1234')
         ->something->toBeNull();
 });
