@@ -6,8 +6,8 @@ namespace Anthropic;
 
 use Anthropic\Contracts\ClientContract;
 use Anthropic\Contracts\TransporterContract;
-use Anthropic\Resources\Message;
 use Anthropic\Resources\Completions;
+use Anthropic\Resources\Messages;
 
 final class Client implements ClientContract
 {
@@ -35,8 +35,8 @@ final class Client implements ClientContract
      *
      * @see https://docs.anthropic.com/claude/reference/messages_post
      */
-    public function message(): Message
+    public function messages(): Messages
     {
-        return new Message($this->transporter);
+        return new Messages($this->transporter);
     }
 }
