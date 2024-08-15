@@ -35,7 +35,7 @@ trait Fakeable
             unset($override[$key]);
         }
 
-        // we are going to append all remaining overrides with numeric keys
+        // we are going to append all remaining overrides
         foreach ($override as $key => $value) {
             if (! is_numeric($key)) {
                 continue;
