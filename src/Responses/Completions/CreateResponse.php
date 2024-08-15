@@ -28,8 +28,7 @@ final class CreateResponse implements ResponseContract
         public readonly string $model,
         public readonly string $stop,
         public readonly string $log_id,
-    ) {
-    }
+    ) {}
 
     /**
      * Acts as static factory, and returns a new Response instance.

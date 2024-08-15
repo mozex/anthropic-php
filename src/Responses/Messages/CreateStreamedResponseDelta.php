@@ -11,8 +11,7 @@ final class CreateStreamedResponseDelta
         public readonly ?string $text,
         public readonly ?string $stop_reason,
         public readonly ?string $stop_sequence,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array{type?: string, text?: string|null, stop_reason?: string, stop_sequence?: string|null}  $attributes

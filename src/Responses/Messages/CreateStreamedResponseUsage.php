@@ -9,8 +9,7 @@ final class CreateStreamedResponseUsage
     private function __construct(
         public readonly ?int $inputTokens,
         public readonly ?int $outputTokens,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array{input_tokens?: int, output_tokens?: int}  $attributes

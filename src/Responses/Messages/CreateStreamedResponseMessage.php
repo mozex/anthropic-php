@@ -17,8 +17,7 @@ final class CreateStreamedResponseMessage
         public readonly ?string $model,
         public readonly ?string $stop_reason,
         public readonly ?string $stop_sequence,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array{id?: string, type?: string, role?: string, content?: array<int, string>, model?: string, stop_reason?: string|null, stop_sequence?:string|null}  $attributes

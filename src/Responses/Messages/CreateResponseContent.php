@@ -9,8 +9,7 @@ final class CreateResponseContent
     private function __construct(
         public readonly string $type,
         public readonly ?string $text,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array{type: string, text: string|null}  $attributes

@@ -23,6 +23,6 @@ final class Anthropic
      */
     public static function factory(): Factory
     {
-        return new Factory();
+        return new Factory;
     }
 }

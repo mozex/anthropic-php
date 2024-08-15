@@ -26,8 +26,7 @@ final class CreateStreamedResponse implements ResponseContract
         public readonly CreateStreamedResponseDelta $delta,
         public readonly CreateStreamedResponseMessage $message,
         public readonly CreateStreamedResponseUsage $usage,
-    ) {
-    }
+    ) {}
 
     /**
      * Acts as static factory, and returns a new Response instance.

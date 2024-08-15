@@ -19,8 +19,7 @@ final class MetaInformation implements MetaInformationContract
         public ?string $requestId,
         public readonly ?MetaInformationRateLimit $requestLimit,
         public readonly ?MetaInformationRateLimit $tokenLimit,
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array{request-id: string[], anthropic-ratelimit-requests-limit: string[], anthropic-ratelimit-requests-remaining: string[], anthropic-ratelimit-requests-reset: string[], anthropic-ratelimit-tokens-limit: string[], anthropic-ratelimit-tokens-remaining: string[], anthropic-ratelimit-tokens-reset: string[]}  $headers

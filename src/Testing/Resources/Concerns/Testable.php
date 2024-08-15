@@ -9,9 +9,7 @@ use Anthropic\Testing\Requests\TestRequest;
 
 trait Testable
 {
-    public function __construct(protected ClientFake $fake)
-    {
-    }
+    public function __construct(protected ClientFake $fake) {}
 
     abstract protected function resource(): string;
 
