@@ -71,10 +71,10 @@ $client = Anthropic::factory()
     ->withApiKey($yourApiKey)
     ->withHttpHeader('anthropic-version', '2023-06-01')
     ->withBaseUri('anthropic.example.com/v1') // default: api.anthropic.com/v1
-    ->withHttpClient($client = new \GuzzleHttp\Client([])) // default: HTTP client found using PSR-18 HTTP Client Discovery
+    ->withHttpClient($httpClient = new \GuzzleHttp\Client([])) // default: HTTP client found using PSR-18 HTTP Client Discovery
     ->withHttpHeader('X-My-Header', 'foo')
     ->withQueryParam('my-param', 'bar')
-    ->withStreamHandler(fn (RequestInterface $request): ResponseInterface => $client->send($request, [
+    ->withStreamHandler(fn (RequestInterface $request): ResponseInterface => $httpClient->send($request, [
         'stream' => true // Allows to provide a custom stream handler for the http client.
     ]))
     ->make();
