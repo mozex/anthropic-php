@@ -45,7 +45,7 @@ final class StreamResponse implements ResponseStreamContract
             $response = json_decode($data, true, flags: JSON_THROW_ON_ERROR);
 
             if (isset($response['error'])) {
-                throw new ErrorException($response['error']);
+                throw new ErrorException($response['error'], $this->response->getStatusCode());
             }
 
             if ($response['type'] !== 'completion') {

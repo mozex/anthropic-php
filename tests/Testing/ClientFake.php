@@ -25,7 +25,7 @@ it('throws fake exceptions', function () {
         new \Anthropic\Exceptions\ErrorException([
             'message' => 'Overloaded',
             'type' => 'overloaded_error',
-        ]),
+        ], 404),
     ]);
 
     $fake->completions()->create([

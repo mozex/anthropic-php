@@ -102,7 +102,8 @@ test('request object server user errors', function () {
         ->toThrow(function (ErrorException $e) {
             expect($e->getMessage())->toBe('Incorrect API key provided: foo.')
                 ->and($e->getErrorMessage())->toBe('Incorrect API key provided: foo.')
-                ->and($e->getErrorType())->toBe('invalid_request_error');
+                ->and($e->getErrorType())->toBe('invalid_request_error')
+                ->and($e->getStatusCode())->toBe(401);
         });
 });
 
