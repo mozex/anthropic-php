@@ -57,6 +57,7 @@ final class StreamResponse implements ResponseHasMetaInformationContract, Respon
             if (! in_array($response['type'], [
                 'message_start',
                 'message_delta',
+                'content_block_start',
                 'content_block_delta',
             ])) {
                 continue;

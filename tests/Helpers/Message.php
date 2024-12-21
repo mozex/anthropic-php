@@ -78,6 +78,18 @@ function messagesCompletionStreamFirstChunk(): array
     ];
 }
 
+function messagesCompletionStreamContentBlockStartChunk(): array
+{
+    return [
+        'type' => 'content_block_start',
+        'index' => 0,
+        'content_block' => [
+            'type' => 'text',
+            'text' => '',
+        ],
+    ];
+}
+
 function messagesCompletionStreamLastChunk(): array
 {
     return [
@@ -100,6 +112,20 @@ function messagesCompletionStreamContentChunk(): array
         'delta' => [
             'type' => 'text_delta',
             'text' => 'Hello',
+        ],
+    ];
+}
+
+function messagesCompletionStreamToolCallsContentBlockStartChunk(): array
+{
+    return [
+        'type' => 'content_block_start',
+        'index' => 1,
+        'content_block' => [
+            'type' => 'tool_use',
+            'id' => 'toolu_01T1x8fJ34qAma2tNTrN7Up1',
+            'name' => 'get_weather',
+            'input' => [],
         ],
     ];
 }

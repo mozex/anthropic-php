@@ -1,6 +1,7 @@
 <?php
 
 use Anthropic\Responses\Messages\CreateStreamedResponse;
+use Anthropic\Responses\Messages\CreateStreamedResponseContentBlockStart;
 use Anthropic\Responses\Messages\CreateStreamedResponseDelta;
 use Anthropic\Responses\Messages\CreateStreamedResponseMessage;
 use Anthropic\Responses\Messages\CreateStreamedResponseUsage;
@@ -16,8 +17,48 @@ test('from first chunk', function () {
         ->delta->text->toBeNull()
         ->message->toBeInstanceOf(CreateStreamedResponseMessage::class)
         ->message->id->toBe('msg_01YS82gyNJHzAN1xVt2ymmTN')
+        ->content_block_start->toBeInstanceOf(CreateStreamedResponseContentBlockStart::class)
+        ->content_block_start->type->toBeNull()
         ->usage->toBeInstanceOf(CreateStreamedResponseUsage::class)
         ->usage->inputTokens->toBe(10);
+});
+
+test('from content block start chunk', function () {
+    $completion = CreateStreamedResponse::from(messagesCompletionStreamContentBlockStartChunk());
+
+    expect($completion)
+        ->toBeInstanceOf(CreateStreamedResponse::class)
+        ->type->toBe('content_block_start')
+        ->index->toBe(0)
+        ->delta->toBeInstanceOf(CreateStreamedResponseDelta::class)
+        ->delta->text->toBeNull()
+        ->message->toBeInstanceOf(CreateStreamedResponseMessage::class)
+        ->message->id->toBeNull()
+        ->content_block_start->toBeInstanceOf(CreateStreamedResponseContentBlockStart::class)
+        ->content_block_start->type->toBe('text')
+        ->content_block_start->text->toBe('')
+        ->usage->toBeInstanceOf(CreateStreamedResponseUsage::class)
+        ->usage->inputTokens->toBeNull();
+});
+
+test('from content block start chunk with tool calls', function () {
+    $completion = CreateStreamedResponse::from(messagesCompletionStreamToolCallsContentBlockStartChunk());
+
+    expect($completion)
+        ->toBeInstanceOf(CreateStreamedResponse::class)
+        ->type->toBe('content_block_start')
+        ->index->toBe(1)
+        ->delta->toBeInstanceOf(CreateStreamedResponseDelta::class)
+        ->delta->text->toBeNull()
+        ->message->toBeInstanceOf(CreateStreamedResponseMessage::class)
+        ->message->id->toBeNull()
+        ->content_block_start->toBeInstanceOf(CreateStreamedResponseContentBlockStart::class)
+        ->content_block_start->type->toBe('tool_use')
+        ->content_block_start->id->toBe('toolu_01T1x8fJ34qAma2tNTrN7Up1')
+        ->content_block_start->name->toBe('get_weather')
+        ->content_block_start->input->toBe([])
+        ->usage->toBeInstanceOf(CreateStreamedResponseUsage::class)
+        ->usage->inputTokens->toBeNull();
 });
 
 test('from content chunk', function () {
@@ -31,6 +72,8 @@ test('from content chunk', function () {
         ->delta->text->toBe('Hello')
         ->message->toBeInstanceOf(CreateStreamedResponseMessage::class)
         ->message->id->toBeNull()
+        ->content_block_start->toBeInstanceOf(CreateStreamedResponseContentBlockStart::class)
+        ->content_block_start->type->toBeNull()
         ->usage->toBeInstanceOf(CreateStreamedResponseUsage::class)
         ->usage->inputTokens->toBeNull();
 });
@@ -47,6 +90,8 @@ test('from last chunk', function () {
         ->delta->stop_reason->toBe('end_turn')
         ->message->toBeInstanceOf(CreateStreamedResponseMessage::class)
         ->message->id->toBeNull()
+        ->content_block_start->toBeInstanceOf(CreateStreamedResponseContentBlockStart::class)
+        ->content_block_start->type->toBeNull()
         ->usage->toBeInstanceOf(CreateStreamedResponseUsage::class)
         ->usage->inputTokens->toBeNull()
         ->usage->outputTokens->toBe(15);
@@ -81,6 +126,13 @@ test('to array', function () {
                 'stop_reason' => null,
                 'stop_sequence' => null,
             ],
+            'content_block_start' => [
+                'id' => null,
+                'type' => null,
+                'text' => null,
+                'name' => null,
+                'input' => null,
+            ],
             'usage' => [
                 'input_tokens' => 10,
                 'output_tokens' => 1,
@@ -92,12 +144,14 @@ test('fake', function () {
     $response = CreateStreamedResponse::fake();
 
     expect($response->getIterator()->current())
-        ->message->id->toBe('msg_01DY6yoXeLT7DXqxiVSSJbha');
+        ->message->id->toBe('msg_01DY6yoXeLT7DXqxiVSSJbha')
+        ->content_block_start->id->toBeNull();
 });
 
 test('fake with override', function () {
     $response = CreateStreamedResponse::fake(messagesCompletionStream());
 
     expect($response->getIterator()->current())
-        ->message->id->toBe('msg_1nZdL29xx5MUA1yADyHTEsnR8uuvGzszyY');
+        ->message->id->toBe('msg_1nZdL29xx5MUA1yADyHTEsnR8uuvGzszyY')
+        ->content_block_start->id->toBeNull();
 });
