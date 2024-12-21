@@ -29,7 +29,7 @@ final class Messages implements MessagesContract
 
         $payload = Payload::create('messages', $parameters);
 
-        /** @var Response<array{id: string, type: string, role: string, model: string, stop_sequence: string|null, usage: array{input_tokens: int, output_tokens: int}, content: array<int, array{type: string, text: string|null}>, stop_reason: string}> $response */
+        /** @var Response<array{id: string, type: string, role: string, model: string, stop_sequence: string|null, usage: array{input_tokens: int, output_tokens: int}, content: array<int, array{type: string, text?: string|null, id?: string, name?: string, input?: array<string, string>}>, stop_reason: string}> $response */
         $response = $this->transporter->requestObject($payload);
 
         return CreateResponse::from($response->data(), $response->meta());

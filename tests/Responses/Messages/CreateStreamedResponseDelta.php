@@ -22,6 +22,16 @@ test('from content chunk', function () {
         ->stop_sequence->toBeNull();
 });
 
+test('from tool calls chunk', function () {
+    $result = CreateStreamedResponseDelta::from(messagesCompletionStreamToolCallsChunk()['delta']);
+
+    expect($result)
+        ->type->toBe('input_json_delta')
+        ->partial_json->toBe('{')
+        ->stop_reason->toBeNull()
+        ->stop_sequence->toBeNull();
+});
+
 test('from last chunk', function () {
     $result = CreateStreamedResponseDelta::from(messagesCompletionStreamLastChunk()['delta']);
 
@@ -53,6 +63,19 @@ test('to array for a content chunk', function () {
             'text' => 'Hello',
             'stop_reason' => null,
             'stop_sequence' => null,
+        ]);
+});
+
+test('to array for a tool calls chunk', function () {
+    $result = CreateStreamedResponseDelta::from(messagesCompletionStreamToolCallsChunk()['delta']);
+
+    expect($result->toArray())
+        ->toBe([
+            'type' => 'input_json_delta',
+            'text' => null,
+            'stop_reason' => null,
+            'stop_sequence' => null,
+            'partial_json' => '{',
         ]);
 });
 

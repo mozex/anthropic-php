@@ -12,12 +12,12 @@ use Anthropic\Responses\Meta\MetaInformation;
 use Anthropic\Testing\Responses\Concerns\Messages\Fakeable;
 
 /**
- * @implements ResponseContract<array{id: string, type: string, role: string, model: string, stop_sequence: string|null, usage: array{input_tokens: int, output_tokens: int}, content: array<int, array{type: string, text: string|null}>, stop_reason: string}>
+ * @implements ResponseContract<array{id: string, type: string, role: string, model: string, stop_sequence: string|null, usage: array{input_tokens: int, output_tokens: int}, content: array<int, array{type: string, text?: string|null, id?: string|null, name?: string|null, input?: array<string, string>|null}>, stop_reason: string}>
  */
 final class CreateResponse implements ResponseContract, ResponseHasMetaInformationContract
 {
     /**
-     * @use ArrayAccessible<array{id: string, type: string, role: string, model: string, stop_sequence: string|null, usage: array{input_tokens: int, output_tokens: int}, content: array<int, array{type: string, text: string|null}>, stop_reason: string}>
+     * @use ArrayAccessible<array{id: string, type: string, role: string, model: string, stop_sequence: string|null, usage: array{input_tokens: int, output_tokens: int}, content: array<int, array{type: string, text?: string|null, id?: string|null, name?: string|null, input?: array<string, string>|null}>, stop_reason: string}>
      */
     use ArrayAccessible;
 
@@ -42,7 +42,7 @@ final class CreateResponse implements ResponseContract, ResponseHasMetaInformati
     /**
      * Acts as static factory, and returns a new Response instance.
      *
-     * @param  array{id: string, type: string, role: string, model: string, stop_sequence: string|null, usage: array{input_tokens: int, output_tokens: int}, content: array<int, array{type: string, text: string|null}>, stop_reason: string}  $attributes
+     * @param  array{id: string, type: string, role: string, model: string, stop_sequence: string|null, usage: array{input_tokens: int, output_tokens: int}, content: array<int, array{type: string, text?: string|null, id?: string|null, name?: string|null, input?: array<string, string>|null}>, stop_reason: string}  $attributes
      */
     public static function from(array $attributes, MetaInformation $meta): self
     {

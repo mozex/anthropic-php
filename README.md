@@ -161,6 +161,60 @@ $response->usage->outputTokens; // 19,
 $response->toArray(); // ['id' => 'msg_01BSy0WCV7QR2adFBauynAX7', ...]
 ```
 
+Creates a completion for the structured list of input messages with a tool call.
+
+```php
+$response = $client->messages()->create([
+    'model' => 'claude-3-opus-20240229',
+    'max_tokens' => 1024,
+    'messages' => [
+        ['role' => 'user', 'content' => 'What is the weather like in San Francisco?'],
+    ],
+    'tools' => [
+        [
+            'name' => 'get_weather',
+            'description' => 'Get the current weather in a given location',
+            'input_schema' => [
+                'type' => 'object',
+                'properties' => [
+                    'location' => [
+                        'type' => 'string',
+                        'description' => 'The city and state, e.g. San Francisco, CA'
+                    ],
+                    'unit' => [
+                        'type' => 'string',
+                        'enum' => ['celsius', 'fahrenheit'],
+                        'description' => 'The unit of temperature, either \"celsius\" or \"fahrenheit\"'
+                    ]
+                ],
+                'required' => ['location']
+            ]
+        ]
+    ]
+]);
+
+$response->id; // 'msg_01BSy0WCV7QR2adFBauynAX7'
+$response->type; // 'message'
+$response->role; // 'assistant'
+$response->model; // 'claude-3-opus-20240229'
+$response->stop_sequence; // null
+$response->stop_reason; // 'tool_use'
+
+$response->content[0]->type; // 'text'
+$response->content[0]->text; // 'I'll help you check the current weather in San Francisco. I'll use the get_weather function, assuming San Francisco, CA as the location.'
+
+$response->content[1]->type; // 'tool_use'
+$response->content[1]->id; // 'toolu_01RnYGkgJusAzXvcySfZ2Dq7'
+$response->content[1]->name; // 'get_weather'
+$response->content[1]->input['location']; // 'San Francisco, CA'
+$response->content[1]->input['unit']; // 'fahrenheit'
+
+$response->usage->inputTokens; // 448,
+$response->usage->outputTokens; // 87,
+
+$response->toArray(); // ['id' => 'msg_01BSy0WCV7QR2adFBauynAX7', ...]
+```
+
 #### `create streamed`
 
 Creates a streamed completion for structured list of input messages.
@@ -196,11 +250,11 @@ foreach($stream as $response){
 ]
 // 2. iteration
 [
-    'type' => 'content_block_delta',
+    'type' => 'content_block_start',
     'index' => 0,
-    'delta' => [    
-        'type' => 'text_delta',
-        'text' => 'Hello',
+    'content_block_start' => [    
+        'type' => 'type',
+        'text' => '',
     ]
 ]
 // 3. iteration
@@ -209,7 +263,134 @@ foreach($stream as $response){
     'index' => 0,
     'delta' => [    
         'type' => 'text_delta',
+        'text' => 'Hello',
+    ]
+]
+// 4. iteration
+[
+    'type' => 'content_block_delta',
+    'index' => 0,
+    'delta' => [    
+        'type' => 'text_delta',
         'text' => '!',
+    ]
+]
+
+// ...
+
+// last iteration
+[
+    'type' => 'message_delta',
+    'delta' => [    
+        'stop_reason' => 'end_turn',
+        'stop_sequence' => null,
+    ],
+    'usage' => [    
+        'output_tokens' => 12,
+    ]
+]
+```
+
+Creates a streamed completion for structured list of input messages with a tool call.
+
+```php
+$stream = $client->messages()->createStreamed([
+    'model' => 'claude-3-haiku-20240307',
+    'max_tokens' => 1024,
+    'messages' => [
+        ['role' => 'user', 'content' => 'What is the weather like in San Francisco?'],
+    ],
+    'tools' => [
+        [
+            'name' => 'get_weather',
+            'description' => 'Get the current weather in a given location',
+            'input_schema' => [
+                'type' => 'object',
+                'properties' => [
+                    'location' => [
+                        'type' => 'string',
+                        'description' => 'The city and state, e.g. San Francisco, CA'
+                    ],
+                    'unit' => [
+                        'type' => 'string',
+                        'enum' => ['celsius', 'fahrenheit'],
+                        'description' => 'The unit of temperature, either \"celsius\" or \"fahrenheit\"'
+                    ]
+                ],
+                'required' => ['location']
+            ]
+        ]
+    ]
+]);
+
+foreach($stream as $response){
+    $response->toArray();
+}
+// 1. iteration
+[
+    'type' => 'message_start',
+    'message' => [    
+        'id' => 'msg_01SX1jLtTXgtJwB2EpSRNutG',
+        'type' => 'message',
+        'role' => 'assistant',
+        'content' => [],
+        'model' => 'claude-3-haiku-20240307',
+        'stop_reason' => null,
+        'stop_sequence' => null,
+    ],
+    'usage' => [    
+        'input_tokens' => 9,
+        'output_tokens' => 1,
+    ]
+]
+// 2. iteration
+[
+    'type' => 'content_block_start',
+    'index' => 0,
+    'content_block_start' => [    
+        'type' => 'type',
+        'text' => '',
+    ]
+]
+// 3. iteration
+[
+    'type' => 'content_block_delta',
+    'index' => 0,
+    'delta' => [    
+        'type' => 'text_delta',
+        'text' => 'I',
+    ]
+]
+// 4. iteration
+[
+    'type' => 'content_block_delta',
+    'index' => 0,
+    'delta' => [    
+        'type' => 'text_delta',
+        'text' => '\'ll help you check the current weather',
+    ]
+]
+
+// ...
+
+// 1. iteration of tool call
+[
+    'type' => 'content_block_start',
+    'index' => 1,
+    'content_block_start' => [    
+        'id' => 'toolu_01RDFRXpbNUGrZ1xQy443s5Q',
+        'type' => 'tool_use',
+        'name' => 'get_weather',
+        'input' => [],
+    ]
+]
+// 2. iteration of tool call
+[
+    'type' => 'content_block_delta',
+    'index' => 1,
+    'delta' => [    
+        'type' => 'input_json_delta',
+        'partial_json' => '{"location',
     ]
 ]
 

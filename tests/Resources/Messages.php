@@ -4,6 +4,7 @@ use Anthropic\Responses\Messages\CreateResponse;
 use Anthropic\Responses\Messages\CreateResponseContent;
 use Anthropic\Responses\Messages\CreateResponseUsage;
 use Anthropic\Responses\Messages\CreateStreamedResponse;
+use Anthropic\Responses\Messages\CreateStreamedResponseContentBlockStart;
 use Anthropic\Responses\Messages\CreateStreamedResponseDelta;
 use Anthropic\Responses\Messages\CreateStreamedResponseMessage;
 use Anthropic\Responses\Messages\CreateStreamedResponseUsage;
@@ -87,6 +88,8 @@ test('create streamed', function () {
         ->delta->text->toBeNull()
         ->message->toBeInstanceOf(CreateStreamedResponseMessage::class)
         ->message->id->toBe('msg_1nZdL29xx5MUA1yADyHTEsnR8uuvGzszyY')
+        ->content_block_start->toBeInstanceOf(CreateStreamedResponseContentBlockStart::class)
+        ->content_block_start->type->toBeNull()
         ->usage->toBeInstanceOf(CreateStreamedResponseUsage::class)
         ->usage->inputTokens->toBe(25);
 
