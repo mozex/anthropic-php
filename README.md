@@ -11,8 +11,8 @@
 - [Support Us](#support-us)
 - [Get Started](#get-started)
 - [Usage](#usage)
-  - [Completions Resource](#completions-resource)
   - [Messages Resource](#messages-resource)
+  - [Completions Resource (Legacy)](#completions-resource-legacy)
 - [Meta Information](#meta-information)
 - [Troubleshooting](#troubleshooting)
 - [Testing](#testing)
@@ -82,52 +82,6 @@ $client = Anthropic::factory()
 
 ## Usage
 
-### `Completions` Resource
-
-#### `create`
-
-Creates a completion for the provided prompt and parameters.
-
-```php
-$response = $client->completions()->create([
-    'model' => 'claude-2.1',
-    'prompt' => '\n\nHuman: Hello, Claude\n\nAssistant:',
-    'max_tokens_to_sample' => 100,
-    'temperature' => 0
-]);
-
-$response->type; // 'completion'
-$response->id; // 'compl_01EKm5HZ9y6khqaSZjsX44fS'
-$response->completion; // ' Hello! Nice to meet you.'
-$response->stop_reason; // 'stop_sequence'
-$response->model; // 'claude-2.1'
-$response->stop; // '\n\nHuman:'
-$response->log_id; // 'compl_01EKm5HZ9y6khqaSZjsX44fS'
-
-$response->toArray(); // ['id' => 'compl_01EKm5HZ9y6khqaSZjsX44fS', ...]
-```
-
-#### `create streamed`
-
-Creates a streamed completion for the provided prompt and parameters.
-
-```php
-$stream = $client->completions()->createStreamed([
-    'model' => 'claude-2.1',
-    'prompt' => 'Hi',
-    'max_tokens_to_sample' => 70,
-]);
-
-foreach($stream as $response){
-    $response->completion;
-}
-// 1. iteration => 'I'
-// 2. iteration => ' am'
-// 3. iteration => ' very'
-// 4. iteration => ' excited'
-// ...
-```
-
 ### `Messages` Resource
 
 #### `create`
@@ -157,6 +111,8 @@ foreach ($response->content as $result) {
 
 $response->usage->inputTokens; // 10,
 $response->usage->outputTokens; // 19,
+$response->usage->cacheCreationInputTokens; // 0,
+$response->usage->cacheReadInputTokens; // 0,
 
 $response->toArray(); // ['id' => 'msg_01BSy0WCV7QR2adFBauynAX7', ...]
 ```
@@ -211,6 +167,8 @@ $response->content[1]->input['unit']; // 'fahrenheit'
 
 $response->usage->inputTokens; // 448,
 $response->usage->outputTokens; // 87,
+$response->usage->cacheCreationInputTokens; // 0,
+$response->usage->cacheReadInputTokens; // 0,
 
 $response->toArray(); // ['id' => 'msg_01BSy0WCV7QR2adFBauynAX7', ...]
 ```
@@ -407,6 +365,52 @@ foreach($stream as $response){
         'output_tokens' => 12,
     ]
 ]
+```
+
+### `Completions` Resource (Legacy)
+
+#### `create`
+
+Creates a completion for the provided prompt and parameters.
+
+```php
+$response = $client->completions()->create([
+    'model' => 'claude-2.1',
+    'prompt' => '\n\nHuman: Hello, Claude\n\nAssistant:',
+    'max_tokens_to_sample' => 100,
+    'temperature' => 0
+]);
+
+$response->type; // 'completion'
+$response->id; // 'compl_01EKm5HZ9y6khqaSZjsX44fS'
+$response->completion; // ' Hello! Nice to meet you.'
+$response->stop_reason; // 'stop_sequence'
+$response->model; // 'claude-2.1'
+$response->stop; // '\n\nHuman:'
+$response->log_id; // 'compl_01EKm5HZ9y6khqaSZjsX44fS'
+
+$response->toArray(); // ['id' => 'compl_01EKm5HZ9y6khqaSZjsX44fS', ...]
+```
+
+#### `create streamed`
+
+Creates a streamed completion for the provided prompt and parameters.
+
+```php
+$stream = $client->completions()->createStreamed([
+    'model' => 'claude-2.1',
+    'prompt' => 'Hi',
+    'max_tokens_to_sample' => 70,
+]);
+
+foreach($stream as $response){
+    $response->completion;
+}
+// 1. iteration => 'I'
+// 2. iteration => ' am'
+// 3. iteration => ' very'
+// 4. iteration => ' excited'
+// ...
 ```
 
 ## Meta Information
