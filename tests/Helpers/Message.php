@@ -25,6 +25,39 @@ function messagesCompletion(): array
     ];
 }
 
+/**
+ * @return array<string, mixed>
+ */
+function messagesCompletionWithToolCalls(): array
+{
+    return [
+        'id' => 'msg_019hiOHAEXQwq1PTeETNEBWe',
+        'type' => 'message',
+        'role' => 'assistant',
+        'model' => 'claude-3-opus-20240229',
+        'stop_sequence' => null,
+        'usage' => [
+            'input_tokens' => 10,
+            'output_tokens' => 20,
+        ],
+        'content' => [
+            [
+                'type' => 'text',
+                'text' => "I'll help you check the current weather in San Francisco. I'll use the get_weather function to find this information.",
+            ],
+            [
+                'type' => 'tool_use',
+                'id' => 'toolu_016udJr9epWhTNC8Ec1mnVQf',
+                'name' => 'get_weather',
+                'input' => [
+                    'location' => 'San Francisco, CA',
+                ],
+            ],
+        ],
+        'stop_reason' => 'tool_use',
+    ];
+}
+
 function messagesCompletionStreamFirstChunk(): array
 {
     return [
@@ -67,6 +100,18 @@ function messagesCompletionStreamContentChunk(): array
         'delta' => [
             'type' => 'text_delta',
             'text' => 'Hello',
+        ],
+    ];
+}
+
+function messagesCompletionStreamToolCallsChunk(): array
+{
+    return [
+        'type' => 'content_block_delta',
+        'index' => 1,
+        'delta' => [
+            'type' => 'input_json_delta',
+            'partial_json' => '{',
         ],
     ];
 }
