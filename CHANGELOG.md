@@ -2,6 +2,15 @@
 
 All notable changes to `anthropic-php` will be documented in this file.
 
+## 1.1.0 - 2024-12-21
+
+### What's Changed
+
+* Add tool use (function calling) support by @mozex in https://github.com/mozex/anthropic-php/pull/6
+* Add cached tokens usage by @mozex in https://github.com/mozex/anthropic-php/pull/7
+
+**Full Changelog**: https://github.com/mozex/anthropic-php/compare/1.0.3...1.1.0
+
 ## 1.0.3 - 2024-12-20
 
 * [bump dependencies](https://github.com/mozex/anthropic-php/commit/85bbeea2894bcbb7a13497afa95c3a135a99b22b)
