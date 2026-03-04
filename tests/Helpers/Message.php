@@ -104,6 +104,44 @@ function messagesCompletionStreamFirstChunk(): array
     ];
 }
 
+function messagesCompletionStreamFirstChunkWithCache(): array
+{
+    return [
+        'type' => 'message_start',
+        'message' => [
+            'id' => 'msg_01YS82gyNJHzAN1xVt2ymmTN',
+            'type' => 'message',
+            'role' => 'assistant',
+            'content' => [],
+            'model' => 'claude-3-haiku-20240307',
+            'stop_reason' => null,
+            'stop_sequence' => null,
+            'usage' => [
+                'input_tokens' => 10,
+                'output_tokens' => 1,
+                'cache_creation_input_tokens' => 30,
+                'cache_read_input_tokens' => 40,
+            ],
+        ],
+    ];
+}
+
+function messagesCompletionStreamLastChunkWithCache(): array
+{
+    return [
+        'type' => 'message_delta',
+        'delta' => [
+            'stop_reason' => 'end_turn',
+            'stop_sequence' => null,
+        ],
+        'usage' => [
+            'output_tokens' => 15,
+            'cache_creation_input_tokens' => 30,
+            'cache_read_input_tokens' => 40,
+        ],
+    ];
+}
+
 function messagesCompletionStreamContentBlockStartChunk(): array
 {
     return [

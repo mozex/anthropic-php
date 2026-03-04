@@ -9,12 +9,12 @@ use Anthropic\Responses\Concerns\ArrayAccessible;
 use Anthropic\Testing\Responses\Concerns\Messages\FakeableForStreamedResponse;
 
 /**
- * @implements ResponseContract<array{type: string, index: int|null, delta: array{type: string|null, text: string|null, partial_json?: ?string, stop_reason: string|null, stop_sequence: string|null}, message: array{id: string|null, type: string|null, role: string|null, content: array<int, string>|null, model: string|null, stop_reason: string|null, stop_sequence:string|null}, content_block_start: array{id: string|null, type: string|null, name: string|null, input: array<int, string>|null}, usage: array{input_tokens: int|null, output_tokens: int|null}}>
+ * @implements ResponseContract<array{type: string, index: int|null, delta: array{type: string|null, text: string|null, partial_json?: ?string, stop_reason: string|null, stop_sequence: string|null}, message: array{id: string|null, type: string|null, role: string|null, content: array<int, string>|null, model: string|null, stop_reason: string|null, stop_sequence:string|null}, content_block_start: array{id: string|null, type: string|null, name: string|null, input: array<int, string>|null}, usage: array{input_tokens: int|null, output_tokens: int|null, cache_creation_input_tokens: int|null, cache_read_input_tokens: int|null}}>
  */
 final class CreateStreamedResponse implements ResponseContract
 {
     /**
-     * @use ArrayAccessible<array{type: string, index: int|null, delta: array{type: string|null, text: string|null, partial_json?: ?string, stop_reason: string|null, stop_sequence: string|null}, message: array{id: string|null, type: string|null, role: string|null, content: array<int, string>|null, model: string|null, stop_reason: string|null, stop_sequence:string|null}, content_block_start: array{id: string|null, type: string|null, name: string|null, input: array<int, string>|null}, usage: array{input_tokens: int|null, output_tokens: int|null}}>
+     * @use ArrayAccessible<array{type: string, index: int|null, delta: array{type: string|null, text: string|null, partial_json?: ?string, stop_reason: string|null, stop_sequence: string|null}, message: array{id: string|null, type: string|null, role: string|null, content: array<int, string>|null, model: string|null, stop_reason: string|null, stop_sequence:string|null}, content_block_start: array{id: string|null, type: string|null, name: string|null, input: array<int, string>|null}, usage: array{input_tokens: int|null, output_tokens: int|null, cache_creation_input_tokens: int|null, cache_read_input_tokens: int|null}}>
      */
     use ArrayAccessible;
 

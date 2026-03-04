@@ -136,6 +136,8 @@ test('to array', function () {
             'usage' => [
                 'input_tokens' => 10,
                 'output_tokens' => 1,
+                'cache_creation_input_tokens' => null,
+                'cache_read_input_tokens' => null,
             ],
         ]);
 });
