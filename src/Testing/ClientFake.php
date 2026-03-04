@@ -10,6 +10,7 @@ use Anthropic\Responses\Messages\StreamResponse as MessagesStreamResponse;
 use Anthropic\Testing\Requests\TestRequest;
 use Anthropic\Testing\Resources\CompletionsTestResource;
 use Anthropic\Testing\Resources\MessagesTestResource;
+use Anthropic\Testing\Resources\ModelsTestResource;
 use PHPUnit\Framework\Assert as PHPUnit;
 use Throwable;
 
@@ -127,5 +128,10 @@ class ClientFake implements ClientContract
     public function messages(): MessagesTestResource
     {
         return new MessagesTestResource($this);
+    }
+
+    public function models(): ModelsTestResource
+    {
+        return new ModelsTestResource($this);
     }
 }

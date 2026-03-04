@@ -13,6 +13,7 @@
 - [Get Started](#get-started)
 - [Usage](#usage)
   - [Messages Resource](#messages-resource)
+  - [Models Resource](#models-resource)
   - [Completions Resource (Legacy)](#completions-resource-legacy)
 - [Meta Information](#meta-information)
 - [Error Handling](#error-handling)
@@ -457,6 +458,49 @@ foreach ($stream as $response) {
     $response->delta->type; // 'text_delta'
     $response->delta->text; // 'The greatest common divisor is **21**.'
 }
+```
+
+### `Models` Resource
+
+#### `list`
+
+Lists the currently available models.
+
+```php
+$response = $client->models()->list();
+
+foreach ($response->data as $model) {
+    $model->id; // 'claude-sonnet-4-6-20250514'
+    $model->type; // 'model'
+    $model->createdAt; // '2025-05-14T00:00:00Z'
+    $model->displayName; // 'Claude Sonnet 4.6 (2025-05-14)'
+}
+
+$response->firstId; // 'claude-sonnet-4-6-20250514'
+$response->lastId; // 'claude-haiku-4-5-20251001'
+$response->hasMore; // true
+```
+
+You can paginate through models using cursor-based pagination:
+
+```php
+$response = $client->models()->list([
+    'limit' => 10,
+    'after_id' => 'claude-haiku-4-5-20251001',
+]);
+```
+
+#### `retrieve`
+
+Gets information about a specific model.
+
+```php
+$response = $client->models()->retrieve('claude-sonnet-4-6');
+
+$response->id; // 'claude-sonnet-4-6-20250514'
+$response->type; // 'model'
+$response->createdAt; // '2025-05-14T00:00:00Z'
+$response->displayName; // 'Claude Sonnet 4.6 (2025-05-14)'
 ```
 
 ### `Completions` Resource (Legacy)
