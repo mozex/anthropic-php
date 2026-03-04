@@ -15,6 +15,7 @@
   - [Messages Resource](#messages-resource)
   - [Completions Resource (Legacy)](#completions-resource-legacy)
 - [Meta Information](#meta-information)
+- [Error Handling](#error-handling)
 - [Troubleshooting](#troubleshooting)
 - [Testing](#testing)
 - [Changelog](#changelog)
@@ -438,6 +439,8 @@ $meta->requestLimit->reset; // '2024-05-01T13:29:17Z'
 $meta->tokenLimit->limit; // 250000
 $meta->tokenLimit->remaining; // 249984
 $meta->tokenLimit->reset; // '2024-05-01T13:29:17Z'
+
+$meta->custom; // additional non-standard headers
 ```
 
 The `toArray()` method returns the meta information in the form originally returned by the API.
@@ -471,6 +474,32 @@ $stream->meta();
 ```
 
 For further details about the rates limits and what to do if you hit them visit the [Anthropic documentation](https://docs.anthropic.com/claude/reference/rate-limits).
+
+## Error Handling
+
+When the API returns an error, an `Anthropic\Exceptions\ErrorException` is thrown.
+
+```php
+try {
+    $result = $client->messages()->create([...]);
+} catch (\Anthropic\Exceptions\ErrorException $e) {
+    $e->getMessage(); // 'Overloaded'
+    $e->getErrorType(); // 'overloaded_error'
+    $e->getStatusCode(); // 529
+}
+```
+
+For rate limit errors (HTTP 429), a dedicated `Anthropic\Exceptions\RateLimitException` is thrown. Since it extends `ErrorException`, existing `catch (ErrorException $e)` blocks will continue to work. If you want to handle rate limits specifically, catch it first:
+
+```php
+try {
+    $result = $client->messages()->create([...]);
+} catch (\Anthropic\Exceptions\RateLimitException $e) {
+    $retryAfter = $e->response->getHeaderLine('Retry-After');
+} catch (\Anthropic\Exceptions\ErrorException $e) {
+    // other API errors
+}
+```
 
 ## Troubleshooting
 
@@ -574,7 +603,7 @@ $client = new ClientFake([
     new \Anthropic\Exceptions\ErrorException([
         'message' => 'Overloaded',
         'type' => 'overloaded_error',
-    ])
+    ], 529)
 ]);
 
 // the `ErrorException` will be thrown
