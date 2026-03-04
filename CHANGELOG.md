@@ -2,6 +2,15 @@
 
 All notable changes to `anthropic-php` will be documented in this file.
 
+## 1.2.3 - 2026-03-04
+
+### What's Changed
+
+* add count tokens support
+* add models list and retrieve support
+
+**Full Changelog**: https://github.com/mozex/anthropic-php/compare/1.2.2...1.2.3
+
 ## 1.2.2 - 2026-03-04
 
 ### What's Changed
