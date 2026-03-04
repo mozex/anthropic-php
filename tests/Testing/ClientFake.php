@@ -2,8 +2,11 @@
 
 use Anthropic\Resources\Batches;
 use Anthropic\Resources\Completions;
+use Anthropic\Resources\Models;
 use Anthropic\Responses\Batches\BatchResponse;
 use Anthropic\Responses\Completions\CreateResponse;
+use Anthropic\Responses\Models\ListResponse;
+use Anthropic\Responses\Models\RetrieveResponse;
 use Anthropic\Testing\ClientFake;
 use PHPUnit\Framework\ExpectationFailedException;
 
@@ -242,5 +245,29 @@ it('asserts a batch request was sent', function () {
     $fake->assertSent(Batches::class, function ($method, $id) {
         return $method === 'retrieve' &&
             $id === 'msgbatch_04Rka1yCsMLGPnR7kfPdgR8x';
+    });
+});
+
+it('returns a fake models list response', function () {
+    $fake = new ClientFake([
+        ListResponse::fake(),
+    ]);
+
+    $list = $fake->models()->list();
+
+    expect($list)
+        ->toBeInstanceOf(ListResponse::class);
+});
+
+it('asserts a models request was sent', function () {
+    $fake = new ClientFake([
+        RetrieveResponse::fake(),
+    ]);
+
+    $fake->models()->retrieve('claude-sonnet-4-6');
+
+    $fake->assertSent(Models::class, function ($method, $model) {
+        return $method === 'retrieve' &&
+            $model === 'claude-sonnet-4-6';
     });
 });
