@@ -27,6 +27,39 @@ function messagesCompletion(): array
     ];
 }
 
+function messagesCompletionWithThinking(): array
+{
+    return [
+        'id' => 'msg_019hiOHAEXQwq1PTeETNEBWe',
+        'type' => 'message',
+        'role' => 'assistant',
+        'model' => 'claude-sonnet-4-6',
+        'stop_sequence' => null,
+        'usage' => [
+            'input_tokens' => 10,
+            'output_tokens' => 200,
+            'cache_creation_input_tokens' => 0,
+            'cache_read_input_tokens' => 0,
+        ],
+        'content' => [
+            [
+                'type' => 'thinking',
+                'thinking' => 'Let me analyze this step by step...',
+                'signature' => 'WaUjzkypQ2mUEVM36O2Txu',
+            ],
+            [
+                'type' => 'redacted_thinking',
+                'data' => 'EmwKAhgBEgy3va3pzix/LafPsn4a',
+            ],
+            [
+                'type' => 'text',
+                'text' => "Hello! I'm Claude, an AI assistant. How can I help you today?",
+            ],
+        ],
+        'stop_reason' => 'end_turn',
+    ];
+}
+
 function messagesCompletionWithCache(): array
 {
     return [

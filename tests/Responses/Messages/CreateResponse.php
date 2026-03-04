@@ -39,6 +39,41 @@ test('from tool calls response', function () {
         ->meta()->toBeInstanceOf(MetaInformation::class);
 });
 
+test('from thinking response', function () {
+    $completion = CreateResponse::from(messagesCompletionWithThinking(), meta());
+
+    expect($completion)
+        ->toBeInstanceOf(CreateResponse::class)
+        ->id->toBe('msg_019hiOHAEXQwq1PTeETNEBWe')
+        ->type->toBe('message')
+        ->role->toBe('assistant')
+        ->model->toBe('claude-sonnet-4-6')
+        ->stop_reason->toBe('end_turn')
+        ->content->toBeArray()->toHaveCount(3)
+        ->content->each->toBeInstanceOf(CreateResponseContent::class);
+
+    expect($completion->content[0])
+        ->type->toBe('thinking')
+        ->thinking->toBe('Let me analyze this step by step...')
+        ->signature->toBe('WaUjzkypQ2mUEVM36O2Txu');
+
+    expect($completion->content[1])
+        ->type->toBe('redacted_thinking')
+        ->data->toBe('EmwKAhgBEgy3va3pzix/LafPsn4a');
+
+    expect($completion->content[2])
+        ->type->toBe('text')
+        ->text->toBe("Hello! I'm Claude, an AI assistant. How can I help you today?");
+});
+
+test('to array from thinking response', function () {
+    $completion = CreateResponse::from(messagesCompletionWithThinking(), meta());
+
+    expect($completion->toArray())
+        ->toBeArray()
+        ->toBe(messagesCompletionWithThinking());
+});
+
 test('as array accessible', function () {
     $completion = CreateResponse::from(messagesCompletion(), meta());
 

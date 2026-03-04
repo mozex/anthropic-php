@@ -174,6 +174,39 @@ $response->usage->cacheReadInputTokens; // 0,
 $response->toArray(); // ['id' => 'msg_01BSy0WCV7QR2adFBauynAX7', ...]
 ```
 
+Creates a completion with extended thinking enabled.
+
+```php
+$response = $client->messages()->create([
+    'model' => 'claude-sonnet-4-6',
+    'max_tokens' => 16000,
+    'thinking' => [
+        'type' => 'enabled',
+        'budget_tokens' => 10000,
+    ],
+    'messages' => [
+        ['role' => 'user', 'content' => 'What is the meaning of life?'],
+    ],
+]);
+
+foreach ($response->content as $block) {
+    $block->type; // 'thinking', 'redacted_thinking', or 'text'
+
+    if ($block->type === 'thinking') {
+        $block->thinking; // 'Let me analyze this step by step...'
+        $block->signature; // 'WaUjzkypQ2mUEVM36O2Txu'
+    }
+
+    if ($block->type === 'redacted_thinking') {
+        $block->data; // 'EmwKAhgBEgy3va3pzix/LafPsn4a'
+    }
+
+    if ($block->type === 'text') {
+        $block->text; // 'The meaning of life is...'
+    }
+}
+```
+
 #### `create streamed`
 
 Creates a streamed completion for structured list of input messages.

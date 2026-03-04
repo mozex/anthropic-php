@@ -33,3 +33,34 @@ test('to array from tool calls response', function () {
     expect($result->toArray())
         ->toBe(messagesCompletionWithToolCalls()['content'][1]);
 });
+
+test('from thinking response', function () {
+    $result = CreateResponseContent::from(messagesCompletionWithThinking()['content'][0]);
+
+    expect($result)
+        ->type->toBe('thinking')
+        ->thinking->toBe('Let me analyze this step by step...')
+        ->signature->toBe('WaUjzkypQ2mUEVM36O2Txu');
+});
+
+test('from redacted thinking response', function () {
+    $result = CreateResponseContent::from(messagesCompletionWithThinking()['content'][1]);
+
+    expect($result)
+        ->type->toBe('redacted_thinking')
+        ->data->toBe('EmwKAhgBEgy3va3pzix/LafPsn4a');
+});
+
+test('to array from thinking response', function () {
+    $result = CreateResponseContent::from(messagesCompletionWithThinking()['content'][0]);
+
+    expect($result->toArray())
+        ->toBe(messagesCompletionWithThinking()['content'][0]);
+});
+
+test('to array from redacted thinking response', function () {
+    $result = CreateResponseContent::from(messagesCompletionWithThinking()['content'][1]);
+
+    expect($result->toArray())
+        ->toBe(messagesCompletionWithThinking()['content'][1]);
+});
