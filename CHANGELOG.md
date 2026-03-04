@@ -2,6 +2,33 @@
 
 All notable changes to `anthropic-php` will be documented in this file.
 
+## 1.2.0 - 2026-03-04
+
+### What's Changed
+
+#### Added
+
+* Add `RateLimitException` for HTTP 429 responses (extends `ErrorException` — no breaking changes)
+* Add PSR-7 response access on `ErrorException` and `UnserializableResponse` via `$e->response`
+* Add `MetaInformationCustom` for capturing non-standard response headers via `$meta->custom`
+* Add `OverrideStrategy` enum for controlling `fake()` override merging behavior
+* Add `addHeader()` method to `TransporterContract` for runtime header injection
+
+#### Improved
+
+* Preserve API error message on rate limit responses instead of using a generic message
+* Use `(string) $response->getBody()` instead of `getContents()` for reliable stream reading
+* Add `JSON_UNESCAPED_UNICODE` flag for proper Unicode handling in request payloads
+* Simplify `Fakeable` trait using `array_replace_recursive`
+* Fix namespace resolution in `Fakeable` `str_replace` call
+* Parameterize `Streamable` trait methods for flexibility
+
+#### Upgrading
+
+See [UPGRADING.md](UPGRADING.md) for details. All changes are backwards compatible.
+
+**Full Changelog**: https://github.com/mozex/anthropic-php/compare/1.1.0...1.2.0
+
 ## 1.1.0 - 2024-12-21
 
 ### What's Changed
