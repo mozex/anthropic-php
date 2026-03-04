@@ -24,6 +24,18 @@ test('from first chunk of tool calls', function () {
         ->input->toBe([]);
 });
 
+test('from first chunk of thinking', function () {
+    $result = CreateStreamedResponseContentBlockStart::from(messagesCompletionStreamThinkingContentBlockStartChunk()['content_block']);
+
+    expect($result)
+        ->type->toBe('thinking')
+        ->thinking->toBe('')
+        ->text->toBeNull()
+        ->id->toBeNull()
+        ->name->toBeNull()
+        ->input->toBeNull();
+});
+
 test('from content chunk', function () {
     $result = CreateStreamedResponseContentBlockStart::from([]);
 
@@ -45,6 +57,7 @@ test('to array from first chunk', function () {
             'text' => '',
             'name' => null,
             'input' => null,
+            'thinking' => null,
         ]);
 });
 
@@ -58,6 +71,21 @@ test('to array from first chunk of tool calls', function () {
             'text' => null,
             'name' => 'get_weather',
             'input' => [],
+            'thinking' => null,
+        ]);
+});
+
+test('to array from first chunk of thinking', function () {
+    $result = CreateStreamedResponseContentBlockStart::from(messagesCompletionStreamThinkingContentBlockStartChunk()['content_block']);
+
+    expect($result->toArray())
+        ->toBe([
+            'id' => null,
+            'type' => 'thinking',
+            'text' => null,
+            'name' => null,
+            'input' => null,
+            'thinking' => '',
         ]);
 });
 
@@ -71,5 +99,6 @@ test('to array for a content chunk', function () {
             'text' => null,
             'name' => null,
             'input' => null,
+            'thinking' => null,
         ]);
 });

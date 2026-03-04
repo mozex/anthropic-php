@@ -78,6 +78,51 @@ test('from content chunk', function () {
         ->usage->inputTokens->toBeNull();
 });
 
+test('from thinking content block start chunk', function () {
+    $completion = CreateStreamedResponse::from(messagesCompletionStreamThinkingContentBlockStartChunk());
+
+    expect($completion)
+        ->toBeInstanceOf(CreateStreamedResponse::class)
+        ->type->toBe('content_block_start')
+        ->index->toBe(0)
+        ->content_block_start->toBeInstanceOf(CreateStreamedResponseContentBlockStart::class)
+        ->content_block_start->type->toBe('thinking')
+        ->content_block_start->thinking->toBe('');
+});
+
+test('from thinking delta chunk', function () {
+    $completion = CreateStreamedResponse::from(messagesCompletionStreamThinkingDeltaChunk());
+
+    expect($completion)
+        ->toBeInstanceOf(CreateStreamedResponse::class)
+        ->type->toBe('content_block_delta')
+        ->index->toBe(0)
+        ->delta->toBeInstanceOf(CreateStreamedResponseDelta::class)
+        ->delta->type->toBe('thinking_delta')
+        ->delta->thinking->toBe('I need to find the GCD using the Euclidean algorithm.');
+});
+
+test('from signature delta chunk', function () {
+    $completion = CreateStreamedResponse::from(messagesCompletionStreamSignatureDeltaChunk());
+
+    expect($completion)
+        ->toBeInstanceOf(CreateStreamedResponse::class)
+        ->type->toBe('content_block_delta')
+        ->index->toBe(0)
+        ->delta->toBeInstanceOf(CreateStreamedResponseDelta::class)
+        ->delta->type->toBe('signature_delta')
+        ->delta->signature->toBe('EqQBCgIYAhIM1gbcDa9GJwZA2b3h');
+});
+
+test('from content block stop chunk', function () {
+    $completion = CreateStreamedResponse::from(messagesCompletionStreamContentBlockStopChunk());
+
+    expect($completion)
+        ->toBeInstanceOf(CreateStreamedResponse::class)
+        ->type->toBe('content_block_stop')
+        ->index->toBe(0);
+});
+
 test('from last chunk', function () {
     $completion = CreateStreamedResponse::from(messagesCompletionStreamLastChunk());
 
@@ -132,6 +177,7 @@ test('to array', function () {
                 'text' => null,
                 'name' => null,
                 'input' => null,
+                'thinking' => null,
             ],
             'usage' => [
                 'input_tokens' => 10,

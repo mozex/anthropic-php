@@ -213,6 +213,50 @@ function messagesCompletionStreamContentChunk(): array
     ];
 }
 
+function messagesCompletionStreamThinkingContentBlockStartChunk(): array
+{
+    return [
+        'type' => 'content_block_start',
+        'index' => 0,
+        'content_block' => [
+            'type' => 'thinking',
+            'thinking' => '',
+        ],
+    ];
+}
+
+function messagesCompletionStreamThinkingDeltaChunk(): array
+{
+    return [
+        'type' => 'content_block_delta',
+        'index' => 0,
+        'delta' => [
+            'type' => 'thinking_delta',
+            'thinking' => 'I need to find the GCD using the Euclidean algorithm.',
+        ],
+    ];
+}
+
+function messagesCompletionStreamSignatureDeltaChunk(): array
+{
+    return [
+        'type' => 'content_block_delta',
+        'index' => 0,
+        'delta' => [
+            'type' => 'signature_delta',
+            'signature' => 'EqQBCgIYAhIM1gbcDa9GJwZA2b3h',
+        ],
+    ];
+}
+
+function messagesCompletionStreamContentBlockStopChunk(): array
+{
+    return [
+        'type' => 'content_block_stop',
+        'index' => 0,
+    ];
+}
+
 function messagesCompletionStreamToolCallsContentBlockStartChunk(): array
 {
     return [

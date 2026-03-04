@@ -59,6 +59,7 @@ final class StreamResponse implements ResponseHasMetaInformationContract, Respon
                 'message_delta',
                 'content_block_start',
                 'content_block_delta',
+                'content_block_stop',
             ])) {
                 continue;
             }

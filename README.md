@@ -409,6 +409,41 @@ foreach($stream as $response){
 ]
 ```
 
+Creates a streamed completion with extended thinking enabled.
+
+```php
+$stream = $client->messages()->createStreamed([
+    'model' => 'claude-sonnet-4-6',
+    'max_tokens' => 16000,
+    'thinking' => [
+        'type' => 'enabled',
+        'budget_tokens' => 10000,
+    ],
+    'messages' => [
+        ['role' => 'user', 'content' => 'What is the greatest common divisor of 1071 and 462?'],
+    ],
+]);
+
+foreach ($stream as $response) {
+    $response->type; // 'content_block_start', 'content_block_delta', 'content_block_stop', ...
+
+    // Thinking block start
+    $response->content_block_start->type; // 'thinking'
+
+    // Thinking delta
+    $response->delta->type; // 'thinking_delta'
+    $response->delta->thinking; // 'I need to find the GCD...'
+
+    // Signature delta (sent before content_block_stop)
+    $response->delta->type; // 'signature_delta'
+    $response->delta->signature; // 'EqQBCgIYAhIM1gbcDa9GJwZA2b3h...'
+
+    // Text delta (after thinking is complete)
+    $response->delta->type; // 'text_delta'
+    $response->delta->text; // 'The greatest common divisor is **21**.'
+}
+```
+
 ### `Completions` Resource (Legacy)
 
 #### `create`

@@ -15,10 +15,11 @@ final class CreateStreamedResponseContentBlockStart
         public readonly ?string $text,
         public readonly ?string $name,
         public readonly ?array $input,
+        public readonly ?string $thinking,
     ) {}
 
     /**
-     * @param  array{id?: string, type?: string, text?: string, name?: string, input?: array<int, string>}  $attributes
+     * @param  array{id?: string, type?: string, text?: string, name?: string, input?: array<int, string>, thinking?: string}  $attributes
      */
     public static function from(array $attributes): self
     {
@@ -28,11 +29,12 @@ final class CreateStreamedResponseContentBlockStart
             $attributes['text'] ?? null,
             $attributes['name'] ?? null,
             $attributes['input'] ?? null,
+            $attributes['thinking'] ?? null,
         );
     }
 
     /**
-     * @return array{id: string|null, type: string|null, text: string|null, name: string|null, input: array<int, string>|null}
+     * @return array{id: string|null, type: string|null, text: string|null, name: string|null, input: array<int, string>|null, thinking: string|null}
      */
     public function toArray(): array
     {
@@ -42,6 +44,7 @@ final class CreateStreamedResponseContentBlockStart
             'text' => $this->text,
             'name' => $this->name,
             'input' => $this->input,
+            'thinking' => $this->thinking,
         ];
     }
 }
