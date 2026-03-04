@@ -2,6 +2,16 @@
 
 All notable changes to `anthropic-php` will be documented in this file.
 
+## 1.2.1 - 2026-03-04
+
+### What's Changed
+
+#### Fixed
+
+* Add missing `cache_creation_input_tokens` and `cache_read_input_tokens` to `CreateStreamedResponseUsage`
+
+**Full Changelog**: https://github.com/mozex/anthropic-php/compare/1.2.0...1.2.1
+
 ## 1.2.0 - 2026-03-04
 
 ### What's Changed
