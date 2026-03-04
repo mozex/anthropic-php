@@ -1,6 +1,7 @@
 <?php
 
 use Anthropic\Responses\Completions\CreateResponse;
+use Anthropic\Testing\Enums\OverrideStrategy;
 
 test('from', function () {
     $completion = CreateResponse::from(completion());
@@ -58,4 +59,18 @@ test('fake can not add inexistent properties', function () {
     expect($response)
         ->id->toBe('compl_1234')
         ->something->toBeNull();
+});
+
+test('fake with replace strategy', function () {
+    $response = CreateResponse::fake(
+        override: [
+            'id' => 'compl_replaced',
+            'completion' => 'replaced!',
+        ],
+        strategy: OverrideStrategy::Replace,
+    );
+
+    expect($response)
+        ->id->toBe('compl_replaced')
+        ->completion->toBe('replaced!');
 });

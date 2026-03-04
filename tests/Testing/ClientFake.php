@@ -21,11 +21,13 @@ it('returns a fake response', function () {
 });
 
 it('throws fake exceptions', function () {
+    $response = new \GuzzleHttp\Psr7\Response(404);
+
     $fake = new ClientFake([
         new \Anthropic\Exceptions\ErrorException([
             'message' => 'Overloaded',
             'type' => 'overloaded_error',
-        ], 404),
+        ], $response),
     ]);
 
     $fake->completions()->create([

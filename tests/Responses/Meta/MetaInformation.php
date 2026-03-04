@@ -1,6 +1,7 @@
 <?php
 
 use Anthropic\Responses\Meta\MetaInformation;
+use Anthropic\Responses\Meta\MetaInformationCustom;
 use Anthropic\Responses\Meta\MetaInformationRateLimit;
 
 test('from response headers', function () {
@@ -66,4 +67,47 @@ test('to array', function () {
             'anthropic-ratelimit-tokens-reset' => '2024-04-30T15:56:17Z',
             'request-id' => '02c10373f63cf2954851197d75c0adab',
         ]);
+});
+
+test('custom headers are captured', function () {
+    $headers = [
+        ...metaHeaders(),
+        'x-custom-header' => ['custom-value'],
+        'cf-ray' => ['abc123'],
+    ];
+
+    $meta = MetaInformation::from($headers);
+
+    expect($meta->custom)
+        ->toBeInstanceOf(MetaInformationCustom::class)
+        ->and($meta->custom->toArray())
+        ->toBe([
+            'x-custom-header' => 'custom-value',
+            'cf-ray' => 'abc123',
+        ]);
+});
+
+test('custom headers exclude known headers', function () {
+    $meta = MetaInformation::from(metaHeaders());
+
+    expect($meta->custom->toArray())->toBe([]);
+});
+
+test('to array includes custom headers when present', function () {
+    $headers = [
+        ...metaHeaders(),
+        'x-custom' => ['value'],
+    ];
+
+    $meta = MetaInformation::from($headers);
+
+    expect($meta->toArray())
+        ->toHaveKey('custom')
+        ->and($meta->toArray()['custom'])->toBe(['x-custom' => 'value']);
+});
+
+test('to array excludes custom key when no custom headers', function () {
+    $meta = MetaInformation::from(metaHeaders());
+
+    expect($meta->toArray())->not->toHaveKey('custom');
 });

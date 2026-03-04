@@ -19,6 +19,7 @@ test('exceptions')
     ->expect('Anthropic\Exceptions')
     ->toOnlyUse([
         'Psr\Http\Client',
+        'Psr\Http\Message\ResponseInterface',
     ])->toImplement(Throwable::class);
 
 test('resources')->expect('Anthropic\Resources')->toOnlyUse([
