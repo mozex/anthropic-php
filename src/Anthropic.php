@@ -14,7 +14,6 @@ final class Anthropic
     {
         return self::factory()
             ->withApiKey($apiKey)
-            ->withHttpHeader('anthropic-version', '2023-06-01')
             ->make();
     }
 

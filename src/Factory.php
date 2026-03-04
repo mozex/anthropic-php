@@ -122,6 +122,8 @@ final class Factory
             $headers = Headers::withAuthorization(ApiKey::from($this->apiKey));
         }
 
+        $headers = $headers->withCustomHeader('anthropic-version', '2023-06-01');
+
         foreach ($this->headers as $name => $value) {
             $headers = $headers->withCustomHeader($name, $value);
         }
