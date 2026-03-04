@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Anthropic\Contracts;
 
 use Anthropic\Exceptions\ErrorException;
+use Anthropic\Exceptions\RateLimitException;
 use Anthropic\Exceptions\TransporterException;
 use Anthropic\Exceptions\UnserializableResponse;
 use Anthropic\ValueObjects\Transporter\Payload;
@@ -21,21 +22,26 @@ interface TransporterContract
      *
      * @return Response<array<array-key, mixed>|string>
      *
-     * @throws ErrorException|UnserializableResponse|TransporterException
+     * @throws ErrorException|UnserializableResponse|TransporterException|RateLimitException
      */
     public function requestObject(Payload $payload): Response;
 
     /**
      * Sends a content request to a server.
      *
-     * @throws ErrorException|TransporterException
+     * @throws ErrorException|TransporterException|RateLimitException
      */
     public function requestContent(Payload $payload): string;
 
     /**
      * Sends a stream request to a server.
-     **
-     * @throws ErrorException
+     *
+     * @throws ErrorException|RateLimitException
      */
     public function requestStream(Payload $payload): ResponseInterface;
+
+    /**
+     * Adds a custom header to the transporter.
+     */
+    public function addHeader(string $name, string $value): self;
 }
