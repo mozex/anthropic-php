@@ -2,6 +2,7 @@
 
 use Anthropic\Enums\Transporter\ContentType;
 use Anthropic\Exceptions\ErrorException;
+use Anthropic\Exceptions\RateLimitException;
 use Anthropic\Exceptions\TransporterException;
 use Anthropic\Exceptions\UnserializableResponse;
 use Anthropic\Transporters\HttpTransporter;
@@ -133,7 +134,7 @@ test('request object server errors', function () {
 test('error type may be null', function () {
     $payload = Payload::list('models');
 
-    $response = new Response(429, ['Content-Type' => 'application/json; charset=utf-8'], json_encode([
+    $response = new Response(422, ['Content-Type' => 'application/json; charset=utf-8'], json_encode([
         'error' => [
             'message' => 'You exceeded your current quota, please check',
             'type' => null,
@@ -402,5 +403,168 @@ test('request stream server errors', function () {
             expect($e->getMessage())->toBe('Incorrect API key provided: foo.')
                 ->and($e->getErrorMessage())->toBe('Incorrect API key provided: foo.')
                 ->and($e->getErrorType())->toBe('invalid_request_error');
+        });
+});
+
+test('request object rate limit', function () {
+    $payload = Payload::list('models');
+
+    $response = new Response(429, ['Content-Type' => 'application/json; charset=utf-8'], json_encode([
+        'error' => [
+            'message' => 'Rate limit exceeded',
+            'type' => 'rate_limit_error',
+        ],
+    ]));
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    expect(fn () => $this->http->requestObject($payload))
+        ->toThrow(function (RateLimitException $e) {
+            expect($e->getMessage())->toBe('Rate limit exceeded')
+                ->and($e->getErrorType())->toBe('rate_limit_error')
+                ->and($e->getStatusCode())->toBe(429)
+                ->and($e->response->getStatusCode())->toBe(429);
+        });
+});
+
+test('rate limit exception is catchable as error exception', function () {
+    $payload = Payload::list('models');
+
+    $response = new Response(429, ['Content-Type' => 'application/json; charset=utf-8'], '');
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    expect(fn () => $this->http->requestObject($payload))
+        ->toThrow(ErrorException::class);
+});
+
+test('request content rate limit', function () {
+    $payload = Payload::list('models');
+
+    $response = new Response(429, ['Content-Type' => 'application/json; charset=utf-8'], '');
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    expect(fn () => $this->http->requestContent($payload))
+        ->toThrow(RateLimitException::class, 'Request rate limit has been exceeded.');
+});
+
+test('request stream rate limit', function () {
+    $payload = Payload::create('complete', []);
+
+    $response = new Response(429, ['Content-Type' => 'application/json; charset=utf-8'], '');
+
+    $this->client
+        ->shouldReceive('sendAsyncRequest')
+        ->once()
+        ->andReturn($response);
+
+    expect(fn () => $this->http->requestStream($payload))
+        ->toThrow(RateLimitException::class, 'Request rate limit has been exceeded.');
+});
+
+test('add header', function () {
+    $payload = Payload::list('models');
+
+    $response = new Response(200, ['Content-Type' => 'application/json; charset=utf-8', ...metaHeaders()], json_encode([
+        'data' => 'test',
+    ]));
+
+    $this->http->addHeader('X-Custom', 'custom-value');
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->withArgs(function (Psr7Request $request) {
+            expect($request->getHeaderLine('X-Custom'))->toBe('custom-value');
+
+            return true;
+        })->andReturn($response);
+
+    $this->http->requestObject($payload);
+});
+
+test('error exception provides response', function () {
+    $payload = Payload::list('models');
+
+    $response = new Response(401, ['Content-Type' => 'application/json; charset=utf-8', 'X-Request-Id' => 'req-123'], json_encode([
+        'error' => [
+            'message' => 'Unauthorized',
+            'type' => 'authentication_error',
+        ],
+    ]));
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    expect(fn () => $this->http->requestObject($payload))
+        ->toThrow(function (ErrorException $e) {
+            expect($e->response)->toBeInstanceOf(ResponseInterface::class)
+                ->and($e->response->getStatusCode())->toBe(401)
+                ->and($e->response->getHeaderLine('X-Request-Id'))->toBe('req-123');
+        });
+});
+
+test('error exception accepts string contents', function () {
+    $response = new Response(500);
+
+    $e = new ErrorException('Something went wrong', $response);
+
+    expect($e->getMessage())->toBe('Something went wrong')
+        ->and($e->getErrorType())->toBeNull()
+        ->and($e->getStatusCode())->toBe(500);
+});
+
+test('error exception accepts int status code for backwards compatibility', function () {
+    $e = new ErrorException(['message' => 'Bad request', 'type' => 'invalid_request_error'], 400);
+
+    expect($e->getMessage())->toBe('Bad request')
+        ->and($e->getErrorType())->toBe('invalid_request_error')
+        ->and($e->getStatusCode())->toBe(400)
+        ->and($e->response)->toBeNull();
+});
+
+test('unserializable response provides response', function () {
+    $payload = Payload::list('models');
+
+    $response = new Response(200, ['Content-Type' => 'application/json; charset=utf-8'], 'not-json');
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    expect(fn () => $this->http->requestObject($payload))
+        ->toThrow(function (UnserializableResponse $e) {
+            expect($e->response)->toBeInstanceOf(ResponseInterface::class)
+                ->and($e->response->getStatusCode())->toBe(200);
+        });
+});
+
+test('rate limit with no json body', function () {
+    $payload = Payload::list('models');
+
+    $response = new Response(429, [], '');
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    expect(fn () => $this->http->requestObject($payload))
+        ->toThrow(function (RateLimitException $e) {
+            expect($e->getMessage())->toBe('Request rate limit has been exceeded.')
+                ->and($e->getStatusCode())->toBe(429);
         });
 });
