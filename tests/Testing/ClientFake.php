@@ -1,6 +1,8 @@
 <?php
 
+use Anthropic\Resources\Batches;
 use Anthropic\Resources\Completions;
+use Anthropic\Responses\Batches\BatchResponse;
 use Anthropic\Responses\Completions\CreateResponse;
 use Anthropic\Testing\ClientFake;
 use PHPUnit\Framework\ExpectationFailedException;
@@ -206,3 +208,39 @@ it('throws an exception if any request was sent when non was expected', function
 
     $fake->assertNothingSent();
 })->expectException(ExpectationFailedException::class);
+
+it('returns a fake batch response', function () {
+    $fake = new ClientFake([
+        BatchResponse::fake([
+            'processing_status' => 'in_progress',
+        ]),
+    ]);
+
+    $batch = $fake->batches()->create([
+        'requests' => [
+            [
+                'custom_id' => 'request-1',
+                'params' => [
+                    'model' => 'claude-sonnet-4-6',
+                    'max_tokens' => 1024,
+                    'messages' => [['role' => 'user', 'content' => 'Hello!']],
+                ],
+            ],
+        ],
+    ]);
+
+    expect($batch['processing_status'])->toBe('in_progress');
+});
+
+it('asserts a batch request was sent', function () {
+    $fake = new ClientFake([
+        BatchResponse::fake(),
+    ]);
+
+    $fake->batches()->retrieve('msgbatch_04Rka1yCsMLGPnR7kfPdgR8x');
+
+    $fake->assertSent(Batches::class, function ($method, $id) {
+        return $method === 'retrieve' &&
+            $id === 'msgbatch_04Rka1yCsMLGPnR7kfPdgR8x';
+    });
+});
