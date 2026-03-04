@@ -14,6 +14,7 @@
 - [Usage](#usage)
   - [Messages Resource](#messages-resource)
   - [Models Resource](#models-resource)
+  - [Message Batches Resource](#message-batches-resource)
   - [Completions Resource (Legacy)](#completions-resource-legacy)
 - [Meta Information](#meta-information)
 - [Error Handling](#error-handling)
@@ -501,6 +502,100 @@ $response->id; // 'claude-sonnet-4-6-20250514'
 $response->type; // 'model'
 $response->createdAt; // '2025-05-14T00:00:00Z'
 $response->displayName; // 'Claude Sonnet 4.6 (2025-05-14)'
+```
+
+### `Message Batches` Resource
+
+#### `create`
+
+Creates a Message Batch. Processing may take up to 24 hours.
+
+```php
+$response = $client->batches()->create([
+    'requests' => [
+        [
+            'custom_id' => 'request-1',
+            'params' => [
+                'model' => 'claude-sonnet-4-6',
+                'max_tokens' => 1024,
+                'messages' => [
+                    ['role' => 'user', 'content' => 'What is the capital of France?'],
+                ],
+            ],
+        ],
+        [
+            'custom_id' => 'request-2',
+            'params' => [
+                'model' => 'claude-sonnet-4-6',
+                'max_tokens' => 1024,
+                'messages' => [
+                    ['role' => 'user', 'content' => 'What is the capital of Germany?'],
+                ],
+            ],
+        ],
+    ],
+]);
+
+$response->id; // 'msgbatch_04Rka1yCsMLGPnR7kfPdgR8x'
+$response->type; // 'message_batch'
+$response->processingStatus; // 'in_progress'
+$response->requestCounts->processing; // 2
+$response->requestCounts->succeeded; // 0
+$response->createdAt; // '2025-04-01T12:00:00Z'
+$response->expiresAt; // '2025-04-02T12:00:00Z'
+$response->endedAt; // null
+$response->resultsUrl; // null
+```
+
+#### `retrieve`
+
+Retrieves a Message Batch. Use this to poll for completion.
+
+```php
+$response = $client->batches()->retrieve('msgbatch_04Rka1yCsMLGPnR7kfPdgR8x');
+
+$response->processingStatus; // 'ended'
+$response->requestCounts->succeeded; // 95
+$response->requestCounts->errored; // 3
+$response->resultsUrl; // 'https://api.anthropic.com/v1/messages/batches/msgbatch_.../results'
+```
+
+#### `list`
+
+Lists Message Batches with cursor-based pagination.
+
+```php
+$response = $client->batches()->list(['limit' => 10]);
+
+foreach ($response->data as $batch) {
+    $batch->id; // 'msgbatch_04Rka1yCsMLGPnR7kfPdgR8x'
+    $batch->processingStatus; // 'ended'
+}
+
+$response->hasMore; // true
+$response->firstId; // 'msgbatch_04Rka1yCsMLGPnR7kfPdgR8x'
+$response->lastId; // 'msgbatch_07V2nm5PqB3bP8szLgTmn1EG'
+```
+
+#### `cancel`
+
+Cancels an in-progress Message Batch.
+
+```php
+$response = $client->batches()->cancel('msgbatch_04Rka1yCsMLGPnR7kfPdgR8x');
+
+$response->processingStatus; // 'canceling'
+```
+
+#### `delete`
+
+Deletes a Message Batch. Only completed batches can be deleted.
+
+```php
+$response = $client->batches()->delete('msgbatch_04Rka1yCsMLGPnR7kfPdgR8x');
+
+$response->id; // 'msgbatch_04Rka1yCsMLGPnR7kfPdgR8x'
+$response->type; // 'message_batch_deleted'
 ```
 
 ### `Completions` Resource (Legacy)

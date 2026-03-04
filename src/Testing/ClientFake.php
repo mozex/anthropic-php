@@ -8,6 +8,7 @@ use Anthropic\Contracts\ResponseStreamContract;
 use Anthropic\Responses\Completions\StreamResponse as CompletionsStreamResponse;
 use Anthropic\Responses\Messages\StreamResponse as MessagesStreamResponse;
 use Anthropic\Testing\Requests\TestRequest;
+use Anthropic\Testing\Resources\BatchesTestResource;
 use Anthropic\Testing\Resources\CompletionsTestResource;
 use Anthropic\Testing\Resources\MessagesTestResource;
 use Anthropic\Testing\Resources\ModelsTestResource;
@@ -133,5 +134,10 @@ class ClientFake implements ClientContract
     public function models(): ModelsTestResource
     {
         return new ModelsTestResource($this);
+    }
+
+    public function batches(): BatchesTestResource
+    {
+        return new BatchesTestResource($this);
     }
 }
