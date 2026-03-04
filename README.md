@@ -34,7 +34,7 @@ Thank you for considering sponsoring. Your support truly makes a difference!
 
 ## Get Started
 
-> **Requires [PHP 8.1+](https://php.net/releases/)**
+> **Requires [PHP 8.2+](https://php.net/releases/)**
 
 First, install Anthropic via the [Composer](https://getcomposer.org/) package manager:
 
@@ -54,7 +54,7 @@ $yourApiKey = getenv('YOUR_API_KEY');
 $client = Anthropic::client($yourApiKey);
 
 $result = $client->messages()->create([
-    'model' => 'claude-3-opus-20240229',
+    'model' => 'claude-sonnet-4-6',
     'max_tokens' => 1024,
     'messages' => [
         ['role' => 'user', 'content' => 'Hello!'],
@@ -71,7 +71,6 @@ $yourApiKey = getenv('YOUR_API_KEY');
 
 $client = Anthropic::factory()
     ->withApiKey($yourApiKey)
-    ->withHttpHeader('anthropic-version', '2023-06-01')
     ->withBaseUri('anthropic.example.com/v1') // default: api.anthropic.com/v1
     ->withHttpClient($httpClient = new \GuzzleHttp\Client([])) // default: HTTP client found using PSR-18 HTTP Client Discovery
     ->withHttpHeader('X-My-Header', 'foo')
@@ -92,7 +91,7 @@ Creates a completion for structured list of input messages.
 
 ```php
 $response = $client->messages()->create([
-    'model' => 'claude-3-opus-20240229',
+    'model' => 'claude-sonnet-4-6',
     'max_tokens' => 1024,
     'messages' => [
         ['role' => 'user', 'content' => 'Hello, world'],
@@ -102,7 +101,7 @@ $response = $client->messages()->create([
 $response->id; // 'msg_01BSy0WCV7QR2adFBauynAX7'
 $response->type; // 'message'
 $response->role; // 'assistant'
-$response->model; // 'claude-3-opus-20240229'
+$response->model; // 'claude-sonnet-4-6'
 $response->stop_sequence; // null
 $response->stop_reason; // 'end_turn'
 
@@ -123,7 +122,7 @@ Creates a completion for the structured list of input messages with a tool call.
 
 ```php
 $response = $client->messages()->create([
-    'model' => 'claude-3-opus-20240229',
+    'model' => 'claude-sonnet-4-6',
     'max_tokens' => 1024,
     'messages' => [
         ['role' => 'user', 'content' => 'What is the weather like in San Francisco?'],
@@ -154,7 +153,7 @@ $response = $client->messages()->create([
 $response->id; // 'msg_01BSy0WCV7QR2adFBauynAX7'
 $response->type; // 'message'
 $response->role; // 'assistant'
-$response->model; // 'claude-3-opus-20240229'
+$response->model; // 'claude-sonnet-4-6'
 $response->stop_sequence; // null
 $response->stop_reason; // 'tool_use'
 
@@ -181,7 +180,7 @@ Creates a streamed completion for structured list of input messages.
 
 ```php
 $stream = $client->messages()->createStreamed([
-    'model' => 'claude-3-haiku-20240307',
+    'model' => 'claude-sonnet-4-6',
     'max_tokens' => 1024,
     'messages' => [
         ['role' => 'user', 'content' => 'Hello!'],
@@ -194,26 +193,28 @@ foreach($stream as $response){
 // 1. iteration
 [
     'type' => 'message_start',
-    'message' => [    
+    'message' => [
         'id' => 'msg_01SX1jLtTXgtJwB2EpSRNutG',
         'type' => 'message',
         'role' => 'assistant',
         'content' => [],
-        'model' => 'claude-3-haiku-20240307',
+        'model' => 'claude-sonnet-4-6',
         'stop_reason' => null,
         'stop_sequence' => null,
     ],
-    'usage' => [    
+    'usage' => [
         'input_tokens' => 9,
         'output_tokens' => 1,
+        'cache_creation_input_tokens' => null,
+        'cache_read_input_tokens' => null,
     ]
 ]
 // 2. iteration
 [
     'type' => 'content_block_start',
     'index' => 0,
-    'content_block_start' => [    
-        'type' => 'type',
+    'content_block_start' => [
+        'type' => 'text',
         'text' => '',
     ]
 ]
@@ -221,7 +222,7 @@ foreach($stream as $response){
 [
     'type' => 'content_block_delta',
     'index' => 0,
-    'delta' => [    
+    'delta' => [
         'type' => 'text_delta',
         'text' => 'Hello',
     ]
@@ -230,7 +231,7 @@ foreach($stream as $response){
 [
     'type' => 'content_block_delta',
     'index' => 0,
-    'delta' => [    
+    'delta' => [
         'type' => 'text_delta',
         'text' => '!',
     ]
@@ -241,12 +242,14 @@ foreach($stream as $response){
 // last iteration
 [
     'type' => 'message_delta',
-    'delta' => [    
+    'delta' => [
         'stop_reason' => 'end_turn',
         'stop_sequence' => null,
     ],
-    'usage' => [    
+    'usage' => [
         'output_tokens' => 12,
+        'cache_creation_input_tokens' => null,
+        'cache_read_input_tokens' => null,
     ]
 ]
 ```
@@ -255,7 +258,7 @@ Creates a streamed completion for structured list of input messages with a tool 
 
 ```php
 $stream = $client->messages()->createStreamed([
-    'model' => 'claude-3-haiku-20240307',
+    'model' => 'claude-sonnet-4-6',
     'max_tokens' => 1024,
     'messages' => [
         ['role' => 'user', 'content' => 'What is the weather like in San Francisco?'],
@@ -289,26 +292,28 @@ foreach($stream as $response){
 // 1. iteration
 [
     'type' => 'message_start',
-    'message' => [    
+    'message' => [
         'id' => 'msg_01SX1jLtTXgtJwB2EpSRNutG',
         'type' => 'message',
         'role' => 'assistant',
         'content' => [],
-        'model' => 'claude-3-haiku-20240307',
+        'model' => 'claude-sonnet-4-6',
         'stop_reason' => null,
         'stop_sequence' => null,
     ],
-    'usage' => [    
+    'usage' => [
         'input_tokens' => 9,
         'output_tokens' => 1,
+        'cache_creation_input_tokens' => null,
+        'cache_read_input_tokens' => null,
     ]
 ]
 // 2. iteration
 [
     'type' => 'content_block_start',
     'index' => 0,
-    'content_block_start' => [    
-        'type' => 'type',
+    'content_block_start' => [
+        'type' => 'text',
         'text' => '',
     ]
 ]
@@ -316,7 +321,7 @@ foreach($stream as $response){
 [
     'type' => 'content_block_delta',
     'index' => 0,
-    'delta' => [    
+    'delta' => [
         'type' => 'text_delta',
         'text' => 'I',
     ]
@@ -325,7 +330,7 @@ foreach($stream as $response){
 [
     'type' => 'content_block_delta',
     'index' => 0,
-    'delta' => [    
+    'delta' => [
         'type' => 'text_delta',
         'text' => '\'ll help you check the current weather',
     ]
@@ -337,7 +342,7 @@ foreach($stream as $response){
 [
     'type' => 'content_block_start',
     'index' => 1,
-    'content_block_start' => [    
+    'content_block_start' => [
         'id' => 'toolu_01RDFRXpbNUGrZ1xQy443s5Q',
         'type' => 'tool_use',
         'name' => 'get_weather',
@@ -348,7 +353,7 @@ foreach($stream as $response){
 [
     'type' => 'content_block_delta',
     'index' => 1,
-    'delta' => [    
+    'delta' => [
         'type' => 'input_json_delta',
         'partial_json' => '{"location',
     ]
@@ -359,12 +364,14 @@ foreach($stream as $response){
 // last iteration
 [
     'type' => 'message_delta',
-    'delta' => [    
+    'delta' => [
         'stop_reason' => 'end_turn',
         'stop_sequence' => null,
     ],
-    'usage' => [    
+    'usage' => [
         'output_tokens' => 12,
+        'cache_creation_input_tokens' => null,
+        'cache_read_input_tokens' => null,
     ]
 ]
 ```
@@ -421,7 +428,7 @@ On messages response object you can access the meta information returned by the 
 
 ```php
 $response = $client->messages()->create([
-    'model' => 'claude-3-sonnet-20240229',
+    'model' => 'claude-sonnet-4-6',
     'max_tokens' => 1024,
     'messages' => [
         ['role' => 'user', 'content' => 'Hello, world'],
@@ -463,7 +470,7 @@ On streaming responses you can access the meta information on the reponse stream
 
 ```php
 $stream = $client->messages()->createStreamed([
-    'model' => 'claude-3-sonnet-20240229',
+    'model' => 'claude-sonnet-4-6',
     'max_tokens' => 1024,
     'messages' => [
         ['role' => 'user', 'content' => 'Hello, world'],
@@ -514,7 +521,6 @@ This example illustrates how to increase the timeout using Guzzle.
 ```php
 Anthropic::factory()
     ->withApiKey($apiKey)
-    ->withHttpHeader('anthropic-version', '2023-06-01')
     ->withHttpClient(new \GuzzleHttp\Client(['timeout' => $timeout]))
     ->make();
 ```
@@ -559,7 +565,7 @@ $client = new ClientFake([
 ]);
 
 $completion = $client->messages()->createStreamed([
-    'model' => 'claude-3-haiku-20240307',
+    'model' => 'claude-sonnet-4-6',
     'max_tokens' => 1024,
     'messages' => [
         ['role' => 'user', 'content' => 'Hello!'],
