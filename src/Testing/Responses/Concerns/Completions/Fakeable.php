@@ -4,43 +4,34 @@ declare(strict_types=1);
 
 namespace Anthropic\Testing\Responses\Concerns\Completions;
 
+use Anthropic\Testing\Enums\OverrideStrategy;
+
 trait Fakeable
 {
     /**
      * @param  array<string, mixed>  $override
      */
-    public static function fake(array $override = []): static
-    {
-        $class = str_replace('Responses\\', 'Testing\\Responses\\Fixtures\\', static::class).'Fixture';
+    public static function fake(
+        array $override = [],
+        OverrideStrategy $strategy = OverrideStrategy::Merge,
+    ): static {
+        $class = str_replace('Anthropic\\Responses\\', 'Anthropic\\Testing\\Responses\\Fixtures\\', static::class).'Fixture';
 
         return static::from(
-            self::buildAttributes($class::ATTRIBUTES, $override),
+            self::buildAttributes($class::ATTRIBUTES, $override, $strategy),
         );
     }
 
     /**
-     * @return mixed[]
+     * @param  array<string, mixed>  $original
+     * @param  array<string, mixed>  $override
+     * @return array<string, mixed>
      */
-    private static function buildAttributes(array $original, array $override): array
+    private static function buildAttributes(array $original, array $override, OverrideStrategy $strategy = OverrideStrategy::Merge): array
     {
-        $new = [];
-
-        foreach ($original as $key => $entry) {
-            $new[$key] = is_array($entry) ?
-                self::buildAttributes($entry, $override[$key] ?? []) :
-                $override[$key] ?? $entry;
-            unset($override[$key]);
-        }
-
-        // we are going to append all remaining overrides
-        foreach ($override as $key => $value) {
-            if (! is_numeric($key)) {
-                continue;
-            }
-
-            $new[$key] = $value;
-        }
-
-        return $new;
+        return match ($strategy) {
+            OverrideStrategy::Replace => array_replace($original, $override),
+            OverrideStrategy::Merge => array_replace_recursive($original, $override),
+        };
     }
 }
