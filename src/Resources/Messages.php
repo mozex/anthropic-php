@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Anthropic\Resources;
 
 use Anthropic\Contracts\Resources\MessagesContract;
+use Anthropic\Responses\Messages\CountTokensResponse;
 use Anthropic\Responses\Messages\CreateResponse;
 use Anthropic\Responses\Messages\CreateStreamedResponse;
 use Anthropic\Responses\Messages\StreamResponse;
@@ -52,5 +53,22 @@ final class Messages implements MessagesContract
         $response = $this->transporter->requestStream($payload);
 
         return new StreamResponse(CreateStreamedResponse::class, $response);
+    }
+
+    /**
+     * Counts the number of tokens in a message
+     *
+     * @see https://docs.anthropic.com/en/api/messages-count-tokens
+     *
+     * @param  array<string, mixed>  $parameters
+     */
+    public function countTokens(array $parameters): CountTokensResponse
+    {
+        $payload = Payload::create('messages/count_tokens', $parameters);
+
+        /** @var Response<array{input_tokens: int}> $response */
+        $response = $this->transporter->requestObject($payload);
+
+        return CountTokensResponse::from($response->data(), $response->meta());
     }
 }

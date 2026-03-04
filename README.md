@@ -207,6 +207,21 @@ foreach ($response->content as $block) {
 }
 ```
 
+#### `countTokens`
+
+Counts the number of tokens in a message without creating it.
+
+```php
+$response = $client->messages()->countTokens([
+    'model' => 'claude-sonnet-4-6',
+    'messages' => [
+        ['role' => 'user', 'content' => 'Hello, world'],
+    ],
+]);
+
+$response->inputTokens; // 2095
+```
+
 #### `create streamed`
 
 Creates a streamed completion for structured list of input messages.

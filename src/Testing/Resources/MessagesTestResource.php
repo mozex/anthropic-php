@@ -4,6 +4,7 @@ namespace Anthropic\Testing\Resources;
 
 use Anthropic\Contracts\Resources\MessagesContract;
 use Anthropic\Resources\Messages;
+use Anthropic\Responses\Messages\CountTokensResponse;
 use Anthropic\Responses\Messages\CreateResponse;
 use Anthropic\Responses\Messages\StreamResponse;
 use Anthropic\Testing\Resources\Concerns\Testable;
@@ -23,6 +24,11 @@ final class MessagesTestResource implements MessagesContract
     }
 
     public function createStreamed(array $parameters): StreamResponse
+    {
+        return $this->record(__FUNCTION__, func_get_args());
+    }
+
+    public function countTokens(array $parameters): CountTokensResponse
     {
         return $this->record(__FUNCTION__, func_get_args());
     }

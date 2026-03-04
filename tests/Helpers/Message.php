@@ -117,6 +117,16 @@ function messagesCompletionWithToolCalls(): array
     ];
 }
 
+/**
+ * @return array<string, int>
+ */
+function messagesCountTokens(): array
+{
+    return [
+        'input_tokens' => 2095,
+    ];
+}
+
 function messagesCompletionStreamFirstChunk(): array
 {
     return [

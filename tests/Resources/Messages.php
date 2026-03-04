@@ -1,5 +1,6 @@
 <?php
 
+use Anthropic\Responses\Messages\CountTokensResponse;
 use Anthropic\Responses\Messages\CreateResponse;
 use Anthropic\Responses\Messages\CreateResponseContent;
 use Anthropic\Responses\Messages\CreateResponseUsage;
@@ -119,4 +120,23 @@ test('handles error messages in stream', function () {
                 ->and($e->getErrorMessage())->toBe('Overloaded')
                 ->and($e->getErrorType())->toBe('overloaded_error');
         });
+});
+
+test('count tokens', function () {
+    $client = mockClient('POST', 'messages/count_tokens', [
+        'model' => 'claude-sonnet-4-6',
+        'messages' => ['role' => 'user', 'content' => 'Hello!'],
+    ], \Anthropic\ValueObjects\Transporter\Response::from(messagesCountTokens(), metaHeaders()));
+
+    $result = $client->messages()->countTokens([
+        'model' => 'claude-sonnet-4-6',
+        'messages' => ['role' => 'user', 'content' => 'Hello!'],
+    ]);
+
+    expect($result)
+        ->toBeInstanceOf(CountTokensResponse::class)
+        ->inputTokens->toBe(2095);
+
+    expect($result->meta())
+        ->toBeInstanceOf(MetaInformation::class);
 });
