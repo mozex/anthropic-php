@@ -598,6 +598,31 @@ $response->id; // 'msgbatch_04Rka1yCsMLGPnR7kfPdgR8x'
 $response->type; // 'message_batch_deleted'
 ```
 
+#### `results`
+
+Streams the results of a completed Message Batch as JSONL. Each result contains the `custom_id` from the original request and a `result` with the response or error.
+
+```php
+$response = $client->batches()->results('msgbatch_04Rka1yCsMLGPnR7kfPdgR8x');
+
+foreach ($response as $individual) {
+    $individual->customId; // 'request-1'
+    $individual->result->type; // 'succeeded', 'errored', 'canceled', or 'expired'
+
+    if ($individual->result->type === 'succeeded') {
+        $individual->result->message->id; // 'msg_014VwiXbi91y3JMjcpyGBHX2'
+        $individual->result->message->content[0]->text; // 'Hello! How can I help you today?'
+    }
+
+    if ($individual->result->type === 'errored') {
+        $individual->result->error->type; // 'invalid_request_error'
+        $individual->result->error->message; // 'max_tokens: Field required'
+    }
+}
+
+$response->meta(); // rate limit and request ID headers
+```
+
 ### `Completions` Resource (Legacy)
 
 #### `create`

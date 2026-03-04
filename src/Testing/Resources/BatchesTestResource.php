@@ -6,6 +6,7 @@ use Anthropic\Contracts\Resources\BatchesContract;
 use Anthropic\Resources\Batches;
 use Anthropic\Responses\Batches\BatchListResponse;
 use Anthropic\Responses\Batches\BatchResponse;
+use Anthropic\Responses\Batches\BatchResultResponse;
 use Anthropic\Responses\Batches\DeletedBatchResponse;
 use Anthropic\Testing\Resources\Concerns\Testable;
 
@@ -39,6 +40,11 @@ final class BatchesTestResource implements BatchesContract
     }
 
     public function delete(string $id): DeletedBatchResponse
+    {
+        return $this->record(__FUNCTION__, func_get_args());
+    }
+
+    public function results(string $id): BatchResultResponse
     {
         return $this->record(__FUNCTION__, func_get_args());
     }

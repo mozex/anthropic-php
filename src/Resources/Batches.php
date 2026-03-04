@@ -7,6 +7,7 @@ namespace Anthropic\Resources;
 use Anthropic\Contracts\Resources\BatchesContract;
 use Anthropic\Responses\Batches\BatchListResponse;
 use Anthropic\Responses\Batches\BatchResponse;
+use Anthropic\Responses\Batches\BatchResultResponse;
 use Anthropic\Responses\Batches\DeletedBatchResponse;
 use Anthropic\ValueObjects\Transporter\Payload;
 use Anthropic\ValueObjects\Transporter\Response;
@@ -92,5 +93,19 @@ final class Batches implements BatchesContract
         $response = $this->transporter->requestObject($payload);
 
         return DeletedBatchResponse::from($response->data(), $response->meta());
+    }
+
+    /**
+     * Retrieves Message Batch results.
+     *
+     * @see https://docs.anthropic.com/en/api/retrieving-message-batch-results
+     */
+    public function results(string $id): BatchResultResponse
+    {
+        $payload = Payload::retrieve('messages/batches', $id, '/results');
+
+        $response = $this->transporter->requestStream($payload);
+
+        return new BatchResultResponse($response);
     }
 }

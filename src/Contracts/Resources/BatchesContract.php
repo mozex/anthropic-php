@@ -4,6 +4,7 @@ namespace Anthropic\Contracts\Resources;
 
 use Anthropic\Responses\Batches\BatchListResponse;
 use Anthropic\Responses\Batches\BatchResponse;
+use Anthropic\Responses\Batches\BatchResultResponse;
 use Anthropic\Responses\Batches\DeletedBatchResponse;
 
 interface BatchesContract
@@ -46,4 +47,11 @@ interface BatchesContract
      * @see https://docs.anthropic.com/en/api/deleting-message-batches
      */
     public function delete(string $id): DeletedBatchResponse;
+
+    /**
+     * Retrieves Message Batch results.
+     *
+     * @see https://docs.anthropic.com/en/api/retrieving-message-batch-results
+     */
+    public function results(string $id): BatchResultResponse;
 }
