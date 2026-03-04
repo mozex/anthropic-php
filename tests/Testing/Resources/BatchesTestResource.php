@@ -3,6 +3,7 @@
 use Anthropic\Resources\Batches;
 use Anthropic\Responses\Batches\BatchListResponse;
 use Anthropic\Responses\Batches\BatchResponse;
+use Anthropic\Responses\Batches\BatchResultResponse;
 use Anthropic\Responses\Batches\DeletedBatchResponse;
 use Anthropic\Testing\ClientFake;
 
@@ -78,6 +79,19 @@ it('records a batches delete request', function () {
 
     $fake->assertSent(Batches::class, function ($method, $id) {
         return $method === 'delete' &&
+            $id === 'msgbatch_04Rka1yCsMLGPnR7kfPdgR8x';
+    });
+});
+
+it('records a batches results request', function () {
+    $fake = new ClientFake([
+        BatchResultResponse::fake(),
+    ]);
+
+    $fake->batches()->results('msgbatch_04Rka1yCsMLGPnR7kfPdgR8x');
+
+    $fake->assertSent(Batches::class, function ($method, $id) {
+        return $method === 'results' &&
             $id === 'msgbatch_04Rka1yCsMLGPnR7kfPdgR8x';
     });
 });

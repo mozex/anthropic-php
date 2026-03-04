@@ -7,6 +7,7 @@ namespace Anthropic\Responses\Batches;
 use Anthropic\Contracts\ResponseHasMetaInformationContract;
 use Anthropic\Contracts\ResponseStreamContract;
 use Anthropic\Responses\Meta\MetaInformation;
+use Anthropic\Testing\Responses\Concerns\Batches\FakeableForBatchResultResponse;
 use Generator;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
@@ -16,6 +17,8 @@ use Psr\Http\Message\StreamInterface;
  */
 final class BatchResultResponse implements ResponseHasMetaInformationContract, ResponseStreamContract
 {
+    use FakeableForBatchResultResponse;
+
     /**
      * Creates a new Batch Result Response instance.
      */
