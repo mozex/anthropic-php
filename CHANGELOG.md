@@ -2,6 +2,15 @@
 
 All notable changes to `anthropic-php` will be documented in this file.
 
+## 1.2.2 - 2026-03-04
+
+### What's Changed
+
+* added thinking support
+* add anthropic-version header to the factory
+
+**Full Changelog**: https://github.com/mozex/anthropic-php/compare/1.2.1...1.2.2
+
 ## 1.2.1 - 2026-03-04
 
 ### What's Changed
