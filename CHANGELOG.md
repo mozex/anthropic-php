@@ -2,6 +2,12 @@
 
 All notable changes to `anthropic-php` will be documented in this file.
 
+## 1.3.2 - 2026-03-05
+
+* add batch response return type to client fake
+
+**Full Changelog**: https://github.com/mozex/anthropic-php/compare/1.3.1...1.3.2
+
 ## 1.3.1 - 2026-03-05
 
 ### What's Changed
