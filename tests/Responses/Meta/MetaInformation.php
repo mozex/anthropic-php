@@ -17,7 +17,15 @@ test('from response headers', function () {
         ->tokenLimit->toBeInstanceOf(MetaInformationRateLimit::class)
         ->tokenLimit->limit->toBe(25000)
         ->tokenLimit->remaining->toBe(25000)
-        ->tokenLimit->reset->toBe('2024-04-30T15:56:17Z');
+        ->tokenLimit->reset->toBe('2024-04-30T15:56:17Z')
+        ->inputTokenLimit->toBeInstanceOf(MetaInformationRateLimit::class)
+        ->inputTokenLimit->limit->toBe(20000)
+        ->inputTokenLimit->remaining->toBe(19500)
+        ->inputTokenLimit->reset->toBe('2024-04-30T15:56:17Z')
+        ->outputTokenLimit->toBeInstanceOf(MetaInformationRateLimit::class)
+        ->outputTokenLimit->limit->toBe(5000)
+        ->outputTokenLimit->remaining->toBe(4900)
+        ->outputTokenLimit->reset->toBe('2024-04-30T15:56:17Z');
 });
 
 test('from response headers without "request-id"', function () {
@@ -44,7 +52,15 @@ test('from response headers in different cases', function () {
         ->tokenLimit->toBeInstanceOf(MetaInformationRateLimit::class)
         ->tokenLimit->limit->toBe(25000)
         ->tokenLimit->remaining->toBe(25000)
-        ->tokenLimit->reset->toBe('2024-04-30T15:56:17Z');
+        ->tokenLimit->reset->toBe('2024-04-30T15:56:17Z')
+        ->inputTokenLimit->toBeInstanceOf(MetaInformationRateLimit::class)
+        ->inputTokenLimit->limit->toBe(20000)
+        ->inputTokenLimit->remaining->toBe(19500)
+        ->inputTokenLimit->reset->toBe('2024-04-30T15:56:17Z')
+        ->outputTokenLimit->toBeInstanceOf(MetaInformationRateLimit::class)
+        ->outputTokenLimit->limit->toBe(5000)
+        ->outputTokenLimit->remaining->toBe(4900)
+        ->outputTokenLimit->reset->toBe('2024-04-30T15:56:17Z');
 });
 
 test('as array accessible', function () {
@@ -65,6 +81,12 @@ test('to array', function () {
             'anthropic-ratelimit-tokens-remaining' => 25000,
             'anthropic-ratelimit-requests-reset' => '2024-04-30T15:56:17Z',
             'anthropic-ratelimit-tokens-reset' => '2024-04-30T15:56:17Z',
+            'anthropic-ratelimit-input-tokens-limit' => 20000,
+            'anthropic-ratelimit-input-tokens-remaining' => 19500,
+            'anthropic-ratelimit-input-tokens-reset' => '2024-04-30T15:56:17Z',
+            'anthropic-ratelimit-output-tokens-limit' => 5000,
+            'anthropic-ratelimit-output-tokens-remaining' => 4900,
+            'anthropic-ratelimit-output-tokens-reset' => '2024-04-30T15:56:17Z',
             'request-id' => '02c10373f63cf2954851197d75c0adab',
         ]);
 });
@@ -101,9 +123,11 @@ test('to array includes custom headers when present', function () {
 
     $meta = MetaInformation::from($headers);
 
-    expect($meta->toArray())
+    $array = $meta->toArray();
+
+    expect($array)
         ->toHaveKey('custom')
-        ->and($meta->toArray()['custom'])->toBe(['x-custom' => 'value']);
+        ->and($array['custom'])->toBe(['x-custom' => 'value']);
 });
 
 test('to array excludes custom key when no custom headers', function () {

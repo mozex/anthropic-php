@@ -84,6 +84,38 @@ function messagesCompletionWithCache(): array
     ];
 }
 
+function messagesCompletionWithExtendedUsage(): array
+{
+    return [
+        'id' => 'msg_019hiOHAEXQwq1PTeETNEBWe',
+        'type' => 'message',
+        'role' => 'assistant',
+        'model' => 'claude-sonnet-4-6',
+        'stop_sequence' => null,
+        'usage' => [
+            'input_tokens' => 2048,
+            'output_tokens' => 503,
+            'cache_creation_input_tokens' => 248,
+            'cache_read_input_tokens' => 1800,
+            'cache_creation' => [
+                'ephemeral_5m_input_tokens' => 148,
+                'ephemeral_1h_input_tokens' => 100,
+            ],
+            'service_tier' => 'standard',
+            'server_tool_use' => [
+                'web_search_requests' => 3,
+            ],
+        ],
+        'content' => [
+            [
+                'type' => 'text',
+                'text' => "Hello! I'm Claude, an AI assistant. How can I help you today?",
+            ],
+        ],
+        'stop_reason' => 'end_turn',
+    ];
+}
+
 /**
  * @return array<string, mixed>
  */
@@ -181,6 +213,54 @@ function messagesCompletionStreamLastChunkWithCache(): array
             'output_tokens' => 15,
             'cache_creation_input_tokens' => 30,
             'cache_read_input_tokens' => 40,
+        ],
+    ];
+}
+
+function messagesCompletionStreamFirstChunkWithExtendedUsage(): array
+{
+    return [
+        'type' => 'message_start',
+        'message' => [
+            'id' => 'msg_01YS82gyNJHzAN1xVt2ymmTN',
+            'type' => 'message',
+            'role' => 'assistant',
+            'content' => [],
+            'model' => 'claude-sonnet-4-6',
+            'stop_reason' => null,
+            'stop_sequence' => null,
+            'usage' => [
+                'input_tokens' => 2048,
+                'output_tokens' => 1,
+                'cache_creation_input_tokens' => 248,
+                'cache_read_input_tokens' => 1800,
+                'cache_creation' => [
+                    'ephemeral_5m_input_tokens' => 148,
+                    'ephemeral_1h_input_tokens' => 100,
+                ],
+                'service_tier' => 'standard',
+                'server_tool_use' => [
+                    'web_search_requests' => 3,
+                ],
+            ],
+        ],
+    ];
+}
+
+function messagesCompletionStreamLastChunkWithExtendedUsage(): array
+{
+    return [
+        'type' => 'message_delta',
+        'delta' => [
+            'stop_reason' => 'end_turn',
+            'stop_sequence' => null,
+        ],
+        'usage' => [
+            'output_tokens' => 15,
+            'service_tier' => 'standard',
+            'server_tool_use' => [
+                'web_search_requests' => 3,
+            ],
         ],
     ];
 }

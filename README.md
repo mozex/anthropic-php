@@ -116,6 +116,12 @@ $response->usage->inputTokens; // 10,
 $response->usage->outputTokens; // 19,
 $response->usage->cacheCreationInputTokens; // 0,
 $response->usage->cacheReadInputTokens; // 0,
+$response->usage->cacheCreation; // null or CreateResponseUsageCacheCreation
+$response->usage->cacheCreation?->ephemeral5mInputTokens; // 456
+$response->usage->cacheCreation?->ephemeral1hInputTokens; // 100
+$response->usage->serviceTier; // 'standard', 'priority', 'batch', or null
+$response->usage->serverToolUse; // null or CreateResponseUsageServerToolUse
+$response->usage->serverToolUse?->webSearchRequests; // 3
 
 $response->toArray(); // ['id' => 'msg_01BSy0WCV7QR2adFBauynAX7', ...]
 ```
@@ -694,6 +700,14 @@ $meta->tokenLimit->limit; // 250000
 $meta->tokenLimit->remaining; // 249984
 $meta->tokenLimit->reset; // '2024-05-01T13:29:17Z'
 
+$meta->inputTokenLimit->limit; // 20000
+$meta->inputTokenLimit->remaining; // 19500
+$meta->inputTokenLimit->reset; // '2024-05-01T13:29:17Z'
+
+$meta->outputTokenLimit->limit; // 5000
+$meta->outputTokenLimit->remaining; // 4900
+$meta->outputTokenLimit->reset; // '2024-05-01T13:29:17Z'
+
 $meta->custom; // additional non-standard headers
 ```
 
@@ -702,7 +716,7 @@ The `toArray()` method returns the meta information in the form originally retur
 ```php
 $meta->toArray();
 
-// [ 
+// [
 //   'request-id' => 'req_012nTzj6kLoP8vZ1SGANvcgR',
 //   'anthropic-ratelimit-requests-limit' => 3000,
 //   'anthropic-ratelimit-requests-remaining' => 2999,
@@ -710,6 +724,12 @@ $meta->toArray();
 //   'anthropic-ratelimit-tokens-limit' => 250000,
 //   'anthropic-ratelimit-tokens-remaining' => 249983,
 //   'anthropic-ratelimit-tokens-reset' => '2024-05-01T13:29:17Z',
+//   'anthropic-ratelimit-input-tokens-limit' => 20000,
+//   'anthropic-ratelimit-input-tokens-remaining' => 19500,
+//   'anthropic-ratelimit-input-tokens-reset' => '2024-05-01T13:29:17Z',
+//   'anthropic-ratelimit-output-tokens-limit' => 5000,
+//   'anthropic-ratelimit-output-tokens-remaining' => 4900,
+//   'anthropic-ratelimit-output-tokens-reset' => '2024-05-01T13:29:17Z',
 // ]
 ```
 
