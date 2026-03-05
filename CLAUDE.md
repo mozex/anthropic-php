@@ -33,7 +33,7 @@ Run a single test by name:
 **Layered design with strict dependency boundaries enforced by architecture tests (`tests/Arch.php`):**
 
 - **`Contracts/`** — Interfaces for all major components (Client, Transporter, Resources, Responses)
-- **`Resources/`** — API endpoint implementations (Messages, Completions). Use `Transportable` and `Streamable` traits. May only depend on Contracts, ValueObjects, Exceptions, and Responses
+- **`Resources/`** — API endpoint implementations (Messages, Completions, Models, Batches). Use `Transportable` and `Streamable` traits. May only depend on Contracts, ValueObjects, Exceptions, and Responses
 - **`Responses/`** — Immutable readonly DTOs with static `from()` factory methods and `toArray()`. Implement `ResponseContract`. May not depend on Resources or Transporters
 - **`ValueObjects/`** — Immutable configuration objects (ApiKey, BaseUri, Headers, Payload, etc.)
 - **`Transporters/`** — HTTP layer (`HttpTransporter`) using PSR-18 client discovery
@@ -46,7 +46,7 @@ Run a single test by name:
 ## Code Conventions
 
 - All files use `declare(strict_types=1)`
-- Response classes are `final readonly` with private constructors and static `from()` factories
+- Response classes are `final` with `readonly` properties, private constructors, and static `from()` factories
 - 100% type coverage is enforced — all parameters, returns, and properties must be typed
 - PHPStan runs at max level
 - No debugging statements allowed: `dd`, `dump`, `var_dump`, `ray`, `die`, `print_r`
