@@ -2,6 +2,12 @@
 
 All notable changes to `anthropic-php` will be documented in this file.
 
+## 1.3.3 - 2026-03-05
+
+* updated model names for consistency
+
+**Full Changelog**: https://github.com/mozex/anthropic-php/compare/1.3.2...1.3.3
+
 ## 1.3.2 - 2026-03-05
 
 * add batch response return type to client fake
