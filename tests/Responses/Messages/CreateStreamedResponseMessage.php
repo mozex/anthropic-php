@@ -10,7 +10,7 @@ test('from first chunk', function () {
         ->type->toBe('message')
         ->role->toBe('assistant')
         ->content->toBe([])
-        ->model->toBe('claude-3-haiku-20240307')
+        ->model->toBe('claude-haiku-4-5')
         ->stop_reason->toBeNull()
         ->stop_sequence->toBeNull();
 });
@@ -37,7 +37,7 @@ test('to array from first chunk', function () {
             'type' => 'message',
             'role' => 'assistant',
             'content' => [],
-            'model' => 'claude-3-haiku-20240307',
+            'model' => 'claude-haiku-4-5',
             'stop_reason' => null,
             'stop_sequence' => null,
         ]);

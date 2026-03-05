@@ -11,18 +11,18 @@ test('from', function () {
         ->toBeInstanceOf(ListResponse::class)
         ->data->toBeArray()->toHaveCount(2)
         ->data->each->toBeInstanceOf(RetrieveResponse::class)
-        ->firstId->toBe('claude-sonnet-4-6-20250514')
-        ->lastId->toBe('claude-haiku-4-5-20251001')
+        ->firstId->toBe('claude-sonnet-4-6')
+        ->lastId->toBe('claude-haiku-4-5')
         ->hasMore->toBeTrue()
         ->meta()->toBeInstanceOf(MetaInformation::class);
 
     expect($result->data[0])
-        ->id->toBe('claude-sonnet-4-6-20250514')
-        ->displayName->toBe('Claude Sonnet 4.6 (2025-05-14)');
+        ->id->toBe('claude-sonnet-4-6')
+        ->displayName->toBe('Claude Sonnet 4.6');
 
     expect($result->data[1])
-        ->id->toBe('claude-haiku-4-5-20251001')
-        ->displayName->toBe('Claude Haiku 4.5 (2025-10-01)');
+        ->id->toBe('claude-haiku-4-5')
+        ->displayName->toBe('Claude Haiku 4.5');
 });
 
 test('as array accessible', function () {
@@ -46,7 +46,7 @@ test('fake', function () {
 
     expect($response)
         ->data->toBeArray()->toHaveCount(1)
-        ->firstId->toBe('claude-sonnet-4-6-20250514')
+        ->firstId->toBe('claude-sonnet-4-6')
         ->hasMore->toBeFalse();
 });
 

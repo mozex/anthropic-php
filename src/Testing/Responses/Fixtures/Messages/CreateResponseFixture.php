@@ -8,7 +8,7 @@ final class CreateResponseFixture
         'id' => 'msg_019hiOHAEXQwq1PTeETNEBWe',
         'type' => 'message',
         'role' => 'assistant',
-        'model' => 'claude-3-opus-20240229',
+        'model' => 'claude-sonnet-4-6',
         'stop_sequence' => null,
         'usage' => [
             'input_tokens' => 10,

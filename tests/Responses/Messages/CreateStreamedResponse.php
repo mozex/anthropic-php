@@ -167,7 +167,7 @@ test('to array', function () {
                 'type' => 'message',
                 'role' => 'assistant',
                 'content' => [],
-                'model' => 'claude-3-haiku-20240307',
+                'model' => 'claude-haiku-4-5',
                 'stop_reason' => null,
                 'stop_sequence' => null,
             ],

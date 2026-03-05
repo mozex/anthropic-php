@@ -8,8 +8,8 @@ final class ListResponseFixture
         'data' => [
             RetrieveResponseFixture::ATTRIBUTES,
         ],
-        'first_id' => 'claude-sonnet-4-6-20250514',
-        'last_id' => 'claude-sonnet-4-6-20250514',
+        'first_id' => 'claude-sonnet-4-6',
+        'last_id' => 'claude-sonnet-4-6',
         'has_more' => false,
     ];
 }

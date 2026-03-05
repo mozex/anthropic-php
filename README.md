@@ -477,14 +477,14 @@ Lists the currently available models.
 $response = $client->models()->list();
 
 foreach ($response->data as $model) {
-    $model->id; // 'claude-sonnet-4-6-20250514'
+    $model->id; // 'claude-sonnet-4-6'
     $model->type; // 'model'
     $model->createdAt; // '2025-05-14T00:00:00Z'
-    $model->displayName; // 'Claude Sonnet 4.6 (2025-05-14)'
+    $model->displayName; // 'Claude Sonnet 4.6'
 }
 
-$response->firstId; // 'claude-sonnet-4-6-20250514'
-$response->lastId; // 'claude-haiku-4-5-20251001'
+$response->firstId; // 'claude-sonnet-4-6'
+$response->lastId; // 'claude-haiku-4-5'
 $response->hasMore; // true
 ```
 
@@ -493,7 +493,7 @@ You can paginate through models using cursor-based pagination:
 ```php
 $response = $client->models()->list([
     'limit' => 10,
-    'after_id' => 'claude-haiku-4-5-20251001',
+    'after_id' => 'claude-haiku-4-5',
 ]);
 ```
 
@@ -504,10 +504,10 @@ Gets information about a specific model.
 ```php
 $response = $client->models()->retrieve('claude-sonnet-4-6');
 
-$response->id; // 'claude-sonnet-4-6-20250514'
+$response->id; // 'claude-sonnet-4-6'
 $response->type; // 'model'
 $response->createdAt; // '2025-05-14T00:00:00Z'
-$response->displayName; // 'Claude Sonnet 4.6 (2025-05-14)'
+$response->displayName; // 'Claude Sonnet 4.6'
 ```
 
 ### `Message Batches` Resource

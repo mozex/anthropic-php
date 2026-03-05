@@ -9,7 +9,7 @@ function messagesCompletion(): array
         'id' => 'msg_019hiOHAEXQwq1PTeETNEBWe',
         'type' => 'message',
         'role' => 'assistant',
-        'model' => 'claude-3-opus-20240229',
+        'model' => 'claude-sonnet-4-6',
         'stop_sequence' => null,
         'usage' => [
             'input_tokens' => 10,
@@ -66,7 +66,7 @@ function messagesCompletionWithCache(): array
         'id' => 'msg_019hiOHAEXQwq1PTeETNEBWe',
         'type' => 'message',
         'role' => 'assistant',
-        'model' => 'claude-3-opus-20240229',
+        'model' => 'claude-sonnet-4-6',
         'stop_sequence' => null,
         'usage' => [
             'input_tokens' => 10,
@@ -125,7 +125,7 @@ function messagesCompletionWithToolCalls(): array
         'id' => 'msg_019hiOHAEXQwq1PTeETNEBWe',
         'type' => 'message',
         'role' => 'assistant',
-        'model' => 'claude-3-opus-20240229',
+        'model' => 'claude-sonnet-4-6',
         'stop_sequence' => null,
         'usage' => [
             'input_tokens' => 10,
@@ -168,7 +168,7 @@ function messagesCompletionStreamFirstChunk(): array
             'type' => 'message',
             'role' => 'assistant',
             'content' => [],
-            'model' => 'claude-3-haiku-20240307',
+            'model' => 'claude-haiku-4-5',
             'stop_reason' => null,
             'stop_sequence' => null,
             'usage' => [
@@ -188,7 +188,7 @@ function messagesCompletionStreamFirstChunkWithCache(): array
             'type' => 'message',
             'role' => 'assistant',
             'content' => [],
-            'model' => 'claude-3-haiku-20240307',
+            'model' => 'claude-haiku-4-5',
             'stop_reason' => null,
             'stop_sequence' => null,
             'usage' => [

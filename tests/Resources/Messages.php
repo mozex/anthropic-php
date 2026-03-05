@@ -16,12 +16,12 @@ use GuzzleHttp\Psr7\Stream;
 
 test('create', function () {
     $client = mockClient('POST', 'messages', [
-        'model' => 'claude-3-haiku-20240307',
+        'model' => 'claude-sonnet-4-6',
         'messages' => ['role' => 'user', 'content' => 'Hello!'],
     ], \Anthropic\ValueObjects\Transporter\Response::from(messagesCompletion(), metaHeaders()));
 
     $result = $client->messages()->create([
-        'model' => 'claude-3-haiku-20240307',
+        'model' => 'claude-sonnet-4-6',
         'messages' => ['role' => 'user', 'content' => 'Hello!'],
     ]);
 
@@ -30,7 +30,7 @@ test('create', function () {
         ->id->toBe('msg_019hiOHAEXQwq1PTeETNEBWe')
         ->type->toBe('message')
         ->role->toBe('assistant')
-        ->model->toBe('claude-3-opus-20240229')
+        ->model->toBe('claude-sonnet-4-6')
         ->stop_sequence->toBeNull()
         ->stop_reason->toBe('end_turn')
         ->content->toBeArray()->toHaveCount(1)
@@ -51,7 +51,7 @@ test('create', function () {
 
 test('create throws an exception if stream option is true', function () {
     Anthropic::client('foo')->messages()->create([
-        'model' => 'claude-3-opus-20240229',
+        'model' => 'claude-sonnet-4-6',
         'messages' => ['role' => 'user', 'content' => 'Hello!'],
         'stream' => true,
     ]);
@@ -64,13 +64,13 @@ test('create streamed', function () {
     );
 
     $client = mockStreamClient('POST', 'messages', [
-        'model' => 'claude-3-opus-20240229',
+        'model' => 'claude-sonnet-4-6',
         'messages' => ['role' => 'user', 'content' => 'Hello!'],
         'stream' => true,
     ], $response);
 
     $result = $client->messages()->createStreamed([
-        'model' => 'claude-3-opus-20240229',
+        'model' => 'claude-sonnet-4-6',
         'messages' => ['role' => 'user', 'content' => 'Hello!'],
     ]);
 
@@ -104,13 +104,13 @@ test('handles error messages in stream', function () {
     );
 
     $client = mockStreamClient('POST', 'messages', [
-        'model' => 'claude-3-opus-20240229',
+        'model' => 'claude-sonnet-4-6',
         'messages' => ['role' => 'user', 'content' => 'Hello!'],
         'stream' => true,
     ], $response);
 
     $result = $client->messages()->createStreamed([
-        'model' => 'claude-3-opus-20240229',
+        'model' => 'claude-sonnet-4-6',
         'messages' => ['role' => 'user', 'content' => 'Hello!'],
     ]);
 

@@ -11,7 +11,7 @@ it('records a messages create request', function () {
     ]);
 
     $fake->messages()->create([
-        'model' => 'claude-3-opus-20240229',
+        'model' => 'claude-sonnet-4-6',
         'messages' => [
             ['role' => 'user', 'content' => 'Hello!'],
         ],
@@ -19,7 +19,7 @@ it('records a messages create request', function () {
 
     $fake->assertSent(Messages::class, function ($method, $parameters) {
         return $method === 'create' &&
-            $parameters['model'] === 'claude-3-opus-20240229' &&
+            $parameters['model'] === 'claude-sonnet-4-6' &&
             $parameters['messages'][0]['role'] === 'user' &&
             $parameters['messages'][0]['content'] === 'Hello!';
     });
@@ -31,7 +31,7 @@ it('records a streamed create create request', function () {
     ]);
 
     $fake->messages()->createStreamed([
-        'model' => 'claude-3-opus-20240229',
+        'model' => 'claude-sonnet-4-6',
         'messages' => [
             ['role' => 'user', 'content' => 'Hello!'],
         ],
@@ -39,7 +39,7 @@ it('records a streamed create create request', function () {
 
     $fake->assertSent(Messages::class, function ($method, $parameters) {
         return $method === 'createStreamed' &&
-            $parameters['model'] === 'claude-3-opus-20240229' &&
+            $parameters['model'] === 'claude-sonnet-4-6' &&
             $parameters['messages'][0]['role'] === 'user' &&
             $parameters['messages'][0]['content'] === 'Hello!';
     });

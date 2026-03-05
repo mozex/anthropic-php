@@ -8,10 +8,10 @@ test('from', function () {
 
     expect($result)
         ->toBeInstanceOf(RetrieveResponse::class)
-        ->id->toBe('claude-sonnet-4-6-20250514')
+        ->id->toBe('claude-sonnet-4-6')
         ->type->toBe('model')
         ->createdAt->toBe('2025-05-14T00:00:00Z')
-        ->displayName->toBe('Claude Sonnet 4.6 (2025-05-14)')
+        ->displayName->toBe('Claude Sonnet 4.6')
         ->meta()->toBeInstanceOf(MetaInformation::class);
 });
 
@@ -20,7 +20,7 @@ test('as array accessible', function () {
 
     expect(isset($result['id']))->toBeTrue();
 
-    expect($result['id'])->toBe('claude-sonnet-4-6-20250514');
+    expect($result['id'])->toBe('claude-sonnet-4-6');
 });
 
 test('to array', function () {
@@ -35,17 +35,17 @@ test('fake', function () {
     $response = RetrieveResponse::fake();
 
     expect($response)
-        ->id->toBe('claude-sonnet-4-6-20250514')
+        ->id->toBe('claude-sonnet-4-6')
         ->type->toBe('model');
 });
 
 test('fake with override', function () {
     $response = RetrieveResponse::fake([
-        'id' => 'claude-opus-4-5-20251101',
+        'id' => 'claude-opus-4-5',
         'display_name' => 'Claude Opus 4.5',
     ]);
 
     expect($response)
-        ->id->toBe('claude-opus-4-5-20251101')
+        ->id->toBe('claude-opus-4-5')
         ->displayName->toBe('Claude Opus 4.5');
 });
