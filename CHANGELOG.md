@@ -2,6 +2,24 @@
 
 All notable changes to `anthropic-php` will be documented in this file.
 
+## 1.3.1 - 2026-03-05
+
+### What's Changed
+
+#### Added
+
+* Add dedicated `inputTokenLimit` and `outputTokenLimit` rate limit properties to `MetaInformation`
+* Add `cache_creation` breakdown to usage (`CreateResponseUsageCacheCreation` with `ephemeral5mInputTokens` and `ephemeral1hInputTokens`)
+* Add `serviceTier` field to usage (standard, priority, or batch)
+* Add `serverToolUse` field to usage (`CreateResponseUsageServerToolUse` with `webSearchRequests`)
+
+#### Improved
+
+* Input/output token rate limit headers are now parsed as dedicated properties instead of falling into the generic `custom` bucket
+* Usage objects now capture all fields returned by the API instead of silently dropping extended fields
+
+**Full Changelog**: https://github.com/mozex/anthropic-php/compare/1.3.0...1.3.1
+
 ## 1.3.0 - 2026-03-05
 
 ### What's Changed
