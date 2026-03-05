@@ -2,6 +2,29 @@
 
 All notable changes to `anthropic-php` will be documented in this file.
 
+## 1.3.0 - 2026-03-05
+
+### What's Changed
+
+#### Added
+
+* Add Message Batches support — create, retrieve, list, cancel, delete, and stream results
+* Add `BatchResponse`, `BatchListResponse`, `DeletedBatchResponse`, and `BatchResultResponse` response DTOs
+* Add `BatchIndividualResponse`, `BatchResult`, and `BatchResultError` for parsing JSONL batch results
+* Add `BatchResponseRequestCounts` for tracking processing, succeeded, errored, canceled, and expired counts
+* Add `BatchResultResponse::fake()` for consumer testing with `ClientFake`
+* Add dedicated `inputTokenLimit` and `outputTokenLimit` rate limit properties to `MetaInformation`
+* Add `cache_creation` breakdown to usage (`CreateResponseUsageCacheCreation` with `ephemeral5mInputTokens` and `ephemeral1hInputTokens`)
+* Add `serviceTier` field to usage (standard, priority, or batch)
+* Add `serverToolUse` field to usage (`CreateResponseUsageServerToolUse` with `webSearchRequests`)
+
+#### Improved
+
+* Input/output token rate limit headers are now parsed as dedicated properties instead of falling into the generic `custom` bucket
+* Usage objects now capture all fields returned by the API instead of silently dropping extended fields
+
+**Full Changelog**: https://github.com/mozex/anthropic-php/compare/1.2.3...1.3.0
+
 ## 1.2.3 - 2026-03-04
 
 ### What's Changed
