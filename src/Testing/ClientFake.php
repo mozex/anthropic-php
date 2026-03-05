@@ -23,12 +23,12 @@ class ClientFake implements ClientContract
     private array $requests = [];
 
     /**
-     * @param  array<array-key, ResponseContract|CompletionsStreamResponse|MessagesStreamResponse|Throwable|string>  $responses
+     * @param  array<array-key, ResponseContract|ResponseStreamContract|CompletionsStreamResponse|MessagesStreamResponse|Throwable|string>  $responses
      */
     public function __construct(protected array $responses = []) {}
 
     /**
-     * @param  array<array-key, ResponseContract|CompletionsStreamResponse|MessagesStreamResponse|Throwable|string>  $responses
+     * @param  array<array-key, ResponseContract|ResponseStreamContract|CompletionsStreamResponse|MessagesStreamResponse|Throwable|string>  $responses
      */
     public function addResponses(array $responses): void
     {
