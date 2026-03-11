@@ -21,7 +21,7 @@ test('create', function () {
                 ],
             ],
         ],
-    ], \Anthropic\ValueObjects\Transporter\Response::from(batchResponse(), metaHeaders()));
+    ], Anthropic\ValueObjects\Transporter\Response::from(batchResponse(), metaHeaders()));
 
     $result = $client->batches()->create([
         'requests' => [
@@ -47,7 +47,7 @@ test('create', function () {
 });
 
 test('retrieve', function () {
-    $client = mockClient('GET', 'messages/batches/msgbatch_04Rka1yCsMLGPnR7kfPdgR8x', [], \Anthropic\ValueObjects\Transporter\Response::from(batchResponse(), metaHeaders()));
+    $client = mockClient('GET', 'messages/batches/msgbatch_04Rka1yCsMLGPnR7kfPdgR8x', [], Anthropic\ValueObjects\Transporter\Response::from(batchResponse(), metaHeaders()));
 
     $result = $client->batches()->retrieve('msgbatch_04Rka1yCsMLGPnR7kfPdgR8x');
 
@@ -61,7 +61,7 @@ test('retrieve', function () {
 });
 
 test('list', function () {
-    $client = mockClient('GET', 'messages/batches', [], \Anthropic\ValueObjects\Transporter\Response::from(batchListResponse(), metaHeaders()), validateParams: false);
+    $client = mockClient('GET', 'messages/batches', [], Anthropic\ValueObjects\Transporter\Response::from(batchListResponse(), metaHeaders()), validateParams: false);
 
     $result = $client->batches()->list();
 
@@ -81,7 +81,7 @@ test('cancel', function () {
     $cancelingResponse = batchInProgressResponse();
     $cancelingResponse['processing_status'] = 'canceling';
 
-    $client = mockClient('POST', 'messages/batches/msgbatch_07V2nm5PqB3bP8szLgTmn1EG/cancel', [], \Anthropic\ValueObjects\Transporter\Response::from($cancelingResponse, metaHeaders()), validateParams: false);
+    $client = mockClient('POST', 'messages/batches/msgbatch_07V2nm5PqB3bP8szLgTmn1EG/cancel', [], Anthropic\ValueObjects\Transporter\Response::from($cancelingResponse, metaHeaders()), validateParams: false);
 
     $result = $client->batches()->cancel('msgbatch_07V2nm5PqB3bP8szLgTmn1EG');
 
@@ -94,7 +94,7 @@ test('cancel', function () {
 });
 
 test('delete', function () {
-    $client = mockClient('DELETE', 'messages/batches/msgbatch_04Rka1yCsMLGPnR7kfPdgR8x', [], \Anthropic\ValueObjects\Transporter\Response::from(deletedBatchResponse(), metaHeaders()));
+    $client = mockClient('DELETE', 'messages/batches/msgbatch_04Rka1yCsMLGPnR7kfPdgR8x', [], Anthropic\ValueObjects\Transporter\Response::from(deletedBatchResponse(), metaHeaders()));
 
     $result = $client->batches()->delete('msgbatch_04Rka1yCsMLGPnR7kfPdgR8x');
 

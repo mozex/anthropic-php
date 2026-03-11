@@ -1,5 +1,6 @@
 <?php
 
+use Anthropic\Exceptions\ErrorException;
 use Anthropic\Resources\Batches;
 use Anthropic\Resources\Completions;
 use Anthropic\Resources\Models;
@@ -8,6 +9,7 @@ use Anthropic\Responses\Completions\CreateResponse;
 use Anthropic\Responses\Models\ListResponse;
 use Anthropic\Responses\Models\RetrieveResponse;
 use Anthropic\Testing\ClientFake;
+use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\ExpectationFailedException;
 
 it('returns a fake response', function () {
@@ -26,10 +28,10 @@ it('returns a fake response', function () {
 });
 
 it('throws fake exceptions', function () {
-    $response = new \GuzzleHttp\Psr7\Response(404);
+    $response = new Response(404);
 
     $fake = new ClientFake([
-        new \Anthropic\Exceptions\ErrorException([
+        new ErrorException([
             'message' => 'Overloaded',
             'type' => 'overloaded_error',
         ], $response),

@@ -3,9 +3,10 @@
 use Anthropic\Responses\Meta\MetaInformation;
 use Anthropic\Responses\Models\ListResponse;
 use Anthropic\Responses\Models\RetrieveResponse;
+use Anthropic\ValueObjects\Transporter\Response;
 
 test('list', function () {
-    $client = mockClient('GET', 'models', [], \Anthropic\ValueObjects\Transporter\Response::from(modelList(), metaHeaders()), validateParams: false);
+    $client = mockClient('GET', 'models', [], Response::from(modelList(), metaHeaders()), validateParams: false);
 
     $result = $client->models()->list();
 
@@ -22,7 +23,7 @@ test('list', function () {
 });
 
 test('retrieve', function () {
-    $client = mockClient('GET', 'models/claude-sonnet-4-6', [], \Anthropic\ValueObjects\Transporter\Response::from(modelRetrieve(), metaHeaders()));
+    $client = mockClient('GET', 'models/claude-sonnet-4-6', [], Response::from(modelRetrieve(), metaHeaders()));
 
     $result = $client->models()->retrieve('claude-sonnet-4-6');
 

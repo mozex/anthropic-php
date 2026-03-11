@@ -3,9 +3,10 @@
 use Anthropic\Responses\Meta\MetaInformation;
 use Anthropic\Responses\Meta\MetaInformationCustom;
 use Anthropic\Responses\Meta\MetaInformationRateLimit;
+use GuzzleHttp\Psr7\Response;
 
 test('from response headers', function () {
-    $meta = MetaInformation::from((new \GuzzleHttp\Psr7\Response(headers: metaHeaders()))->getHeaders());
+    $meta = MetaInformation::from((new Response(headers: metaHeaders()))->getHeaders());
 
     expect($meta)
         ->toBeInstanceOf(MetaInformation::class)
@@ -40,7 +41,7 @@ test('from response headers without "request-id"', function () {
 });
 
 test('from response headers in different cases', function () {
-    $meta = MetaInformation::from((new \GuzzleHttp\Psr7\Response(headers: metaHeadersWithDifferentCases()))->getHeaders());
+    $meta = MetaInformation::from((new Response(headers: metaHeadersWithDifferentCases()))->getHeaders());
 
     expect($meta)
         ->toBeInstanceOf(MetaInformation::class)

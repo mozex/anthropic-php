@@ -11,7 +11,7 @@ test('create', function () {
     $client = mockClient('POST', 'complete', [
         'model' => 'claude-2.1',
         'prompt' => 'hi',
-    ], \Anthropic\ValueObjects\Transporter\Response::from(completion(), metaHeaders()));
+    ], Anthropic\ValueObjects\Transporter\Response::from(completion(), metaHeaders()));
 
     $result = $client->completions()->create([
         'model' => 'claude-2.1',

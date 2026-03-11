@@ -1,5 +1,7 @@
 <?php
 
+use Anthropic\Exceptions\ErrorException;
+use Anthropic\Exceptions\InvalidArgumentException;
 use Anthropic\Responses\Messages\CountTokensResponse;
 use Anthropic\Responses\Messages\CreateResponse;
 use Anthropic\Responses\Messages\CreateResponseContent;
@@ -18,7 +20,7 @@ test('create', function () {
     $client = mockClient('POST', 'messages', [
         'model' => 'claude-sonnet-4-6',
         'messages' => ['role' => 'user', 'content' => 'Hello!'],
-    ], \Anthropic\ValueObjects\Transporter\Response::from(messagesCompletion(), metaHeaders()));
+    ], Anthropic\ValueObjects\Transporter\Response::from(messagesCompletion(), metaHeaders()));
 
     $result = $client->messages()->create([
         'model' => 'claude-sonnet-4-6',
@@ -55,7 +57,7 @@ test('create throws an exception if stream option is true', function () {
         'messages' => ['role' => 'user', 'content' => 'Hello!'],
         'stream' => true,
     ]);
-})->throws(Anthropic\Exceptions\InvalidArgumentException::class, 'Stream option is not supported. Please use the createStreamed() method instead.');
+})->throws(InvalidArgumentException::class, 'Stream option is not supported. Please use the createStreamed() method instead.');
 
 test('create streamed', function () {
     $response = new Response(
@@ -115,7 +117,7 @@ test('handles error messages in stream', function () {
     ]);
 
     expect(fn () => $result->getIterator()->current())
-        ->toThrow(function (Anthropic\Exceptions\ErrorException $e) {
+        ->toThrow(function (ErrorException $e) {
             expect($e->getMessage())->toBe('Overloaded')
                 ->and($e->getErrorMessage())->toBe('Overloaded')
                 ->and($e->getErrorType())->toBe('overloaded_error');
@@ -126,7 +128,7 @@ test('count tokens', function () {
     $client = mockClient('POST', 'messages/count_tokens', [
         'model' => 'claude-sonnet-4-6',
         'messages' => ['role' => 'user', 'content' => 'Hello!'],
-    ], \Anthropic\ValueObjects\Transporter\Response::from(messagesCountTokens(), metaHeaders()));
+    ], Anthropic\ValueObjects\Transporter\Response::from(messagesCountTokens(), metaHeaders()));
 
     $result = $client->messages()->countTokens([
         'model' => 'claude-sonnet-4-6',
