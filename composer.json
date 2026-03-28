@@ -1,6 +1,6 @@
 {
     "name": "mozex/anthropic-php",
-    "description": "Anthropic PHP is a supercharged community-maintained PHP API client that allows you to interact with Anthropic API.",
+    "description": "PHP client for the Anthropic Claude API — messages, streaming, tool use, vision, batch processing, and more.",
     "keywords": ["php", "anthropic", "claude", "sdk", "api", "client", "ai", "llm", "nlp", "chatbot", "streaming", "generative-ai", "text-generation", "claude-opus", "claude-sonnet", "claude-haiku"],
     "license": "MIT",
     "authors": [
