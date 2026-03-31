@@ -182,18 +182,17 @@ $response->usage->cacheReadInputTokens; // 0,
 $response->toArray(); // ['id' => 'msg_01BSy0WCV7QR2adFBauynAX7', ...]
 ```
 
-Creates a completion with extended thinking enabled.
+Creates a completion with adaptive thinking. This is the recommended approach for Claude Opus 4.6 and Sonnet 4.6, where the model decides when and how much to think based on the request complexity.
 
 ```php
 $response = $client->messages()->create([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-opus-4-6',
     'max_tokens' => 16000,
     'thinking' => [
-        'type' => 'enabled',
-        'budget_tokens' => 10000,
+        'type' => 'adaptive',
     ],
     'messages' => [
-        ['role' => 'user', 'content' => 'What is the meaning of life?'],
+        ['role' => 'user', 'content' => 'Explain why the sum of two even numbers is always even.'],
     ],
 ]);
 
@@ -202,7 +201,7 @@ foreach ($response->content as $block) {
 
     if ($block->type === 'thinking') {
         $block->thinking; // 'Let me analyze this step by step...'
-        $block->signature; // 'WaUjzkypQ2mUEVM36O2Txu'
+        $block->signature; // 'WaUjzkypQ2mUEVM36O2TxuC06KN8xyfbJwyem...'
     }
 
     if ($block->type === 'redacted_thinking') {
@@ -210,9 +209,64 @@ foreach ($response->content as $block) {
     }
 
     if ($block->type === 'text') {
-        $block->text; // 'The meaning of life is...'
+        $block->text; // 'Based on my analysis...'
     }
 }
+```
+
+Use the `display` option to control how thinking content appears in responses. With `'summarized'` (the default), thinking blocks contain a summary of the model's reasoning. With `'omitted'`, the `thinking` field is empty but the `signature` is still present for multi-turn continuity.
+
+```php
+$response = $client->messages()->create([
+    'model' => 'claude-sonnet-4-6',
+    'max_tokens' => 16000,
+    'thinking' => [
+        'type' => 'adaptive',
+        'display' => 'omitted',
+    ],
+    'messages' => [
+        ['role' => 'user', 'content' => 'What is 27 * 453?'],
+    ],
+]);
+
+$response->content[0]->type; // 'thinking'
+$response->content[0]->thinking; // '' (empty when omitted)
+$response->content[0]->signature; // 'EosnCkYICxIMMb3LzNrMu...' (always present)
+$response->content[1]->text; // 'The answer is 12,231.'
+```
+
+Use `output_config.effort` to guide how much the model thinks. Accepts `'max'` (Opus 4.6 only), `'high'` (default), `'medium'`, or `'low'`. With lower effort, the model may skip thinking entirely for simple queries.
+
+```php
+$response = $client->messages()->create([
+    'model' => 'claude-opus-4-6',
+    'max_tokens' => 16000,
+    'thinking' => [
+        'type' => 'adaptive',
+    ],
+    'output_config' => [
+        'effort' => 'medium',
+    ],
+    'messages' => [
+        ['role' => 'user', 'content' => 'What is the capital of France?'],
+    ],
+]);
+```
+
+For older models (Claude Sonnet 3.7, Opus 4.5, Sonnet 4.5), use `budget_tokens` instead of adaptive thinking.
+
+```php
+$response = $client->messages()->create([
+    'model' => 'claude-sonnet-4-5',
+    'max_tokens' => 16000,
+    'thinking' => [
+        'type' => 'enabled',
+        'budget_tokens' => 10000,
+    ],
+    'messages' => [
+        ['role' => 'user', 'content' => 'Are there an infinite number of prime numbers such that n mod 4 == 3?'],
+    ],
+]);
 ```
 
 #### `countTokens`
@@ -432,15 +486,14 @@ foreach($stream as $response){
 ]
 ```
 
-Creates a streamed completion with extended thinking enabled.
+Creates a streamed completion with adaptive thinking. Streaming works the same way for both adaptive and `budget_tokens` thinking.
 
 ```php
 $stream = $client->messages()->createStreamed([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-opus-4-6',
     'max_tokens' => 16000,
     'thinking' => [
-        'type' => 'enabled',
-        'budget_tokens' => 10000,
+        'type' => 'adaptive',
     ],
     'messages' => [
         ['role' => 'user', 'content' => 'What is the greatest common divisor of 1071 and 462?'],
@@ -455,17 +508,19 @@ foreach ($stream as $response) {
 
     // Thinking delta
     $response->delta->type; // 'thinking_delta'
-    $response->delta->thinking; // 'I need to find the GCD...'
+    $response->delta->thinking; // 'I need to find the GCD of 1071 and 462 using the Euclidean algorithm...'
 
     // Signature delta (sent before content_block_stop)
     $response->delta->type; // 'signature_delta'
-    $response->delta->signature; // 'EqQBCgIYAhIM1gbcDa9GJwZA2b3h...'
+    $response->delta->signature; // 'EqQBCgIYAhIM1gbcDa9GJwZA2b3hGgxBdjrkzLoky3dl1pkiMOYds...'
 
     // Text delta (after thinking is complete)
     $response->delta->type; // 'text_delta'
-    $response->delta->text; // 'The greatest common divisor is **21**.'
+    $response->delta->text; // 'The greatest common divisor of 1071 and 462 is **21**.'
 }
 ```
+
+When using `'display' => 'omitted'` with streaming, no `thinking_delta` events are emitted. You'll only receive the `signature_delta` followed by text deltas, which gives a faster time-to-first-text-token.
 
 ### `Models` Resource
 

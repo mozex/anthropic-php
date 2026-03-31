@@ -66,6 +66,31 @@ test('from thinking response', function () {
         ->text->toBe("Hello! I'm Claude, an AI assistant. How can I help you today?");
 });
 
+test('from omitted thinking response', function () {
+    $completion = CreateResponse::from(messagesCompletionWithOmittedThinking(), meta());
+
+    expect($completion)
+        ->toBeInstanceOf(CreateResponse::class)
+        ->content->toBeArray()->toHaveCount(2);
+
+    expect($completion->content[0])
+        ->type->toBe('thinking')
+        ->thinking->toBe('')
+        ->signature->toBe('EosnCkYICxIMMb3LzNrMu');
+
+    expect($completion->content[1])
+        ->type->toBe('text')
+        ->text->toBe('The answer is 12,231.');
+});
+
+test('to array from omitted thinking response', function () {
+    $completion = CreateResponse::from(messagesCompletionWithOmittedThinking(), meta());
+
+    expect($completion->toArray())
+        ->toBeArray()
+        ->toBe(messagesCompletionWithOmittedThinking());
+});
+
 test('to array from thinking response', function () {
     $completion = CreateResponse::from(messagesCompletionWithThinking(), meta());
 

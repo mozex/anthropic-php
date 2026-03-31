@@ -60,6 +60,35 @@ function messagesCompletionWithThinking(): array
     ];
 }
 
+function messagesCompletionWithOmittedThinking(): array
+{
+    return [
+        'id' => 'msg_019hiOHAEXQwq1PTeETNEBWe',
+        'type' => 'message',
+        'role' => 'assistant',
+        'model' => 'claude-sonnet-4-6',
+        'stop_sequence' => null,
+        'usage' => [
+            'input_tokens' => 10,
+            'output_tokens' => 200,
+            'cache_creation_input_tokens' => 0,
+            'cache_read_input_tokens' => 0,
+        ],
+        'content' => [
+            [
+                'type' => 'thinking',
+                'thinking' => '',
+                'signature' => 'EosnCkYICxIMMb3LzNrMu',
+            ],
+            [
+                'type' => 'text',
+                'text' => 'The answer is 12,231.',
+            ],
+        ],
+        'stop_reason' => 'end_turn',
+    ];
+}
+
 function messagesCompletionWithCache(): array
 {
     return [
@@ -387,4 +416,12 @@ function messagesCompletionStream()
 function messagesCompletionStreamError()
 {
     return fopen(__DIR__.'/Streams/MessagesCompletionCreateError.txt', 'r');
+}
+
+/**
+ * @return resource
+ */
+function messagesCompletionStreamWithAdaptiveThinking()
+{
+    return fopen(__DIR__.'/Streams/MessagesCompletionCreateWithAdaptiveThinking.txt', 'r');
 }
