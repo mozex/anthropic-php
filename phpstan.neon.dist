@@ -6,4 +6,6 @@ parameters:
             analyse:
                 - src/Testing
 
+    treatPhpDocTypesAsCertain: false
+
     reportUnmatchedIgnoredErrors: true

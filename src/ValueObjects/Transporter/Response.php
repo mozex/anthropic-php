@@ -7,7 +7,7 @@ namespace Anthropic\ValueObjects\Transporter;
 use Anthropic\Responses\Meta\MetaInformation;
 
 /**
- * @template-covariant TData of array|string
+ * @template TData of array|string
  *
  * @internal
  */
@@ -29,7 +29,7 @@ final class Response
      * Creates a new Response value object from the given data and meta information.
      *
      * @param  TData  $data
-     * @param  array<string, array<int, string>>  $headers
+     * @param  array<array<string>>  $headers
      * @return Response<TData>
      */
     public static function from(array|string $data, array $headers): self

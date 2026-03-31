@@ -14,7 +14,7 @@ final class MetaInformationCustom
     ) {}
 
     /**
-     * @param  array<string, string[]>  $headers
+     * @param  array<array<string>>  $headers
      * @param  array<int, string>  $knownHeaders
      */
     public static function from(array $headers, array $knownHeaders): self
@@ -22,6 +22,8 @@ final class MetaInformationCustom
         $custom = [];
 
         foreach ($headers as $name => $values) {
+            $name = (string) $name;
+
             if (in_array($name, $knownHeaders, true)) {
                 continue;
             }

@@ -25,7 +25,7 @@ final class MetaInformation implements MetaInformationContract
     ) {}
 
     /**
-     * @param  array<string, string[]>  $headers
+     * @param  array<array<string>>  $headers
      */
     public static function from(array $headers): self
     {

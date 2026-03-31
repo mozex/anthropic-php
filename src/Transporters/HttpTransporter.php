@@ -20,6 +20,7 @@ use GuzzleHttp\Exception\ClientException;
 use JsonException;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -29,6 +30,8 @@ final class HttpTransporter implements TransporterContract
 {
     /**
      * Creates a new Http Transporter instance.
+     *
+     * @param  Closure(RequestInterface): ResponseInterface  $streamHandler
      */
     public function __construct(
         private readonly ClientInterface $client,
@@ -107,6 +110,9 @@ final class HttpTransporter implements TransporterContract
         return $this;
     }
 
+    /**
+     * @param  Closure(): ResponseInterface  $callable
+     */
     private function sendRequest(Closure $callable): ResponseInterface
     {
         try {
