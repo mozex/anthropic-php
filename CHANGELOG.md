@@ -2,6 +2,29 @@
 
 All notable changes to `anthropic-php` will be documented in this file.
 
+## 1.4.0 - 2026-04-01
+
+### What's Changed
+
+#### Added
+
+* Add adaptive thinking support (`thinking.type: "adaptive"`) for Claude Opus 4.6 and Sonnet 4.6
+* Add `display` option on thinking config (`summarized` / `omitted`) to control thinking output in responses
+* Add `output_config.effort` parameter for guiding thinking depth (`max`, `high`, `medium`, `low`)
+* Add `server_tool_use` content block type for server-side tools (web search, web fetch, code execution, tool search)
+* Add `web_search_tool_result` content block type with search results array
+* Add `web_fetch_tool_result` content block type
+* Add `code_execution_tool_result`, `bash_code_execution_tool_result`, and `text_editor_code_execution_tool_result` content block types
+* Add `tool_search_tool_result` content block type
+* Add `tool_use_id` and `content` properties on `CreateResponseContent` for all server tool result blocks
+* Add `container` field on `CreateResponse` for code execution sandbox persistence
+* Add `citations` array on text content blocks, supporting all 5 citation location types: `char_location`, `page_location`, `content_block_location`, `web_search_result_location`, `search_result_location`
+* Add `citations_delta` streaming support with `citation` property on `CreateStreamedResponseDelta`
+* Add `webFetchRequests`, `codeExecutionRequests`, and `toolSearchRequests` to `CreateResponseUsageServerToolUse`
+* Add streaming support for `server_tool_use` and server tool result blocks in `CreateStreamedResponseContentBlockStart`
+
+**Full Changelog**: https://github.com/mozex/anthropic-php/compare/1.3.3...1.4.0
+
 ## 1.3.3 - 2026-03-05
 
 * updated model names for consistency
