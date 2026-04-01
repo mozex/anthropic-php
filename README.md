@@ -269,6 +269,69 @@ $response = $client->messages()->create([
 ]);
 ```
 
+Creates a completion with web search. Claude searches the web, and the response contains `server_tool_use`, `web_search_tool_result`, and `text` blocks with citations back to the sources.
+
+```php
+$response = $client->messages()->create([
+    'model' => 'claude-sonnet-4-6',
+    'max_tokens' => 1024,
+    'tools' => [['type' => 'web_search_20250305', 'name' => 'web_search']],
+    'messages' => [
+        ['role' => 'user', 'content' => 'When was Claude Shannon born?'],
+    ],
+]);
+
+// The search query Claude chose
+$response->content[0]->type; // 'server_tool_use'
+$response->content[0]->id; // 'srvtoolu_01WYG3ziw53XMcoyKL4XcZmE'
+$response->content[0]->name; // 'web_search'
+$response->content[0]->input; // ['query' => 'claude shannon birth date']
+
+// Search results (linked back to the server_tool_use by tool_use_id)
+$response->content[1]->type; // 'web_search_tool_result'
+$response->content[1]->tool_use_id; // 'srvtoolu_01WYG3ziw53XMcoyKL4XcZmE'
+$response->content[1]->content[0]['title']; // 'Claude Shannon - Wikipedia'
+$response->content[1]->content[0]['url']; // 'https://en.wikipedia.org/wiki/Claude_Shannon'
+
+// Claude's answer with citations to sources
+$response->content[2]->type; // 'text'
+$response->content[2]->text; // 'Claude Shannon was born on April 30, 1916...'
+$response->content[2]->citations[0]['type']; // 'web_search_result_location'
+$response->content[2]->citations[0]['title']; // 'Claude Shannon - Wikipedia'
+$response->content[2]->citations[0]['url']; // 'https://en.wikipedia.org/wiki/Claude_Shannon'
+$response->content[2]->citations[0]['cited_text']; // 'Claude Elwood Shannon (April 30, 1916 – ...'
+
+$response->usage->serverToolUse?->webSearchRequests; // 1
+```
+
+Creates a completion with code execution. Claude runs code in a sandboxed container and returns the output. The response may include `bash_code_execution_tool_result` and `text_editor_code_execution_tool_result` blocks depending on which operations Claude performs.
+
+```php
+$response = $client->messages()->create([
+    'model' => 'claude-sonnet-4-6',
+    'max_tokens' => 4096,
+    'tools' => [['type' => 'code_execution_20250825', 'name' => 'code_execution']],
+    'messages' => [
+        ['role' => 'user', 'content' => 'Run this Python code: print(sum(range(1, 101)))'],
+    ],
+]);
+
+$response->content[0]->type; // 'server_tool_use'
+$response->content[0]->name; // 'bash_code_execution'
+
+$response->content[1]->type; // 'bash_code_execution_tool_result'
+$response->content[1]->tool_use_id; // 'srvtoolu_01EWAZ5utP321iRHFdsvbWEV'
+$response->content[1]->content['type']; // 'bash_code_execution_result'
+$response->content[1]->content['stdout']; // '5050'
+$response->content[1]->content['return_code']; // 0
+
+// Container persists across turns for multi-step code execution
+$response->container['id']; // 'container_011CZcynv5pD9zSXC9hAyeS2'
+$response->container['expires_at']; // '2026-04-01T12:28:18.898511Z'
+```
+
+The same `tool_use_id` + `content` pattern applies to `web_fetch_tool_result`, `code_execution_tool_result`, and `tool_search_tool_result` blocks.
+
 #### `countTokens`
 
 Counts the number of tokens in a message without creating it.

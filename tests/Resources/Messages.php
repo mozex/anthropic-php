@@ -208,6 +208,72 @@ test('create streamed with adaptive thinking', function () {
         ->delta->text->toBe('The greatest common divisor of 1071 and 462 is **21**.');
 });
 
+test('create with web search', function () {
+    $client = mockClient('POST', 'messages', [
+        'model' => 'claude-sonnet-4-6',
+        'max_tokens' => 1024,
+        'tools' => [['type' => 'web_search_20250305', 'name' => 'web_search']],
+        'messages' => ['role' => 'user', 'content' => 'When was Claude Shannon born?'],
+    ], Anthropic\ValueObjects\Transporter\Response::from(messagesCompletionWithWebSearch(), metaHeaders()));
+
+    $result = $client->messages()->create([
+        'model' => 'claude-sonnet-4-6',
+        'max_tokens' => 1024,
+        'tools' => [['type' => 'web_search_20250305', 'name' => 'web_search']],
+        'messages' => ['role' => 'user', 'content' => 'When was Claude Shannon born?'],
+    ]);
+
+    expect($result)
+        ->toBeInstanceOf(CreateResponse::class)
+        ->content->toBeArray()->toHaveCount(4);
+
+    expect($result->content[1])
+        ->type->toBe('server_tool_use')
+        ->name->toBe('web_search');
+
+    expect($result->content[2])
+        ->type->toBe('web_search_tool_result')
+        ->tool_use_id->toBe('srvtoolu_01WYG3ziw53XMcoyKL4XcZmE');
+
+    expect($result->content[3])
+        ->type->toBe('text')
+        ->citations->toBeArray()->toHaveCount(1);
+
+    expect($result->usage->serverToolUse)
+        ->webSearchRequests->toBe(1);
+});
+
+test('create with code execution', function () {
+    $client = mockClient('POST', 'messages', [
+        'model' => 'claude-sonnet-4-6',
+        'max_tokens' => 1024,
+        'tools' => [['type' => 'code_execution_20250825', 'name' => 'code_execution']],
+        'messages' => ['role' => 'user', 'content' => 'Run hello world'],
+    ], Anthropic\ValueObjects\Transporter\Response::from(messagesCompletionWithCodeExecution(), metaHeaders()));
+
+    $result = $client->messages()->create([
+        'model' => 'claude-sonnet-4-6',
+        'max_tokens' => 1024,
+        'tools' => [['type' => 'code_execution_20250825', 'name' => 'code_execution']],
+        'messages' => ['role' => 'user', 'content' => 'Run hello world'],
+    ]);
+
+    expect($result)
+        ->toBeInstanceOf(CreateResponse::class)
+        ->container->toBe(['id' => 'container_123', 'expires_at' => '2025-03-15T10:30:00Z'])
+        ->content->toBeArray()->toHaveCount(3);
+
+    expect($result->content[0])
+        ->type->toBe('server_tool_use')
+        ->name->toBe('code_execution');
+
+    expect($result->content[1])
+        ->type->toBe('code_execution_tool_result');
+
+    expect($result->usage->serverToolUse)
+        ->codeExecutionRequests->toBe(1);
+});
+
 test('create throws an exception if stream option is true', function () {
     Anthropic::client('foo')->messages()->create([
         'model' => 'claude-sonnet-4-6',

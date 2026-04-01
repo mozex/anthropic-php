@@ -179,6 +179,154 @@ function messagesCompletionWithToolCalls(): array
 }
 
 /**
+ * @return array<string, mixed>
+ */
+function messagesCompletionWithWebSearch(): array
+{
+    return [
+        'id' => 'msg_a930390d3a',
+        'type' => 'message',
+        'role' => 'assistant',
+        'model' => 'claude-sonnet-4-6',
+        'stop_sequence' => null,
+        'usage' => [
+            'input_tokens' => 6039,
+            'output_tokens' => 931,
+            'cache_creation_input_tokens' => 0,
+            'cache_read_input_tokens' => 0,
+            'server_tool_use' => [
+                'web_search_requests' => 1,
+            ],
+        ],
+        'content' => [
+            [
+                'type' => 'text',
+                'text' => "I'll search for when Claude Shannon was born.",
+            ],
+            [
+                'type' => 'server_tool_use',
+                'id' => 'srvtoolu_01WYG3ziw53XMcoyKL4XcZmE',
+                'name' => 'web_search',
+                'input' => [
+                    'query' => 'claude shannon birth date',
+                ],
+            ],
+            [
+                'type' => 'web_search_tool_result',
+                'tool_use_id' => 'srvtoolu_01WYG3ziw53XMcoyKL4XcZmE',
+                'content' => [
+                    [
+                        'type' => 'web_search_result',
+                        'url' => 'https://en.wikipedia.org/wiki/Claude_Shannon',
+                        'title' => 'Claude Shannon - Wikipedia',
+                        'encrypted_content' => 'EqgfCioIARgBIiQ3YTAwMjY1Mi1mZjM5LTQ1NGUtODgxNC1kNjNjNTk1ZWI3Y',
+                        'page_age' => 'April 30, 2025',
+                    ],
+                ],
+            ],
+            [
+                'type' => 'text',
+                'text' => 'Claude Shannon was born on April 30, 1916, in Petoskey, Michigan',
+                'citations' => [
+                    [
+                        'type' => 'web_search_result_location',
+                        'url' => 'https://en.wikipedia.org/wiki/Claude_Shannon',
+                        'title' => 'Claude Shannon - Wikipedia',
+                        'encrypted_index' => 'Eo8BCioIAhgBIiQyYjQ0OWJmZi1lNm',
+                        'cited_text' => 'Claude Elwood Shannon (April 30, 1916 – February 24, 2001) was an American mathematician',
+                    ],
+                ],
+            ],
+        ],
+        'stop_reason' => 'end_turn',
+    ];
+}
+
+/**
+ * @return array<string, mixed>
+ */
+function messagesCompletionWithCodeExecution(): array
+{
+    return [
+        'id' => 'msg_019hiOHAEXQwq1PTeETNEBWe',
+        'type' => 'message',
+        'role' => 'assistant',
+        'model' => 'claude-sonnet-4-6',
+        'stop_sequence' => null,
+        'usage' => [
+            'input_tokens' => 105,
+            'output_tokens' => 239,
+            'cache_creation_input_tokens' => 0,
+            'cache_read_input_tokens' => 0,
+            'server_tool_use' => [
+                'code_execution_requests' => 1,
+            ],
+        ],
+        'content' => [
+            [
+                'type' => 'server_tool_use',
+                'id' => 'srvtoolu_01A2B3C4D5E6F7G8H9',
+                'name' => 'code_execution',
+                'input' => [
+                    'code' => 'print("Hello, World!")',
+                ],
+            ],
+            [
+                'type' => 'code_execution_tool_result',
+                'tool_use_id' => 'srvtoolu_01A2B3C4D5E6F7G8H9',
+                'content' => [
+                    'type' => 'code_execution_result',
+                    'stdout' => 'Hello, World!',
+                    'stderr' => '',
+                    'return_code' => 0,
+                ],
+            ],
+            [
+                'type' => 'text',
+                'text' => 'The code executed successfully.',
+            ],
+        ],
+        'stop_reason' => 'end_turn',
+        'container' => [
+            'id' => 'container_123',
+            'expires_at' => '2025-03-15T10:30:00Z',
+        ],
+    ];
+}
+
+function messagesCompletionStreamServerToolUseContentBlockStartChunk(): array
+{
+    return [
+        'type' => 'content_block_start',
+        'index' => 1,
+        'content_block' => [
+            'type' => 'server_tool_use',
+            'id' => 'srvtoolu_01WYG3ziw53XMcoyKL4XcZmE',
+            'name' => 'web_search',
+        ],
+    ];
+}
+
+function messagesCompletionStreamWebSearchResultContentBlockStartChunk(): array
+{
+    return [
+        'type' => 'content_block_start',
+        'index' => 2,
+        'content_block' => [
+            'type' => 'web_search_tool_result',
+            'tool_use_id' => 'srvtoolu_01WYG3ziw53XMcoyKL4XcZmE',
+            'content' => [
+                [
+                    'type' => 'web_search_result',
+                    'title' => 'Quantum Computing Breakthroughs in 2025',
+                    'url' => 'https://example.com',
+                ],
+            ],
+        ],
+    ];
+}
+
+/**
  * @return array<string, int>
  */
 function messagesCountTokens(): array

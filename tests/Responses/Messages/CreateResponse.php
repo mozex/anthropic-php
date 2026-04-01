@@ -115,6 +115,92 @@ test('to array', function () {
         ->toBe(messagesCompletion());
 });
 
+test('from web search response', function () {
+    $completion = CreateResponse::from(messagesCompletionWithWebSearch(), meta());
+
+    expect($completion)
+        ->toBeInstanceOf(CreateResponse::class)
+        ->id->toBe('msg_a930390d3a')
+        ->stop_reason->toBe('end_turn')
+        ->content->toBeArray()->toHaveCount(4);
+
+    expect($completion->content[0])
+        ->type->toBe('text')
+        ->text->toBe("I'll search for when Claude Shannon was born.");
+
+    expect($completion->content[1])
+        ->type->toBe('server_tool_use')
+        ->id->toBe('srvtoolu_01WYG3ziw53XMcoyKL4XcZmE')
+        ->name->toBe('web_search')
+        ->input->toBe(['query' => 'claude shannon birth date']);
+
+    expect($completion->content[2])
+        ->type->toBe('web_search_tool_result')
+        ->tool_use_id->toBe('srvtoolu_01WYG3ziw53XMcoyKL4XcZmE')
+        ->content->toBeArray()->toHaveCount(1);
+
+    expect($completion->content[2]->content[0])
+        ->toBe([
+            'type' => 'web_search_result',
+            'url' => 'https://en.wikipedia.org/wiki/Claude_Shannon',
+            'title' => 'Claude Shannon - Wikipedia',
+            'encrypted_content' => 'EqgfCioIARgBIiQ3YTAwMjY1Mi1mZjM5LTQ1NGUtODgxNC1kNjNjNTk1ZWI3Y',
+            'page_age' => 'April 30, 2025',
+        ]);
+
+    expect($completion->content[3])
+        ->type->toBe('text')
+        ->text->toBe('Claude Shannon was born on April 30, 1916, in Petoskey, Michigan')
+        ->citations->toBeArray()->toHaveCount(1);
+
+    expect($completion->usage->serverToolUse)
+        ->webSearchRequests->toBe(1);
+});
+
+test('to array from web search response', function () {
+    $completion = CreateResponse::from(messagesCompletionWithWebSearch(), meta());
+
+    expect($completion->toArray())
+        ->toBeArray()
+        ->toBe(messagesCompletionWithWebSearch());
+});
+
+test('from code execution response', function () {
+    $completion = CreateResponse::from(messagesCompletionWithCodeExecution(), meta());
+
+    expect($completion)
+        ->toBeInstanceOf(CreateResponse::class)
+        ->stop_reason->toBe('end_turn')
+        ->container->toBe(['id' => 'container_123', 'expires_at' => '2025-03-15T10:30:00Z'])
+        ->content->toBeArray()->toHaveCount(3);
+
+    expect($completion->content[0])
+        ->type->toBe('server_tool_use')
+        ->id->toBe('srvtoolu_01A2B3C4D5E6F7G8H9')
+        ->name->toBe('code_execution');
+
+    expect($completion->content[1])
+        ->type->toBe('code_execution_tool_result')
+        ->tool_use_id->toBe('srvtoolu_01A2B3C4D5E6F7G8H9')
+        ->content->toBe([
+            'type' => 'code_execution_result',
+            'stdout' => 'Hello, World!',
+            'stderr' => '',
+            'return_code' => 0,
+        ]);
+
+    expect($completion->usage->serverToolUse)
+        ->codeExecutionRequests->toBe(1);
+});
+
+test('to array from code execution response', function () {
+    $completion = CreateResponse::from(messagesCompletionWithCodeExecution(), meta());
+
+    expect($completion->toArray())
+        ->toBeArray()
+        ->toBe(messagesCompletionWithCodeExecution());
+});
+
 test('fake', function () {
     $response = CreateResponse::fake();
 

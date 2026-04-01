@@ -114,6 +114,32 @@ test('from signature delta chunk', function () {
         ->delta->signature->toBe('EqQBCgIYAhIM1gbcDa9GJwZA2b3h');
 });
 
+test('from server tool use content block start chunk', function () {
+    $completion = CreateStreamedResponse::from(messagesCompletionStreamServerToolUseContentBlockStartChunk());
+
+    expect($completion)
+        ->toBeInstanceOf(CreateStreamedResponse::class)
+        ->type->toBe('content_block_start')
+        ->index->toBe(1)
+        ->content_block_start->toBeInstanceOf(CreateStreamedResponseContentBlockStart::class)
+        ->content_block_start->type->toBe('server_tool_use')
+        ->content_block_start->id->toBe('srvtoolu_01WYG3ziw53XMcoyKL4XcZmE')
+        ->content_block_start->name->toBe('web_search');
+});
+
+test('from web search result content block start chunk', function () {
+    $completion = CreateStreamedResponse::from(messagesCompletionStreamWebSearchResultContentBlockStartChunk());
+
+    expect($completion)
+        ->toBeInstanceOf(CreateStreamedResponse::class)
+        ->type->toBe('content_block_start')
+        ->index->toBe(2)
+        ->content_block_start->toBeInstanceOf(CreateStreamedResponseContentBlockStart::class)
+        ->content_block_start->type->toBe('web_search_tool_result')
+        ->content_block_start->tool_use_id->toBe('srvtoolu_01WYG3ziw53XMcoyKL4XcZmE')
+        ->content_block_start->content->toBeArray()->toHaveCount(1);
+});
+
 test('from content block stop chunk', function () {
     $completion = CreateStreamedResponse::from(messagesCompletionStreamContentBlockStopChunk());
 

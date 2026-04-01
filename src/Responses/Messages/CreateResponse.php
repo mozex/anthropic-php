@@ -12,12 +12,12 @@ use Anthropic\Responses\Meta\MetaInformation;
 use Anthropic\Testing\Responses\Concerns\Messages\Fakeable;
 
 /**
- * @implements ResponseContract<array{id: string, type: string, role: string, model: string, stop_sequence: string|null, usage: array{input_tokens: int, output_tokens: int, cache_creation_input_tokens: int, cache_read_input_tokens: int, cache_creation?: array{ephemeral_5m_input_tokens: int, ephemeral_1h_input_tokens: int}, service_tier?: string, server_tool_use?: array{web_search_requests: int}}, content: array<int, array{type: string, text?: string|null, id?: string|null, name?: string|null, input?: array<string, mixed>|null, thinking?: string|null, signature?: string|null, data?: string|null}>, stop_reason: string}>
+ * @implements ResponseContract<array{id: string, type: string, role: string, model: string, stop_sequence: string|null, usage: array{input_tokens: int, output_tokens: int, cache_creation_input_tokens: int, cache_read_input_tokens: int, cache_creation?: array{ephemeral_5m_input_tokens: int, ephemeral_1h_input_tokens: int}, service_tier?: string, server_tool_use?: array<string, int>}, content: array<int, array{type: string, text?: string|null, id?: string|null, name?: string|null, input?: array<string, mixed>|null, thinking?: string|null, signature?: string|null, data?: string|null, tool_use_id?: string|null, content?: array<int|string, mixed>|null, citations?: array<int|string, mixed>|null}>, stop_reason: string, container?: array{id: string, expires_at: string}}>
  */
 final class CreateResponse implements ResponseContract, ResponseHasMetaInformationContract
 {
     /**
-     * @use ArrayAccessible<array{id: string, type: string, role: string, model: string, stop_sequence: string|null, usage: array{input_tokens: int, output_tokens: int, cache_creation_input_tokens: int, cache_read_input_tokens: int, cache_creation?: array{ephemeral_5m_input_tokens: int, ephemeral_1h_input_tokens: int}, service_tier?: string, server_tool_use?: array{web_search_requests: int}}, content: array<int, array{type: string, text?: string|null, id?: string|null, name?: string|null, input?: array<string, mixed>|null, thinking?: string|null, signature?: string|null, data?: string|null}>, stop_reason: string}>
+     * @use ArrayAccessible<array{id: string, type: string, role: string, model: string, stop_sequence: string|null, usage: array{input_tokens: int, output_tokens: int, cache_creation_input_tokens: int, cache_read_input_tokens: int, cache_creation?: array{ephemeral_5m_input_tokens: int, ephemeral_1h_input_tokens: int}, service_tier?: string, server_tool_use?: array<string, int>}, content: array<int, array{type: string, text?: string|null, id?: string|null, name?: string|null, input?: array<string, mixed>|null, thinking?: string|null, signature?: string|null, data?: string|null, tool_use_id?: string|null, content?: array<int|string, mixed>|null, citations?: array<int|string, mixed>|null}>, stop_reason: string, container?: array{id: string, expires_at: string}}>
      */
     use ArrayAccessible;
 
@@ -26,6 +26,7 @@ final class CreateResponse implements ResponseContract, ResponseHasMetaInformati
 
     /**
      * @param  array<int, CreateResponseContent>  $content
+     * @param  array{id: string, expires_at: string}|null  $container
      */
     private function __construct(
         public readonly string $id,
@@ -36,13 +37,14 @@ final class CreateResponse implements ResponseContract, ResponseHasMetaInformati
         public readonly string $stop_reason,
         public readonly array $content,
         public readonly CreateResponseUsage $usage,
+        public readonly ?array $container,
         private readonly MetaInformation $meta,
     ) {}
 
     /**
      * Acts as static factory, and returns a new Response instance.
      *
-     * @param  array{id: string, type: string, role: string, model: string, stop_sequence: string|null, usage: array{input_tokens: int, output_tokens: int, cache_creation_input_tokens: int|null, cache_read_input_tokens: int|null}, content: array<int, array{type: string, text?: string|null, id?: string|null, name?: string|null, input?: array<string, mixed>|null, thinking?: string|null, signature?: string|null, data?: string|null}>, stop_reason: string}  $attributes
+     * @param  array{id: string, type: string, role: string, model: string, stop_sequence: string|null, usage: array{input_tokens: int, output_tokens: int, cache_creation_input_tokens?: int|null, cache_read_input_tokens?: int|null, cache_creation?: array{ephemeral_5m_input_tokens: int, ephemeral_1h_input_tokens: int}|null, service_tier?: string|null, server_tool_use?: array{web_search_requests?: int, web_fetch_requests?: int, code_execution_requests?: int, tool_search_requests?: int}|null}, content: array<int, array{type: string, text?: string|null, id?: string|null, name?: string|null, input?: array<string, mixed>|null, thinking?: string|null, signature?: string|null, data?: string|null, tool_use_id?: string|null, content?: array<int|string, mixed>|null, citations?: array<int|string, mixed>|null}>, stop_reason: string, container?: array{id: string, expires_at: string}|null}  $attributes
      */
     public static function from(array $attributes, MetaInformation $meta): self
     {
@@ -59,6 +61,7 @@ final class CreateResponse implements ResponseContract, ResponseHasMetaInformati
             $attributes['stop_reason'],
             $content,
             CreateResponseUsage::from($attributes['usage']),
+            $attributes['container'] ?? null,
             $meta,
         );
     }
@@ -68,7 +71,7 @@ final class CreateResponse implements ResponseContract, ResponseHasMetaInformati
      */
     public function toArray(): array
     {
-        return [
+        $result = [
             'id' => $this->id,
             'type' => $this->type,
             'role' => $this->role,
@@ -81,5 +84,11 @@ final class CreateResponse implements ResponseContract, ResponseHasMetaInformati
             ),
             'stop_reason' => $this->stop_reason,
         ];
+
+        if ($this->container !== null) {
+            $result['container'] = $this->container;
+        }
+
+        return $result;
     }
 }
