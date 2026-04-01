@@ -140,6 +140,28 @@ test('from web search result content block start chunk', function () {
         ->content_block_start->content->toBeArray()->toHaveCount(1);
 });
 
+test('from citations delta chunk', function () {
+    $completion = CreateStreamedResponse::from(messagesCompletionStreamCitationsDeltaChunk());
+
+    expect($completion)
+        ->toBeInstanceOf(CreateStreamedResponse::class)
+        ->type->toBe('content_block_delta')
+        ->index->toBe(0)
+        ->delta->toBeInstanceOf(CreateStreamedResponseDelta::class)
+        ->delta->type->toBe('citations_delta')
+        ->delta->citation->toBeArray();
+
+    expect($completion->delta->citation)
+        ->toBe([
+            'type' => 'char_location',
+            'cited_text' => 'The grass is green.',
+            'document_index' => 0,
+            'document_title' => 'Example Document',
+            'start_char_index' => 0,
+            'end_char_index' => 20,
+        ]);
+});
+
 test('from content block stop chunk', function () {
     $completion = CreateStreamedResponse::from(messagesCompletionStreamContentBlockStopChunk());
 

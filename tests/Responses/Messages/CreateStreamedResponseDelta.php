@@ -66,6 +66,46 @@ test('from signature delta chunk', function () {
         ->stop_sequence->toBeNull();
 });
 
+test('from citations delta chunk', function () {
+    $result = CreateStreamedResponseDelta::from(messagesCompletionStreamCitationsDeltaChunk()['delta']);
+
+    expect($result)
+        ->type->toBe('citations_delta')
+        ->citation->toBeArray()
+        ->text->toBeNull()
+        ->stop_reason->toBeNull();
+
+    expect($result->citation)
+        ->toBe([
+            'type' => 'char_location',
+            'cited_text' => 'The grass is green.',
+            'document_index' => 0,
+            'document_title' => 'Example Document',
+            'start_char_index' => 0,
+            'end_char_index' => 20,
+        ]);
+});
+
+test('to array for a citations delta chunk', function () {
+    $result = CreateStreamedResponseDelta::from(messagesCompletionStreamCitationsDeltaChunk()['delta']);
+
+    expect($result->toArray())
+        ->toBe([
+            'type' => 'citations_delta',
+            'text' => null,
+            'stop_reason' => null,
+            'stop_sequence' => null,
+            'citation' => [
+                'type' => 'char_location',
+                'cited_text' => 'The grass is green.',
+                'document_index' => 0,
+                'document_title' => 'Example Document',
+                'start_char_index' => 0,
+                'end_char_index' => 20,
+            ],
+        ]);
+});
+
 test('to array from first chunk', function () {
     $result = CreateStreamedResponseDelta::from([]);
 

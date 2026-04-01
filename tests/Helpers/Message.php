@@ -327,6 +327,120 @@ function messagesCompletionStreamWebSearchResultContentBlockStartChunk(): array
 }
 
 /**
+ * @return array<string, mixed>
+ */
+function messagesCompletionWithDocumentCitations(): array
+{
+    return [
+        'id' => 'msg_019hiOHAEXQwq1PTeETNEBWe',
+        'type' => 'message',
+        'role' => 'assistant',
+        'model' => 'claude-opus-4-6',
+        'stop_sequence' => null,
+        'usage' => [
+            'input_tokens' => 1024,
+            'output_tokens' => 120,
+            'cache_creation_input_tokens' => 0,
+            'cache_read_input_tokens' => 0,
+        ],
+        'content' => [
+            [
+                'type' => 'text',
+                'text' => 'According to the document, ',
+            ],
+            [
+                'type' => 'text',
+                'text' => 'the grass is green',
+                'citations' => [
+                    [
+                        'type' => 'char_location',
+                        'cited_text' => 'The grass is green.',
+                        'document_index' => 0,
+                        'document_title' => 'Example Document',
+                        'start_char_index' => 0,
+                        'end_char_index' => 20,
+                    ],
+                ],
+            ],
+            [
+                'type' => 'text',
+                'text' => ' and ',
+            ],
+            [
+                'type' => 'text',
+                'text' => 'the sky is blue',
+                'citations' => [
+                    [
+                        'type' => 'char_location',
+                        'cited_text' => 'The sky is blue.',
+                        'document_index' => 0,
+                        'document_title' => 'Example Document',
+                        'start_char_index' => 20,
+                        'end_char_index' => 36,
+                    ],
+                ],
+            ],
+            [
+                'type' => 'text',
+                'text' => '. Information from page 5 states that ',
+            ],
+            [
+                'type' => 'text',
+                'text' => 'water is essential',
+                'citations' => [
+                    [
+                        'type' => 'page_location',
+                        'cited_text' => 'Water is essential for life.',
+                        'document_index' => 1,
+                        'document_title' => 'PDF Document',
+                        'start_page_number' => 5,
+                        'end_page_number' => 6,
+                    ],
+                ],
+            ],
+            [
+                'type' => 'text',
+                'text' => '. The custom document mentions ',
+            ],
+            [
+                'type' => 'text',
+                'text' => 'important findings',
+                'citations' => [
+                    [
+                        'type' => 'content_block_location',
+                        'cited_text' => 'These are important findings.',
+                        'document_index' => 2,
+                        'document_title' => 'Custom Content Document',
+                        'start_block_index' => 0,
+                        'end_block_index' => 1,
+                    ],
+                ],
+            ],
+        ],
+        'stop_reason' => 'end_turn',
+    ];
+}
+
+function messagesCompletionStreamCitationsDeltaChunk(): array
+{
+    return [
+        'type' => 'content_block_delta',
+        'index' => 0,
+        'delta' => [
+            'type' => 'citations_delta',
+            'citation' => [
+                'type' => 'char_location',
+                'cited_text' => 'The grass is green.',
+                'document_index' => 0,
+                'document_title' => 'Example Document',
+                'start_char_index' => 0,
+                'end_char_index' => 20,
+            ],
+        ],
+    ];
+}
+
+/**
  * @return array<string, int>
  */
 function messagesCountTokens(): array

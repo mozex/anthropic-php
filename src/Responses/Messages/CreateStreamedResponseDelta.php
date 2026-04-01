@@ -6,6 +6,9 @@ namespace Anthropic\Responses\Messages;
 
 final class CreateStreamedResponseDelta
 {
+    /**
+     * @param  array<string, mixed>|null  $citation
+     */
     private function __construct(
         public readonly ?string $type,
         public readonly ?string $text,
@@ -14,10 +17,11 @@ final class CreateStreamedResponseDelta
         public readonly ?string $stop_sequence,
         public readonly ?string $thinking,
         public readonly ?string $signature,
+        public readonly ?array $citation,
     ) {}
 
     /**
-     * @param  array{type?: string, text?: string|null, partial_json?: ?string, stop_reason?: string, stop_sequence?: string|null, thinking?: string|null, signature?: string|null}  $attributes
+     * @param  array{type?: string, text?: string|null, partial_json?: string|null, stop_reason?: string, stop_sequence?: string|null, thinking?: string|null, signature?: string|null, citation?: array<string, mixed>|null}  $attributes
      */
     public static function from(array $attributes): self
     {
@@ -29,11 +33,12 @@ final class CreateStreamedResponseDelta
             $attributes['stop_sequence'] ?? null,
             $attributes['thinking'] ?? null,
             $attributes['signature'] ?? null,
+            $attributes['citation'] ?? null,
         );
     }
 
     /**
-     * @return array{type: string|null, text: string|null, partial_json?: ?string, stop_reason: string|null, stop_sequence: string|null, thinking?: string|null, signature?: string|null}
+     * @return array{type: string|null, text: string|null, partial_json?: string|null, stop_reason: string|null, stop_sequence: string|null, thinking?: string|null, signature?: string|null, citation?: array<string, mixed>}
      */
     public function toArray(): array
     {
@@ -54,6 +59,10 @@ final class CreateStreamedResponseDelta
 
         if ($this->signature !== null) {
             $data['signature'] = $this->signature;
+        }
+
+        if ($this->citation !== null) {
+            $data['citation'] = $this->citation;
         }
 
         return $data;

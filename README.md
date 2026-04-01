@@ -332,6 +332,64 @@ $response->container['expires_at']; // '2026-04-01T12:28:18.898511Z'
 
 The same `tool_use_id` + `content` pattern applies to `web_fetch_tool_result`, `code_execution_tool_result`, and `tool_search_tool_result` blocks.
 
+Creates a completion with document citations. Enable citations on document blocks, and the response will contain multiple text blocks where each cited claim includes a `citations` array pointing to exact locations in your source documents.
+
+```php
+$response = $client->messages()->create([
+    'model' => 'claude-opus-4-6',
+    'max_tokens' => 1024,
+    'messages' => [
+        [
+            'role' => 'user',
+            'content' => [
+                [
+                    'type' => 'document',
+                    'source' => [
+                        'type' => 'text',
+                        'media_type' => 'text/plain',
+                        'data' => 'The grass is green. The sky is blue.',
+                    ],
+                    'title' => 'My Document',
+                    'citations' => ['enabled' => true],
+                ],
+                [
+                    'type' => 'text',
+                    'text' => 'What color is the grass and sky?',
+                ],
+            ],
+        ],
+    ],
+]);
+
+// Uncited text
+$response->content[0]->type; // 'text'
+$response->content[0]->text; // 'According to the document, '
+$response->content[0]->citations; // null
+
+// Cited claim with char_location (plain text documents)
+$response->content[1]->type; // 'text'
+$response->content[1]->text; // 'the grass is green'
+$response->content[1]->citations[0]['type']; // 'char_location'
+$response->content[1]->citations[0]['cited_text']; // 'The grass is green.'
+$response->content[1]->citations[0]['document_index']; // 0
+$response->content[1]->citations[0]['document_title']; // 'My Document'
+$response->content[1]->citations[0]['start_char_index']; // 0
+$response->content[1]->citations[0]['end_char_index']; // 20
+```
+
+Five citation location types exist depending on the document source: `char_location` (plain text), `page_location` (PDFs), `content_block_location` (custom content), `web_search_result_location` (web search), and `search_result_location` (search results).
+
+When streaming, citations arrive as `citations_delta` events on the delta object:
+
+```php
+foreach ($stream as $response) {
+    if ($response->delta->type === 'citations_delta') {
+        $response->delta->citation['type']; // 'char_location'
+        $response->delta->citation['cited_text']; // 'The grass is green.'
+    }
+}
+```
+
 #### `countTokens`
 
 Counts the number of tokens in a message without creating it.

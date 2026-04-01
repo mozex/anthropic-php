@@ -99,6 +99,58 @@ test('to array from thinking response', function () {
         ->toBe(messagesCompletionWithThinking());
 });
 
+test('from document citations response', function () {
+    $completion = CreateResponse::from(messagesCompletionWithDocumentCitations(), meta());
+
+    expect($completion)
+        ->toBeInstanceOf(CreateResponse::class)
+        ->content->toBeArray()->toHaveCount(8);
+
+    // Plain text block without citations
+    expect($completion->content[0])
+        ->type->toBe('text')
+        ->text->toBe('According to the document, ')
+        ->citations->toBeNull();
+
+    // char_location citation
+    expect($completion->content[1])
+        ->type->toBe('text')
+        ->text->toBe('the grass is green')
+        ->citations->toBeArray()->toHaveCount(1);
+
+    expect($completion->content[1]->citations[0])
+        ->toBe([
+            'type' => 'char_location',
+            'cited_text' => 'The grass is green.',
+            'document_index' => 0,
+            'document_title' => 'Example Document',
+            'start_char_index' => 0,
+            'end_char_index' => 20,
+        ]);
+
+    // page_location citation
+    expect($completion->content[5]->citations[0]['type'])
+        ->toBe('page_location');
+
+    expect($completion->content[5]->citations[0]['start_page_number'])
+        ->toBe(5);
+
+    // content_block_location citation
+    expect($completion->content[7]->citations[0]['type'])
+        ->toBe('content_block_location');
+
+    expect($completion->content[7]->citations[0]['start_block_index'])
+        ->toBe(0);
+});
+
+test('to array from document citations response', function () {
+    $completion = CreateResponse::from(messagesCompletionWithDocumentCitations(), meta());
+
+    expect($completion->toArray())
+        ->toBeArray()
+        ->toBe(messagesCompletionWithDocumentCitations());
+});
+
 test('as array accessible', function () {
     $completion = CreateResponse::from(messagesCompletion(), meta());
 
