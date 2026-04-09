@@ -1,4 +1,8 @@
 {
+    "$schema": "https://context7.com/schema/context7.json",
     "url": "https://context7.com/mozex/anthropic-php",
-    "public_key": "pk_2dXAZIEpHP6qQeGGTuyQt"
+    "public_key": "pk_2dXAZIEpHP6qQeGGTuyQt",
+    "projectTitle": "Anthropic PHP",
+    "description": "PHP client for the Anthropic Claude API — messages, streaming, tool use, vision, batch processing, and more.",
+    "folders": []
 }
