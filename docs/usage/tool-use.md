@@ -200,3 +200,7 @@ When using [extended thinking](./thinking.md), only `auto` and `none` are suppor
 ## Streaming with tool use
 
 Tool calls also work with streaming. See [Streaming](./streaming.md) for how tool input arrives as `input_json_delta` events.
+
+---
+
+For all tool definition options, tool choice behavior, and advanced patterns, see the [Tool use guide](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview) on the Anthropic docs.

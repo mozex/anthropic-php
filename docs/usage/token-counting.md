@@ -85,3 +85,7 @@ $response = $client->messages()->create([
     'messages' => $conversationHistory,
 ]);
 ```
+
+---
+
+For the full request specification, see the [Count Tokens API reference](https://platform.claude.com/docs/en/api/messages/count_tokens) on the Anthropic docs.

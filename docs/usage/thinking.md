@@ -171,3 +171,7 @@ $followUp = $client->messages()->create([
 ```
 
 This is why the `signature` field exists even when `display` is set to `'omitted'`: it's needed for multi-turn continuity.
+
+---
+
+For thinking token limits, pricing, and advanced patterns like interleaved thinking with tool use, see the [Extended thinking guide](https://platform.claude.com/docs/en/build-with-claude/extended-thinking) and [Adaptive thinking guide](https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking) on the Anthropic docs.

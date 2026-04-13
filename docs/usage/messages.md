@@ -168,3 +168,7 @@ $response->stop_sequence; // '```'
 ```
 
 When Claude hits a stop sequence, `stop_reason` is `'stop_sequence'` and `stop_sequence` tells you which one matched.
+
+---
+
+For the full list of parameters, content block types, and the latest API changes, see the [Messages API reference](https://platform.claude.com/docs/en/api/messages/create) on the Anthropic docs.

@@ -169,3 +169,7 @@ foreach ($results as $individual) {
 // 4. Clean up
 $client->batches()->delete($batch->id);
 ```
+
+---
+
+For batch limits, pricing, and the full API specification, see the [Batch processing guide](https://platform.claude.com/docs/en/build-with-claude/batch-processing) on the Anthropic docs.

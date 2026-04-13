@@ -157,3 +157,7 @@ You can pass multiple documents in a single request. The `document_index` in eac
     ],
 ]
 ```
+
+---
+
+For document types, chunking behavior, and token cost details, see the [Citations guide](https://platform.claude.com/docs/en/build-with-claude/citations) on the Anthropic docs.

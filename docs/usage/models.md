@@ -83,3 +83,7 @@ $response->displayName; // 'Claude Sonnet 4.6'
 ```
 
 This returns a `RetrieveResponse` with the same fields as each item in the list.
+
+---
+
+For available model IDs and capabilities, see the [Models API reference](https://platform.claude.com/docs/en/api/models/list) and [Models overview](https://platform.claude.com/docs/en/about-claude/models/overview) on the Anthropic docs.

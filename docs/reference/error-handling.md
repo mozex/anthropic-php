@@ -145,3 +145,7 @@ try {
     // Response wasn't valid JSON
 }
 ```
+
+---
+
+For the full error format and request size limits, see the [Errors reference](https://platform.claude.com/docs/en/api/errors) on the Anthropic docs.

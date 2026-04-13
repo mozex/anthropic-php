@@ -221,3 +221,7 @@ $response->usage->serverToolUse?->toolSearchRequests;    // number of tool searc
 ```
 
 These counts are `null` when no server tools were used.
+
+---
+
+For pricing, supported models, and advanced configuration, see the [Web search tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool) and [Code execution tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/code-execution-tool) guides on the Anthropic docs.

@@ -46,3 +46,7 @@ foreach ($stream as $response) {
 ```
 
 Each iteration gives you the next chunk of the completion text.
+
+---
+
+For the full specification, see the [Text Completions API reference](https://platform.claude.com/docs/en/api/completions/create) on the Anthropic docs.

@@ -234,3 +234,7 @@ $stream->meta(); // MetaInformation object with rate limits
 ```
 
 See [Meta Information](../reference/meta-information.md) for details on what's available.
+
+---
+
+For the full event format and streaming specification, see the [Streaming guide](https://platform.claude.com/docs/en/build-with-claude/streaming) on the Anthropic docs.
