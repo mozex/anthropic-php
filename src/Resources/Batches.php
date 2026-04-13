@@ -19,7 +19,7 @@ final class Batches implements BatchesContract
     /**
      * Creates a Message Batch.
      *
-     * @see https://docs.anthropic.com/en/api/creating-message-batches
+     * @see https://platform.claude.com/docs/en/api/messages/batches/create
      *
      * @param  array<string, mixed>  $parameters
      */
@@ -36,7 +36,7 @@ final class Batches implements BatchesContract
     /**
      * Retrieves a Message Batch.
      *
-     * @see https://docs.anthropic.com/en/api/retrieving-message-batches
+     * @see https://platform.claude.com/docs/en/api/messages/batches/retrieve
      */
     public function retrieve(string $id): BatchResponse
     {
@@ -51,7 +51,7 @@ final class Batches implements BatchesContract
     /**
      * Lists Message Batches.
      *
-     * @see https://docs.anthropic.com/en/api/listing-message-batches
+     * @see https://platform.claude.com/docs/en/api/messages/batches/list
      *
      * @param  array<string, mixed>  $parameters
      */
@@ -68,7 +68,7 @@ final class Batches implements BatchesContract
     /**
      * Cancels a Message Batch.
      *
-     * @see https://docs.anthropic.com/en/api/canceling-message-batches
+     * @see https://platform.claude.com/docs/en/api/messages/batches/cancel
      */
     public function cancel(string $id): BatchResponse
     {
@@ -83,7 +83,7 @@ final class Batches implements BatchesContract
     /**
      * Deletes a Message Batch.
      *
-     * @see https://docs.anthropic.com/en/api/deleting-message-batches
+     * @see https://platform.claude.com/docs/en/api/messages/batches/delete
      */
     public function delete(string $id): DeletedBatchResponse
     {
@@ -98,7 +98,7 @@ final class Batches implements BatchesContract
     /**
      * Retrieves Message Batch results.
      *
-     * @see https://docs.anthropic.com/en/api/retrieving-message-batch-results
+     * @see https://platform.claude.com/docs/en/api/messages/batches/results
      */
     public function results(string $id): BatchResultResponse
     {

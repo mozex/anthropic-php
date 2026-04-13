@@ -11,7 +11,7 @@ interface CompletionsContract
     /**
      * Creates a completion for the provided prompt and parameters
      *
-     * @see https://docs.anthropic.com/claude/reference/complete_post
+     * @see https://platform.claude.com/docs/en/api/completions/create
      *
      * @param  array<string, mixed>  $parameters
      */
@@ -20,7 +20,7 @@ interface CompletionsContract
     /**
      * Creates a streamed completion for the provided prompt and parameters
      *
-     * @see https://docs.anthropic.com/claude/reference/streaming
+     * @see https://platform.claude.com/docs/en/build-with-claude/streaming
      *
      * @param  array<string, mixed>  $parameters
      * @return StreamResponse<CreateStreamedResponse>

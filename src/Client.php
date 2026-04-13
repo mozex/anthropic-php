@@ -24,7 +24,7 @@ final class Client implements ClientContract
     /**
      * The Text Completions API is a legacy API. We recommend using the Messages API going forward.
      *
-     * @see https://docs.anthropic.com/claude/reference/complete_post
+     * @see https://platform.claude.com/docs/en/api/completions/create
      */
     public function completions(): Completions
     {
@@ -35,7 +35,7 @@ final class Client implements ClientContract
      * Send a structured list of input messages with text and/or image content, and the model will
      * generate the next message in the conversation.
      *
-     * @see https://docs.anthropic.com/claude/reference/messages_post
+     * @see https://platform.claude.com/docs/en/api/messages/create
      */
     public function messages(): Messages
     {
@@ -45,7 +45,7 @@ final class Client implements ClientContract
     /**
      * List and retrieve information about available models.
      *
-     * @see https://docs.anthropic.com/en/api/models
+     * @see https://platform.claude.com/docs/en/api/models
      */
     public function models(): Models
     {
@@ -55,7 +55,7 @@ final class Client implements ClientContract
     /**
      * Create, retrieve, list, cancel, and delete Message Batches.
      *
-     * @see https://docs.anthropic.com/en/api/creating-message-batches
+     * @see https://platform.claude.com/docs/en/api/messages/batches/create
      */
     public function batches(): Batches
     {

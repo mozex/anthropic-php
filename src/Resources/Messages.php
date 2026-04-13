@@ -20,7 +20,7 @@ final class Messages implements MessagesContract
     /**
      * Creates a completion for structured list of input messages
      *
-     * @see https://docs.anthropic.com/claude/reference/messages_post
+     * @see https://platform.claude.com/docs/en/api/messages/create
      *
      * @param  array<string, mixed>  $parameters
      */
@@ -39,7 +39,7 @@ final class Messages implements MessagesContract
     /**
      * Creates a streamed completion for structured list of input messages
      *
-     * @see https://docs.anthropic.com/claude/reference/messages-streaming
+     * @see https://platform.claude.com/docs/en/build-with-claude/streaming
      *
      * @param  array<string, mixed>  $parameters
      * @return StreamResponse<CreateStreamedResponse>
@@ -58,7 +58,7 @@ final class Messages implements MessagesContract
     /**
      * Counts the number of tokens in a message
      *
-     * @see https://docs.anthropic.com/en/api/messages-count-tokens
+     * @see https://platform.claude.com/docs/en/api/messages/count_tokens
      *
      * @param  array<string, mixed>  $parameters
      */

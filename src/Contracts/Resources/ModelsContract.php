@@ -10,7 +10,7 @@ interface ModelsContract
     /**
      * Lists the currently available models.
      *
-     * @see https://docs.anthropic.com/en/api/models-list
+     * @see https://platform.claude.com/docs/en/api/models/list
      *
      * @param  array<string, mixed>  $parameters
      */
@@ -19,7 +19,7 @@ interface ModelsContract
     /**
      * Gets information about a specific model.
      *
-     * @see https://docs.anthropic.com/en/api/models-get
+     * @see https://platform.claude.com/docs/en/api/models/retrieve
      */
     public function retrieve(string $model): RetrieveResponse;
 }
