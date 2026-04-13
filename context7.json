@@ -3,6 +3,6 @@
     "url": "https://context7.com/mozex/anthropic-php",
     "public_key": "pk_2dXAZIEpHP6qQeGGTuyQt",
     "projectTitle": "Anthropic PHP",
-    "description": "PHP client for the Anthropic Claude API — messages, streaming, tool use, vision, batch processing, and more.",
+    "description": "PHP client for the Anthropic API: messages, streaming, tool use, thinking, web search, code execution, batches, and more.",
     "folders": []
 }

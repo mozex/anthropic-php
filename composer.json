@@ -1,7 +1,7 @@
 {
     "name": "mozex/anthropic-php",
-    "description": "PHP client for the Anthropic Claude API — messages, streaming, tool use, vision, batch processing, and more.",
-    "keywords": ["php", "anthropic", "claude", "sdk", "api", "client", "ai", "llm", "nlp", "chatbot", "streaming", "generative-ai", "text-generation", "claude-opus", "claude-sonnet", "claude-haiku"],
+    "description": "PHP client for the Anthropic API: messages, streaming, tool use, thinking, web search, code execution, batches, and more.",
+    "keywords": ["php", "anthropic", "claude", "sdk", "api", "client", "ai", "llm", "streaming", "tool-use", "thinking", "generative-ai", "text-generation", "claude-opus", "claude-sonnet", "claude-haiku"],
     "license": "MIT",
     "authors": [
         {
