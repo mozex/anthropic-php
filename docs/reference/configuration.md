@@ -142,7 +142,7 @@ Without a stream handler, calling `createStreamed()` will throw an exception.
 
 ## Timeout configuration
 
-The default timeout depends on your HTTP client. For long-running requests (large context windows, extended thinking, code execution), you'll likely want to increase it.
+The default timeout depends on your HTTP client. For long-running requests (large context windows, [extended thinking](../usage/thinking.md), [code execution](../usage/server-tools.md)), you'll likely want to increase it.
 
 With Guzzle:
 
