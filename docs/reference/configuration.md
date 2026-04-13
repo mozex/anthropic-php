@@ -88,7 +88,7 @@ You only need this for HTTP clients other than Guzzle or Symfony. Both of those 
 
 Guzzle is the most common choice. Everything works out of the box, including streaming:
 
-```php
+```bash
 composer require guzzlehttp/guzzle
 ```
 
@@ -108,7 +108,7 @@ No stream handler needed. The factory detects Guzzle and configures streaming au
 
 Symfony's HTTP client also works without a custom stream handler:
 
-```php
+```bash
 composer require symfony/http-client
 ```
 
