@@ -3,7 +3,7 @@ title: Introduction
 weight: 0
 ---
 
-Anthropic PHP is a community-maintained PHP SDK for the [Anthropic API](https://docs.anthropic.com/en/docs/about-claude/models). It gives you typed access to Claude's Messages API, streaming, tool use, extended thinking, web search, code execution, message batches, and more.
+Anthropic PHP is a community-maintained PHP SDK for the [Anthropic API](https://platform.claude.com/docs/en/about-claude/models/overview). It gives you typed access to Claude's Messages API, streaming, tool use, extended thinking, web search, code execution, message batches, and more.
 
 The SDK follows a pass-through design: your parameters go directly to the API as-is, and responses come back as typed, immutable PHP objects. When Anthropic adds new API parameters, they work immediately without waiting for a client update.
 
