@@ -5,9 +5,19 @@ weight: 0
 
 Anthropic PHP is a community-maintained PHP SDK for the [Anthropic API](https://platform.claude.com/docs/en/about-claude/models/overview). It gives you typed access to Claude's Messages API, streaming, tool use, extended thinking, web search, code execution, message batches, and more.
 
-The SDK follows a pass-through design: your parameters go directly to the API as-is, and responses come back as typed, immutable PHP objects. When Anthropic adds new API parameters, they work immediately without waiting for a client update.
-
 > **Using Laravel?** Check out [Anthropic Laravel](https://github.com/mozex/anthropic-laravel), which wraps this SDK with service container integration, config-based setup, and an `Anthropic` facade.
+
+## Why this package
+
+**Built-in test client.** The `ClientFake` class lets you queue fake responses, run your code, and assert exactly which API requests were sent. No HTTP mocking libraries, no test servers. Drop it into your test suite and go. [See the testing docs →](./reference/testing.md)
+
+**Forward-compatible.** The SDK follows a pass-through design: your parameters go directly to the API as-is, and responses come back as typed, immutable PHP objects. When Anthropic adds new API parameters, they work immediately without waiting for a client update. You don't get blocked by SDK releases.
+
+**Typed, immutable responses.** Every response is a `readonly` PHP object with typed properties. Access `$response->usage->inputTokens` instead of digging through nested arrays. Full IDE autocompletion, zero guesswork.
+
+**Rate limits on every response.** Call `$response->meta()` on any response (including streams and batch results) to get your current request limits, token limits, and reset times. No extra API calls needed.
+
+**Any HTTP client.** Built on PSR-18. Works with Guzzle, Symfony HTTP Client, Buzz, or whatever your project already uses. No vendor lock-in, no framework coupling.
 
 ## Installation
 
