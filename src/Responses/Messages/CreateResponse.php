@@ -12,12 +12,12 @@ use Anthropic\Responses\Meta\MetaInformation;
 use Anthropic\Testing\Responses\Concerns\Messages\Fakeable;
 
 /**
- * @implements ResponseContract<array{id: string, type: string, role: string, model: string, stop_sequence: string|null, usage: array{input_tokens: int, output_tokens: int, cache_creation_input_tokens: int, cache_read_input_tokens: int, cache_creation?: array{ephemeral_5m_input_tokens: int, ephemeral_1h_input_tokens: int}, service_tier?: string, server_tool_use?: array<string, int>}, content: array<int, array{type: string, text?: string|null, id?: string|null, name?: string|null, input?: array<string, mixed>|null, thinking?: string|null, signature?: string|null, data?: string|null, tool_use_id?: string|null, content?: array<int|string, mixed>|null, citations?: array<int|string, mixed>|null}>, stop_reason: string, container?: array{id: string, expires_at: string}}>
+ * @implements ResponseContract<array{id: string, type: string, role: string, model: string, stop_sequence: string|null, usage: array{input_tokens: int, output_tokens: int, cache_creation_input_tokens: int, cache_read_input_tokens: int, cache_creation?: array{ephemeral_5m_input_tokens: int, ephemeral_1h_input_tokens: int}, service_tier?: string, server_tool_use?: array<string, int>, inference_geo?: string}, content: array<int, array{type: string, text?: string|null, id?: string|null, name?: string|null, input?: array<string, mixed>|null, thinking?: string|null, signature?: string|null, data?: string|null, tool_use_id?: string|null, content?: array<int|string, mixed>|null, citations?: array<int|string, mixed>|null, caller?: array{type: string, tool_id?: string|null}|null, file_id?: string|null}>, stop_reason: string, stop_details?: array{type: string, category: string|null, explanation: string|null}, container?: array{id: string, expires_at: string}}>
  */
 final class CreateResponse implements ResponseContract, ResponseHasMetaInformationContract
 {
     /**
-     * @use ArrayAccessible<array{id: string, type: string, role: string, model: string, stop_sequence: string|null, usage: array{input_tokens: int, output_tokens: int, cache_creation_input_tokens: int, cache_read_input_tokens: int, cache_creation?: array{ephemeral_5m_input_tokens: int, ephemeral_1h_input_tokens: int}, service_tier?: string, server_tool_use?: array<string, int>}, content: array<int, array{type: string, text?: string|null, id?: string|null, name?: string|null, input?: array<string, mixed>|null, thinking?: string|null, signature?: string|null, data?: string|null, tool_use_id?: string|null, content?: array<int|string, mixed>|null, citations?: array<int|string, mixed>|null}>, stop_reason: string, container?: array{id: string, expires_at: string}}>
+     * @use ArrayAccessible<array{id: string, type: string, role: string, model: string, stop_sequence: string|null, usage: array{input_tokens: int, output_tokens: int, cache_creation_input_tokens: int, cache_read_input_tokens: int, cache_creation?: array{ephemeral_5m_input_tokens: int, ephemeral_1h_input_tokens: int}, service_tier?: string, server_tool_use?: array<string, int>, inference_geo?: string}, content: array<int, array{type: string, text?: string|null, id?: string|null, name?: string|null, input?: array<string, mixed>|null, thinking?: string|null, signature?: string|null, data?: string|null, tool_use_id?: string|null, content?: array<int|string, mixed>|null, citations?: array<int|string, mixed>|null, caller?: array{type: string, tool_id?: string|null}|null, file_id?: string|null}>, stop_reason: string, stop_details?: array{type: string, category: string|null, explanation: string|null}, container?: array{id: string, expires_at: string}}>
      */
     use ArrayAccessible;
 
@@ -35,6 +35,7 @@ final class CreateResponse implements ResponseContract, ResponseHasMetaInformati
         public readonly string $model,
         public readonly ?string $stop_sequence,
         public readonly string $stop_reason,
+        public readonly ?CreateResponseStopDetails $stop_details,
         public readonly array $content,
         public readonly CreateResponseUsage $usage,
         public readonly ?array $container,
@@ -44,7 +45,7 @@ final class CreateResponse implements ResponseContract, ResponseHasMetaInformati
     /**
      * Acts as static factory, and returns a new Response instance.
      *
-     * @param  array{id: string, type: string, role: string, model: string, stop_sequence: string|null, usage: array{input_tokens: int, output_tokens: int, cache_creation_input_tokens?: int|null, cache_read_input_tokens?: int|null, cache_creation?: array{ephemeral_5m_input_tokens: int, ephemeral_1h_input_tokens: int}|null, service_tier?: string|null, server_tool_use?: array{web_search_requests?: int, web_fetch_requests?: int, code_execution_requests?: int, tool_search_requests?: int}|null}, content: array<int, array{type: string, text?: string|null, id?: string|null, name?: string|null, input?: array<string, mixed>|null, thinking?: string|null, signature?: string|null, data?: string|null, tool_use_id?: string|null, content?: array<int|string, mixed>|null, citations?: array<int|string, mixed>|null}>, stop_reason: string, container?: array{id: string, expires_at: string}|null}  $attributes
+     * @param  array{id: string, type: string, role: string, model: string, stop_sequence: string|null, usage: array{input_tokens: int, output_tokens: int, cache_creation_input_tokens?: int|null, cache_read_input_tokens?: int|null, cache_creation?: array{ephemeral_5m_input_tokens: int, ephemeral_1h_input_tokens: int}|null, service_tier?: string|null, server_tool_use?: array{web_search_requests?: int, web_fetch_requests?: int, code_execution_requests?: int, tool_search_requests?: int}|null, inference_geo?: string|null}, content: array<int, array{type: string, text?: string|null, id?: string|null, name?: string|null, input?: array<string, mixed>|null, thinking?: string|null, signature?: string|null, data?: string|null, tool_use_id?: string|null, content?: array<int|string, mixed>|null, citations?: array<int|string, mixed>|null, caller?: array{type: string, tool_id?: string|null}|null, file_id?: string|null}>, stop_reason: string, stop_details?: array{type: string, category?: string|null, explanation?: string|null}|null, container?: array{id: string, expires_at: string}|null}  $attributes
      */
     public static function from(array $attributes, MetaInformation $meta): self
     {
@@ -59,6 +60,7 @@ final class CreateResponse implements ResponseContract, ResponseHasMetaInformati
             $attributes['model'],
             $attributes['stop_sequence'],
             $attributes['stop_reason'],
+            isset($attributes['stop_details']) ? CreateResponseStopDetails::from($attributes['stop_details']) : null,
             $content,
             CreateResponseUsage::from($attributes['usage']),
             $attributes['container'] ?? null,
@@ -84,6 +86,10 @@ final class CreateResponse implements ResponseContract, ResponseHasMetaInformati
             ),
             'stop_reason' => $this->stop_reason,
         ];
+
+        if ($this->stop_details !== null) {
+            $result['stop_details'] = $this->stop_details->toArray();
+        }
 
         if ($this->container !== null) {
             $result['container'] = $this->container;

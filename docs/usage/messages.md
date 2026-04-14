@@ -240,6 +240,65 @@ $response->stop_sequence; // '```'
 
 When Claude hits a stop sequence, `stop_reason` is `'stop_sequence'` and `stop_sequence` tells you which one matched.
 
+## Handling refusals
+
+When safety classifiers intervene mid-generation, the API returns `stop_reason: 'refusal'` along with a `stop_details` object that explains why. The response is otherwise well-formed, so you can treat it like any other completion and just branch on `stop_reason`:
+
+```php
+$response = $client->messages()->create([
+    'model' => 'claude-sonnet-4-6',
+    'max_tokens' => 1024,
+    'messages' => [
+        ['role' => 'user', 'content' => $userPrompt],
+    ],
+]);
+
+if ($response->stop_reason === 'refusal') {
+    $response->stop_details->type;        // 'refusal'
+    $response->stop_details->category;    // 'cyber', 'bio', or null
+    $response->stop_details->explanation; // human-readable text, or null
+}
+```
+
+`stop_details` is only populated on refusal responses; on a normal completion it's `null`. The `explanation` text isn't guaranteed to be stable between requests, so don't parse it. Treat `category` as the machine-readable signal and show `explanation` to the user if you need to display something.
+
+## The `pause_turn` stop reason
+
+Long-running turns that hit internal limits come back with `stop_reason: 'pause_turn'` instead of `'end_turn'`. The response is valid and complete for the work done so far. To let Claude continue, send the same response back as the next assistant message:
+
+```php
+$response = $client->messages()->create([
+    'model' => 'claude-sonnet-4-6',
+    'max_tokens' => 8192,
+    'messages' => $messages,
+]);
+
+while ($response->stop_reason === 'pause_turn') {
+    $messages[] = [
+        'role' => 'assistant',
+        'content' => array_map(fn ($block) => $block->toArray(), $response->content),
+    ];
+
+    $response = $client->messages()->create([
+        'model' => 'claude-sonnet-4-6',
+        'max_tokens' => 8192,
+        'messages' => $messages,
+    ]);
+}
+```
+
+You don't need any special parameter to resume, just echo the paused content back in the next turn. If you don't want to resume, leave it as is and treat it like a normal reply.
+
+## Inference region
+
+Responses include the geographic region that processed the request:
+
+```php
+$response->usage->inferenceGeo; // 'us', 'eu', or null
+```
+
+Useful for data-residency logging or routing decisions. The field is `null` when the API doesn't report a region.
+
 ---
 
 For the full list of parameters, content block types, and the latest API changes, see the [Messages API reference](https://platform.claude.com/docs/en/api/messages/create) on the Anthropic docs.

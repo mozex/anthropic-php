@@ -2,6 +2,8 @@
 
 use Anthropic\Responses\Messages\CreateResponse;
 use Anthropic\Responses\Messages\CreateResponseContent;
+use Anthropic\Responses\Messages\CreateResponseContentCaller;
+use Anthropic\Responses\Messages\CreateResponseStopDetails;
 use Anthropic\Responses\Messages\CreateResponseUsage;
 use Anthropic\Responses\Meta\MetaInformation;
 
@@ -16,10 +18,77 @@ test('from', function () {
         ->model->toBe('claude-sonnet-4-6')
         ->stop_sequence->toBeNull()
         ->stop_reason->toBe('end_turn')
+        ->stop_details->toBeNull()
         ->content->toBeArray()->toHaveCount(1)
         ->content->each->toBeInstanceOf(CreateResponseContent::class)
         ->usage->toBeInstanceOf(CreateResponseUsage::class)
         ->meta()->toBeInstanceOf(MetaInformation::class);
+});
+
+test('from refusal response', function () {
+    $completion = CreateResponse::from(messagesCompletionWithRefusal(), meta());
+
+    expect($completion)
+        ->toBeInstanceOf(CreateResponse::class)
+        ->stop_reason->toBe('refusal')
+        ->stop_details->toBeInstanceOf(CreateResponseStopDetails::class);
+
+    expect($completion->stop_details)
+        ->type->toBe('refusal')
+        ->category->toBe('cyber')
+        ->explanation->toBe('This request was flagged for a cybersecurity policy violation.');
+});
+
+test('to array from refusal response', function () {
+    $completion = CreateResponse::from(messagesCompletionWithRefusal(), meta());
+
+    expect($completion->toArray())
+        ->toBeArray()
+        ->toBe(messagesCompletionWithRefusal());
+});
+
+test('from tool calls response with caller', function () {
+    $completion = CreateResponse::from(messagesCompletionWithToolCallsAndCaller(), meta());
+
+    expect($completion->content[0])
+        ->type->toBe('tool_use')
+        ->caller->toBeInstanceOf(CreateResponseContentCaller::class);
+
+    expect($completion->content[0]->caller)
+        ->type->toBe('direct')
+        ->tool_id->toBeNull();
+
+    expect($completion->content[1])
+        ->type->toBe('server_tool_use')
+        ->caller->toBeInstanceOf(CreateResponseContentCaller::class);
+
+    expect($completion->content[1]->caller)
+        ->type->toBe('code_execution_20250825')
+        ->tool_id->toBe('srvtoolu_parentCodeExec01');
+});
+
+test('to array from tool calls response with caller', function () {
+    $completion = CreateResponse::from(messagesCompletionWithToolCallsAndCaller(), meta());
+
+    expect($completion->toArray())
+        ->toBeArray()
+        ->toBe(messagesCompletionWithToolCallsAndCaller());
+});
+
+test('from container upload response', function () {
+    $completion = CreateResponse::from(messagesCompletionWithContainerUpload(), meta());
+
+    expect($completion->content[0])
+        ->type->toBe('container_upload')
+        ->file_id->toBe('file_01ABCDefGhIjKlMnOpQrStUv');
+});
+
+test('to array from container upload response', function () {
+    $completion = CreateResponse::from(messagesCompletionWithContainerUpload(), meta());
+
+    expect($completion->toArray())
+        ->toBeArray()
+        ->toBe(messagesCompletionWithContainerUpload());
 });
 
 test('from tool calls response', function () {

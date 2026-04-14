@@ -43,7 +43,14 @@ test('from with extended usage', function () {
         ->cacheCreation->ephemeral1hInputTokens->toBe(100)
         ->serviceTier->toBe('standard')
         ->serverToolUse->toBeInstanceOf(CreateResponseUsageServerToolUse::class)
-        ->serverToolUse->webSearchRequests->toBe(3);
+        ->serverToolUse->webSearchRequests->toBe(3)
+        ->inferenceGeo->toBe('us');
+});
+
+test('from without inference geo', function () {
+    $result = CreateResponseUsage::from(messagesCompletion()['usage']);
+
+    expect($result)->inferenceGeo->toBeNull();
 });
 
 test('to array', function () {

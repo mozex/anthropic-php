@@ -134,6 +134,7 @@ function messagesCompletionWithExtendedUsage(): array
             'server_tool_use' => [
                 'web_search_requests' => 3,
             ],
+            'inference_geo' => 'us',
         ],
         'content' => [
             [
@@ -175,6 +176,79 @@ function messagesCompletionWithToolCalls(): array
             ],
         ],
         'stop_reason' => 'tool_use',
+    ];
+}
+
+/**
+ * @return array<string, mixed>
+ */
+function messagesCompletionWithToolCallsAndCaller(): array
+{
+    return [
+        'id' => 'msg_019hiOHAEXQwq1PTeETNEBWe',
+        'type' => 'message',
+        'role' => 'assistant',
+        'model' => 'claude-sonnet-4-6',
+        'stop_sequence' => null,
+        'usage' => [
+            'input_tokens' => 10,
+            'output_tokens' => 20,
+            'cache_creation_input_tokens' => 0,
+            'cache_read_input_tokens' => 0,
+        ],
+        'content' => [
+            [
+                'type' => 'tool_use',
+                'id' => 'toolu_016udJr9epWhTNC8Ec1mnVQf',
+                'name' => 'get_weather',
+                'input' => [
+                    'location' => 'San Francisco, CA',
+                ],
+                'caller' => [
+                    'type' => 'direct',
+                ],
+            ],
+            [
+                'type' => 'server_tool_use',
+                'id' => 'srvtoolu_01A2B3C4D5E6F7G8H9',
+                'name' => 'bash_code_execution',
+                'input' => [
+                    'command' => 'ls -la',
+                ],
+                'caller' => [
+                    'type' => 'code_execution_20250825',
+                    'tool_id' => 'srvtoolu_parentCodeExec01',
+                ],
+            ],
+        ],
+        'stop_reason' => 'tool_use',
+    ];
+}
+
+/**
+ * @return array<string, mixed>
+ */
+function messagesCompletionWithContainerUpload(): array
+{
+    return [
+        'id' => 'msg_019hiOHAEXQwq1PTeETNEBWe',
+        'type' => 'message',
+        'role' => 'assistant',
+        'model' => 'claude-sonnet-4-6',
+        'stop_sequence' => null,
+        'usage' => [
+            'input_tokens' => 10,
+            'output_tokens' => 20,
+            'cache_creation_input_tokens' => 0,
+            'cache_read_input_tokens' => 0,
+        ],
+        'content' => [
+            [
+                'type' => 'container_upload',
+                'file_id' => 'file_01ABCDefGhIjKlMnOpQrStUv',
+            ],
+        ],
+        'stop_reason' => 'end_turn',
     ];
 }
 
@@ -290,6 +364,38 @@ function messagesCompletionWithCodeExecution(): array
         'container' => [
             'id' => 'container_123',
             'expires_at' => '2025-03-15T10:30:00Z',
+        ],
+    ];
+}
+
+/**
+ * @return array<string, mixed>
+ */
+function messagesCompletionWithRefusal(): array
+{
+    return [
+        'id' => 'msg_019hiOHAEXQwq1PTeETNEBWe',
+        'type' => 'message',
+        'role' => 'assistant',
+        'model' => 'claude-sonnet-4-6',
+        'stop_sequence' => null,
+        'usage' => [
+            'input_tokens' => 10,
+            'output_tokens' => 5,
+            'cache_creation_input_tokens' => 0,
+            'cache_read_input_tokens' => 0,
+        ],
+        'content' => [
+            [
+                'type' => 'text',
+                'text' => "I can't help with that request.",
+            ],
+        ],
+        'stop_reason' => 'refusal',
+        'stop_details' => [
+            'type' => 'refusal',
+            'category' => 'cyber',
+            'explanation' => 'This request was flagged for a cybersecurity policy violation.',
         ],
     ];
 }

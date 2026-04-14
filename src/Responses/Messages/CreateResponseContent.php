@@ -23,10 +23,12 @@ final class CreateResponseContent
         public readonly ?string $tool_use_id,
         public readonly ?array $content,
         public readonly ?array $citations,
+        public readonly ?CreateResponseContentCaller $caller,
+        public readonly ?string $file_id,
     ) {}
 
     /**
-     * @param  array{type: string, text?: string|null, id?: string|null, name?: string|null, input?: array<string, mixed>|null, thinking?: string|null, signature?: string|null, data?: string|null, tool_use_id?: string|null, content?: array<int|string, mixed>|null, citations?: array<int|string, mixed>|null}  $attributes
+     * @param  array{type: string, text?: string|null, id?: string|null, name?: string|null, input?: array<string, mixed>|null, thinking?: string|null, signature?: string|null, data?: string|null, tool_use_id?: string|null, content?: array<int|string, mixed>|null, citations?: array<int|string, mixed>|null, caller?: array{type: string, tool_id?: string|null}|null, file_id?: string|null}  $attributes
      */
     public static function from(array $attributes): self
     {
@@ -42,11 +44,13 @@ final class CreateResponseContent
             $attributes['tool_use_id'] ?? null,
             $attributes['content'] ?? null,
             $attributes['citations'] ?? null,
+            isset($attributes['caller']) ? CreateResponseContentCaller::from($attributes['caller']) : null,
+            $attributes['file_id'] ?? null,
         );
     }
 
     /**
-     * @return array{type: string, text?: string|null, id?: string|null, name?: string|null, input?: array<string, mixed>|null, thinking?: string|null, signature?: string|null, data?: string|null, tool_use_id?: string|null, content?: array<int|string, mixed>|null, citations?: array<int|string, mixed>|null}
+     * @return array{type: string, text?: string|null, id?: string|null, name?: string|null, input?: array<string, mixed>|null, thinking?: string|null, signature?: string|null, data?: string|null, tool_use_id?: string|null, content?: array<int|string, mixed>|null, citations?: array<int|string, mixed>|null, caller?: array{type: string, tool_id?: string}, file_id?: string|null}
      */
     public function toArray(): array
     {
@@ -60,12 +64,13 @@ final class CreateResponseContent
                 'type' => $this->type,
                 'data' => $this->data,
             ],
-            'tool_use', 'server_tool_use' => [
+            'tool_use', 'server_tool_use' => array_filter([
                 'type' => $this->type,
                 'id' => $this->id,
                 'name' => $this->name,
                 'input' => $this->input,
-            ],
+                'caller' => $this->caller?->toArray(),
+            ], fn (mixed $value): bool => ! is_null($value)),
             'web_search_tool_result',
             'web_fetch_tool_result',
             'code_execution_tool_result',
@@ -75,6 +80,10 @@ final class CreateResponseContent
                 'type' => $this->type,
                 'tool_use_id' => $this->tool_use_id,
                 'content' => $this->content,
+            ],
+            'container_upload' => [
+                'type' => $this->type,
+                'file_id' => $this->file_id,
             ],
             default => array_filter([
                 'type' => $this->type,

@@ -153,6 +153,31 @@ $followUp = $client->messages()->create([
 ]);
 ```
 
+### File uploads
+
+When Claude writes a file inside the container, a `container_upload` block shows up in the response pointing at the stored file:
+
+```php
+foreach ($response->content as $block) {
+    if ($block->type === 'container_upload') {
+        $block->file_id; // 'file_01ABCDefGhIjKlMnOpQrStUv'
+    }
+}
+```
+
+Use the `file_id` with the [Files API](https://platform.claude.com/docs/en/api/files) to download the file, forward it to a user, or reference it in a later request.
+
+### Who invoked a tool
+
+Inside a code execution turn, Claude can call other tools on your behalf (including your own custom tools, via programmatic tool calling). Every `tool_use` and `server_tool_use` block carries a `caller` object so you can tell direct calls from indirect ones:
+
+```php
+$block->caller->type;    // 'direct', 'code_execution_20250825', or 'code_execution_20260120'
+$block->caller->tool_id; // parent server_tool_use id for indirect calls, null for direct
+```
+
+If you're iterating over blocks to execute your own tools, skip any where `caller->type` isn't `'direct'`. Indirect calls have already been handled by the code execution sandbox; running them again would duplicate the work.
+
 ## Result block types
 
 Server tools can produce several result block types depending on what operations Claude performs:

@@ -67,6 +67,19 @@ The `stop_reason` will be `'tool_use'` instead of `'end_turn'` when Claude wants
 $response->stop_reason; // 'tool_use'
 ```
 
+### Who invoked the tool
+
+Every `tool_use` block also carries a `caller` object that says whether Claude asked for the tool directly or whether another server-side tool triggered it:
+
+```php
+$block = $response->content[1];
+
+$block->caller->type;    // 'direct' for normal tool calls
+$block->caller->tool_id; // null when type is 'direct'
+```
+
+When a server tool like code execution calls another tool on your behalf, `caller->type` is a versioned identifier (for example `code_execution_20250825` or `code_execution_20260120`) and `caller->tool_id` points at the parent block's ID. If you've built a tool runner that executes every `tool_use` block it sees, check `caller->type === 'direct'` first so you only run tools Claude asked you to run, not tools the server already handled.
+
 ## Sending tool results back
 
 After executing the tool, you send the result back to Claude in a `tool_result` content block. Include the full conversation history so Claude has context:
