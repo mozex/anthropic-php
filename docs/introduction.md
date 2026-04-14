@@ -21,7 +21,7 @@ Anthropic PHP is a community-maintained PHP SDK for the [Anthropic API](https://
 
 ## Installation
 
-> **Requires [PHP 8.2+](https://php.net/releases/)** - see [all version requirements](https://mozex.dev/docs/anthropic-php/v1/requirements)
+> **Requires [PHP 8.2+](https://www.php.net/releases/)** - see [all version requirements](https://mozex.dev/docs/anthropic-php/v1/requirements)
 
 Install via Composer:
 
