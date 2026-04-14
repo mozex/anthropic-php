@@ -40,6 +40,19 @@ function metaHeadersWithDifferentCases(): array
     ];
 }
 
+function metaHeadersWithPriority(): array
+{
+    return [
+        ...metaHeaders(),
+        'anthropic-priority-input-tokens-limit' => [50000],
+        'anthropic-priority-input-tokens-remaining' => [48000],
+        'anthropic-priority-input-tokens-reset' => ['2024-04-30T15:56:17Z'],
+        'anthropic-priority-output-tokens-limit' => [10000],
+        'anthropic-priority-output-tokens-remaining' => [9500],
+        'anthropic-priority-output-tokens-reset' => ['2024-04-30T15:56:17Z'],
+    ];
+}
+
 function meta(): MetaInformation
 {
     return MetaInformation::from(metaHeaders());

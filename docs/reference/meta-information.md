@@ -67,6 +67,22 @@ $meta->outputTokenLimit->reset;     // '2024-05-01T13:29:17Z'
 
 Each limit object has the same three fields: `limit` (the maximum), `remaining` (how much is left), and `reset` (when it resets, as an ISO 8601 timestamp).
 
+### Priority Tier limits
+
+If your organization is on [Priority Tier](https://platform.claude.com/docs/en/api/service-tiers), two extra rate limits apply on top of the standard ones. They're exposed as typed properties and stay `null` when the request didn't use Priority Tier:
+
+```php
+$meta->priorityInputTokenLimit?->limit;     // 50000
+$meta->priorityInputTokenLimit?->remaining; // 48000
+$meta->priorityInputTokenLimit?->reset;     // '2024-05-01T13:29:17Z'
+
+$meta->priorityOutputTokenLimit?->limit;     // 10000
+$meta->priorityOutputTokenLimit?->remaining; // 9500
+$meta->priorityOutputTokenLimit?->reset;     // '2024-05-01T13:29:17Z'
+```
+
+These track your Priority Tier allocation separately from the shared standard pool. When you want to know whether a request drew from Priority capacity or spilled over into standard capacity, these are the fields to check.
+
 ## Raw header format
 
 The `toArray()` method returns the meta information using the original HTTP header names:
@@ -90,6 +106,8 @@ $meta->toArray();
 //   'request-id' => 'req_012nTzj6kLoP8vZ1SGANvcgR',
 // ]
 ```
+
+Priority Tier headers (`anthropic-priority-input-tokens-*` and `anthropic-priority-output-tokens-*`) are included in the same array when they're present on the response.
 
 ## Custom headers
 

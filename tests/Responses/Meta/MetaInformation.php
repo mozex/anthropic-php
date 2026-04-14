@@ -26,7 +26,37 @@ test('from response headers', function () {
         ->outputTokenLimit->toBeInstanceOf(MetaInformationRateLimit::class)
         ->outputTokenLimit->limit->toBe(5000)
         ->outputTokenLimit->remaining->toBe(4900)
-        ->outputTokenLimit->reset->toBe('2024-04-30T15:56:17Z');
+        ->outputTokenLimit->reset->toBe('2024-04-30T15:56:17Z')
+        ->priorityInputTokenLimit->toBeNull()
+        ->priorityOutputTokenLimit->toBeNull();
+});
+
+test('from response headers with priority tier', function () {
+    $meta = MetaInformation::from((new Response(headers: metaHeadersWithPriority()))->getHeaders());
+
+    expect($meta)
+        ->priorityInputTokenLimit->toBeInstanceOf(MetaInformationRateLimit::class)
+        ->priorityInputTokenLimit->limit->toBe(50000)
+        ->priorityInputTokenLimit->remaining->toBe(48000)
+        ->priorityInputTokenLimit->reset->toBe('2024-04-30T15:56:17Z')
+        ->priorityOutputTokenLimit->toBeInstanceOf(MetaInformationRateLimit::class)
+        ->priorityOutputTokenLimit->limit->toBe(10000)
+        ->priorityOutputTokenLimit->remaining->toBe(9500)
+        ->priorityOutputTokenLimit->reset->toBe('2024-04-30T15:56:17Z');
+
+    expect($meta->custom->toArray())->toBe([]);
+});
+
+test('to array with priority tier headers', function () {
+    $meta = MetaInformation::from(metaHeadersWithPriority());
+
+    expect($meta->toArray())
+        ->toHaveKey('anthropic-priority-input-tokens-limit', 50000)
+        ->toHaveKey('anthropic-priority-input-tokens-remaining', 48000)
+        ->toHaveKey('anthropic-priority-input-tokens-reset', '2024-04-30T15:56:17Z')
+        ->toHaveKey('anthropic-priority-output-tokens-limit', 10000)
+        ->toHaveKey('anthropic-priority-output-tokens-remaining', 9500)
+        ->toHaveKey('anthropic-priority-output-tokens-reset', '2024-04-30T15:56:17Z');
 });
 
 test('from response headers without "request-id"', function () {
