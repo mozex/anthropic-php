@@ -2,6 +2,42 @@
 
 All notable changes to `anthropic-php` will be documented in this file.
 
+## 1.5.0 - 2026-04-14
+
+### What's Changed
+
+#### Added
+
+**Models API**
+
+- Add `maxInputTokens` and `maxTokens` properties to `RetrieveResponse` (and every item returned by `ListResponse`)
+- Add typed `capabilities` tree on model responses: `batch`, `citations`, `codeExecution`, `imageInput`, `pdfInput`, `structuredOutputs`, `thinking` (with `types.adaptive` and `types.enabled`), and `effort` (with `low`, `medium`, `high`, `max` levels)
+- Add `capabilities.contextManagement` as a map keyed by the raw API strategy name (`clear_thinking_20251015`, `clear_tool_uses_20250919`, `compact_20260112`, and any future version), so new strategies Anthropic ships are captured automatically without a package update
+
+**Messages API**
+
+- Add `stop_details` on `CreateResponse` with `type`, `category`, and `explanation` — populated when `stop_reason` is `'refusal'`
+- Add `caller` on `tool_use` and `server_tool_use` content blocks (`type` and `tool_id`) so direct model calls can be distinguished from calls made inside a code execution sandbox
+- Add `container_upload` content block support with `file_id`
+- Add `inferenceGeo` to `CreateResponseUsage` and `CreateStreamedResponseUsage`, surfacing which region handled the request (`'us'`, `'eu'`, or `null`)
+- Document the new `pause_turn` and `refusal` stop reasons and the idiom for resuming paused turns
+
+**Meta information**
+
+- Add `priorityInputTokenLimit` and `priorityOutputTokenLimit` on `MetaInformation`, parsing the six `anthropic-priority-*` headers into typed properties instead of dropping them into the generic `custom` bucket
+
+**Documentation**
+
+- Ship the full documentation site at [mozex.dev/docs/anthropic-php/v1](https://mozex.dev/docs/anthropic-php/v1) with dedicated pages for every feature: introduction, configuration, messages, tool use, server tools, streaming, thinking, citations, batches, token counting, models, completions, meta information, testing, and error handling
+- Every page now links back to the matching Anthropic reference on `platform.claude.com/docs/`
+
+#### Improved
+
+- `tool_use` / `server_tool_use` `toArray()` output now includes the `caller` object when present, so response round-trips stay lossless
+- `MetaInformation` rate-limit headers (including the new priority tier) round-trip cleanly through `toArray()`
+
+**Full Changelog**: https://github.com/mozex/anthropic-php/compare/1.4.0...1.5.0
+
 ## 1.4.0 - 2026-04-01
 
 ### What's Changed
