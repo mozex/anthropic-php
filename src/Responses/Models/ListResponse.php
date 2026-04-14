@@ -12,12 +12,12 @@ use Anthropic\Responses\Meta\MetaInformation;
 use Anthropic\Testing\Responses\Concerns\Models\Fakeable;
 
 /**
- * @implements ResponseContract<array{data: array<int, array{id: string, type: string, created_at: string, display_name: string}>, first_id: string, last_id: string, has_more: bool}>
+ * @implements ResponseContract<array{data: array<int, array{id: string, type: string, created_at: string, display_name: string, max_input_tokens: int, max_tokens: int, capabilities: array{batch: array{supported: bool}, citations: array{supported: bool}, code_execution: array{supported: bool}, context_management: array<string, bool|array{supported: bool}>, effort: array{supported: bool, low: array{supported: bool}, medium: array{supported: bool}, high: array{supported: bool}, max: array{supported: bool}}, image_input: array{supported: bool}, pdf_input: array{supported: bool}, structured_outputs: array{supported: bool}, thinking: array{supported: bool, types: array{adaptive: array{supported: bool}, enabled: array{supported: bool}}}}}>, first_id: string, last_id: string, has_more: bool}>
  */
 final class ListResponse implements ResponseContract, ResponseHasMetaInformationContract
 {
     /**
-     * @use ArrayAccessible<array{data: array<int, array{id: string, type: string, created_at: string, display_name: string}>, first_id: string, last_id: string, has_more: bool}>
+     * @use ArrayAccessible<array{data: array<int, array{id: string, type: string, created_at: string, display_name: string, max_input_tokens: int, max_tokens: int, capabilities: array{batch: array{supported: bool}, citations: array{supported: bool}, code_execution: array{supported: bool}, context_management: array<string, bool|array{supported: bool}>, effort: array{supported: bool, low: array{supported: bool}, medium: array{supported: bool}, high: array{supported: bool}, max: array{supported: bool}}, image_input: array{supported: bool}, pdf_input: array{supported: bool}, structured_outputs: array{supported: bool}, thinking: array{supported: bool, types: array{adaptive: array{supported: bool}, enabled: array{supported: bool}}}}}>, first_id: string, last_id: string, has_more: bool}>
      */
     use ArrayAccessible;
 
@@ -38,7 +38,7 @@ final class ListResponse implements ResponseContract, ResponseHasMetaInformation
     /**
      * Acts as static factory, and returns a new Response instance.
      *
-     * @param  array{data: array<int, array{id: string, type: string, created_at: string, display_name: string}>, first_id: string, last_id: string, has_more: bool}  $attributes
+     * @param  array{data: array<int, array{id: string, type: string, created_at: string, display_name: string, max_input_tokens: int, max_tokens: int, capabilities: array{batch: array{supported: bool}, citations: array{supported: bool}, code_execution: array{supported: bool}, context_management: array<string, bool|array{supported: bool}>, effort: array{supported: bool, low: array{supported: bool}, medium: array{supported: bool}, high: array{supported: bool}, max: array{supported: bool}}, image_input: array{supported: bool}, pdf_input: array{supported: bool}, structured_outputs: array{supported: bool}, thinking: array{supported: bool, types: array{adaptive: array{supported: bool}, enabled: array{supported: bool}}}}}>, first_id: string, last_id: string, has_more: bool}  $attributes
      */
     public static function from(array $attributes, MetaInformation $meta): self
     {
