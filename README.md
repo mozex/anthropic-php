@@ -71,7 +71,7 @@ $client->assertSent(Messages::class, function (string $method, array $parameters
 
 ## Installation
 
-> **Requires [PHP 8.2+](https://php.net/releases/)** - see [all version requirements](https://mozex.dev/docs/anthropic-php/v1/requirements)
+> **Requires [PHP 8.2+](https://www.php.net/releases/)** - see [all version requirements](https://mozex.dev/docs/anthropic-php/v1/requirements)
 
 ```bash
 composer require mozex/anthropic-php
