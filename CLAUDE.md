@@ -37,6 +37,59 @@ When asked to develop a new feature, work on a roadmap item, or add support for 
 3. **Build test fixtures from documentation examples.** Never fabricate fixture values. Extract the exact JSON request/response examples from the docs and use those values verbatim (strings, IDs, signatures, text). This way, tests passing means the code actually handles real API responses correctly. For values the docs truncate with "...", drop the trailing dots but keep the rest as-is. If the docs only show a partial response (e.g., just the `content` array), compose the outer envelope from existing fixture patterns.
 4. **Implement and test.** Write the code, then run `test:unit`, `test:types`, and `test:lint`.
 5. **Update the README** with usage examples that match the documented API, and update this CLAUDE.md if the new feature introduces patterns worth preserving.
+6. **Mirror the change in the Laravel wrapper docs.** See the "Keeping the Laravel wrapper docs in sync" section below. Any feature touching user-facing response shapes, request parameters, or control-flow stop reasons must be reviewed against the Laravel package docs.
+
+## Keeping the Laravel wrapper docs in sync
+
+The Laravel wrapper package (`mozex/anthropic-laravel`) carries its own documentation that intentionally does NOT duplicate this package's docs page-for-page. Instead the wrapper docs act as a **shortened, Laravel-flavored layer** with a footer link back to the equivalent page on `mozex.dev/docs/anthropic-php/v1/...` for full detail.
+
+After every documentation change in this package, open the matching Laravel wrapper page and decide whether to mirror, adapt, or defer. Do not skip this step.
+
+### Page mapping
+
+| PHP doc | Laravel doc |
+|---------|-------------|
+| `docs/usage/messages.md` | `docs/usage/messages.md` |
+| `docs/usage/tool-use.md` | `docs/usage/tool-use.md` |
+| `docs/usage/server-tools.md` | `docs/usage/server-tools.md` |
+| `docs/usage/models.md` | `docs/usage/models.md` |
+| `docs/usage/streaming.md` | `docs/usage/streaming.md` |
+| `docs/usage/thinking.md` | `docs/usage/thinking.md` |
+| `docs/usage/citations.md` | `docs/usage/citations.md` |
+| `docs/usage/batches.md` | `docs/usage/batches.md` |
+| `docs/usage/token-counting.md` | `docs/usage/token-counting.md` |
+| `docs/usage/completions.md` | `docs/usage/completions.md` |
+| `docs/reference/meta-information.md` | `docs/reference/meta-information.md` |
+| `docs/reference/error-handling.md` | `docs/reference/error-handling.md` |
+| `docs/reference/testing.md` | `docs/reference/testing.md` |
+| `docs/reference/configuration.md` | `docs/reference/configuration.md` |
+
+### What belongs in the Laravel docs vs what to defer
+
+**Add (or update) on the Laravel side when:**
+- The feature has a natural Laravel idiom — `Log`, `Cache`, `Queue`/`ShouldQueue`, `Storage`, Eloquent, `auth()`, `config()`, controllers, form requests, middleware.
+- An existing Laravel example would be subtly wrong without the new field. The `tool_use` dispatcher pattern needing a `$block->caller?->type === 'direct'` filter is the canonical example — miss that and users ship a duplicate-execution bug.
+- The feature changes control flow users must handle — new `stop_reason` values, refusal responses, pause-and-resume, rate-limit headers they should throttle on. These usually deserve a code snippet, not just a pointer.
+- The feature is something a Laravel dev will reach for in normal app flow (persisting `container_upload` file IDs on an Eloquent model, caching the model list, etc.).
+
+**Defer to the PHP docs (just ensure the footer link exists) when:**
+- The change is a pure schema detail — optional fields, every nullable, TS SDK union members, full enum lists.
+- The PHP example translates 1:1 with no Laravel twist. Repeating it adds maintenance burden without adding value.
+- It's reference material — full header lists, complete `toArray()` shapes, every block type variant, tool version history.
+- It's a rare edge case. The Laravel page aims for the 80% path; edge cases belong in the PHP docs.
+
+### Style conventions for the Laravel docs
+
+- **Short.** A Laravel page typically runs half the length of its PHP counterpart.
+- **Facade-first.** Every example starts with `use Anthropic\Laravel\Facades\Anthropic;` and calls `Anthropic::messages()->create([...])` rather than `$client->messages()->create(...)`.
+- **Laravel primitives in examples.** Reach for `Log::warning`, `Cache::remember`, `Storage::disk`, `ShouldQueue` jobs, Eloquent relationships, `auth()->id()`, `now()->addHour()`. A plain PHP code sample is a signal the content probably belongs in the PHP docs, not here.
+- **Footer pointer, every page.** Each page ends with a line like: `For ... see the [X page in the PHP docs](https://mozex.dev/docs/anthropic-php/v1/...) or the [Anthropic reference](https://platform.claude.com/docs/en/...)`.
+- **Follow the `human-writing` skill.** No em dashes, no AI-flavored filler ("delve into", "leverage", "it's important to note"), mixed sentence rhythm, contractions on.
+- **Match the existing voice.** Read a neighboring section before writing a new one so the tone and code-comment style are consistent.
+
+### When in doubt
+
+If the PHP doc change added 150+ lines, the Laravel mirror is usually 20-40 lines plus one or two Laravel-idiomatic examples. If you find yourself copying an entire section verbatim, stop and defer to the PHP docs instead.
 
 ## Architecture
 
