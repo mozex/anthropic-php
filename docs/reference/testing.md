@@ -106,6 +106,65 @@ $client = new ClientFake([
 ]);
 ```
 
+### Building a stream from text chunks
+
+For tests that need predictable streamed text (without a fixture file), you can build a fake stream in memory. This helper takes an array of text parts and returns a resource with the full SSE event sequence:
+
+```php
+function fakeStream(array $parts)
+{
+    $events = [];
+
+    $events[] = [
+        'type' => 'message_start',
+        'message' => [
+            'id' => 'msg_test',
+            'type' => 'message',
+            'role' => 'assistant',
+            'model' => 'claude-sonnet-4-6',
+            'content' => [],
+            'stop_reason' => null,
+            'stop_sequence' => null,
+            'usage' => ['input_tokens' => 10, 'output_tokens' => 1],
+        ],
+    ];
+
+    foreach ($parts as $part) {
+        $events[] = [
+            'type' => 'content_block_delta',
+            'index' => 0,
+            'delta' => ['type' => 'text_delta', 'text' => $part],
+        ];
+    }
+
+    $events[] = [
+        'type' => 'message_delta',
+        'delta' => ['stop_reason' => 'end_turn', 'stop_sequence' => null],
+        'usage' => ['output_tokens' => 12],
+    ];
+
+    $events[] = ['type' => 'message_stop'];
+
+    $body = implode("\n\n", array_map(
+        fn (array $event): string => "event: {$event['type']}\ndata: " . json_encode($event),
+        $events,
+    ));
+
+    $handle = fopen('php://memory', 'r+');
+    fwrite($handle, $body);
+    rewind($handle);
+
+    return $handle;
+}
+
+// Use it in a test
+$client = new ClientFake([
+    CreateStreamedResponse::fake(fakeStream(['Hello', ', ', 'world!'])),
+]);
+```
+
+The stream emits `message_start`, three `content_block_delta` events with the text parts, `message_delta`, and `message_stop`. This is enough to test code that reads incremental text without needing an external fixture file.
+
 ## Testing errors
 
 To test error handling, pass an exception as a fake response. It will be thrown when the matching request is made:

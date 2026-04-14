@@ -127,6 +127,77 @@ $response = $client->messages()->create([
 
 The system message isn't part of the `messages` array. It's a separate top-level parameter.
 
+## Vision
+
+Claude can read images in the same request as text. Instead of a string, pass an array of content blocks in the message's `content`:
+
+```php
+$imagePath = '/path/to/photo.jpg';
+
+$response = $client->messages()->create([
+    'model' => 'claude-sonnet-4-6',
+    'max_tokens' => 1024,
+    'messages' => [
+        [
+            'role' => 'user',
+            'content' => [
+                [
+                    'type' => 'text',
+                    'text' => 'What is in this image?',
+                ],
+                [
+                    'type' => 'image',
+                    'source' => [
+                        'type' => 'base64',
+                        'media_type' => 'image/jpeg',
+                        'data' => base64_encode(file_get_contents($imagePath)),
+                    ],
+                ],
+            ],
+        ],
+    ],
+]);
+```
+
+Supported media types are `image/jpeg`, `image/png`, `image/gif`, and `image/webp`. You can detect the MIME type from the file itself with PHP's `finfo`:
+
+```php
+$mimeType = (new finfo(FILEINFO_MIME_TYPE))->file($imagePath);
+```
+
+You can also pass images by URL instead of embedding them:
+
+```php
+[
+    'type' => 'image',
+    'source' => [
+        'type' => 'url',
+        'url' => 'https://example.com/photo.jpg',
+    ],
+]
+```
+
+Multiple images in a single message work too. Add as many image blocks as you need to the content array alongside the text block.
+
+## Tracking users
+
+Pass a `metadata` object with a `user_id` to associate each request with a user in your system. These IDs appear in the Anthropic Console for analytics and abuse detection:
+
+```php
+$response = $client->messages()->create([
+    'model' => 'claude-sonnet-4-6',
+    'max_tokens' => 1024,
+    'metadata' => [
+        'user_id' => $user->uuid,
+    ],
+    'messages' => [
+        ['role' => 'user', 'content' => 'Hello!'],
+    ],
+]);
+```
+
+Use an opaque identifier like a UUID or hash. Don't send personal information like names or email addresses.
+
 ## Passing parameters
 
 This client doesn't validate or transform request parameters. Whatever you pass in the array goes directly to the Anthropic API as JSON. This means:
