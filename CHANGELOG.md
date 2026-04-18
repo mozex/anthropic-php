@@ -2,6 +2,61 @@
 
 All notable changes to `anthropic-php` will be documented in this file.
 
+## 1.7.0 - 2026-04-18
+
+### What's New
+
+#### Files API
+
+Upload a document once and reference it by `file_id` on later Messages calls. Useful for repeated PDFs and images, and for reading outputs produced by the code execution tool and Skills.
+
+Five methods on `$client->files()`:
+
+- `upload(array $parameters)`: multipart upload, returns a `FileResponse`
+- `list(array $parameters = [])`: cursor-paginated listing
+- `retrieveMetadata(string $fileId)`: fetch metadata for a single file
+- `download(string $fileId)`: raw bytes for files produced by code execution or Skills (user-uploaded files are not downloadable)
+- `delete(string $fileId)`: returns a `DeletedFileResponse`
+
+```php
+$file = $client->files()->upload([
+    'file' => fopen('/path/to/doc.pdf', 'r'),
+]);
+
+$response = $client->messages()->create([
+    'model' => 'claude-opus-4-6',
+    'max_tokens' => 1024,
+    'betas' => ['files-api-2025-04-14'],
+    'messages' => [[
+        'role' => 'user',
+        'content' => [
+            ['type' => 'text', 'text' => 'Summarise this.'],
+            ['type' => 'document', 'source' => ['type' => 'file', 'file_id' => $file->id]],
+        ],
+    ]],
+]);
+
+```
+Anthropic currently flags the Files endpoints as beta. The SDK auto-injects the required `anthropic-beta: files-api-2025-04-14` header on every `$client->files()` call, so you don't type the version string. When you reference a `file_id` inside a Messages call, pass `'betas' => ['files-api-2025-04-14']` on that call too; the Messages endpoint also needs the header when a file is referenced.
+
+#### Documentation
+
+New [Files usage guide](https://mozex.dev/docs/anthropic-php/v1/usage/files) covers upload, list, retrieve, download, delete, and Messages integration, including the per-call `betas` pattern for referencing uploaded files.
+
+#### Testing
+
+Every Files response DTO has a `fake()` method for use with `ClientFake`:
+
+- `FileResponse::fake()`
+- `FileListResponse::fake()`
+- `DeletedFileResponse::fake()`
+
+### What's Changed
+
+* Add Files API resource by @mozex in https://github.com/mozex/anthropic-php/pull/17
+
+**Full Changelog**: https://github.com/mozex/anthropic-php/compare/1.6.0...1.7.0
+
 ## 1.6.0 - 2026-04-18
 
 ### What's Changed
