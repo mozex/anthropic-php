@@ -25,6 +25,7 @@ A community-maintained PHP SDK for the [Anthropic API](https://platform.claude.c
   - [Token Counting](https://mozex.dev/docs/anthropic-php/v1/usage/token-counting)
   - [Models](https://mozex.dev/docs/anthropic-php/v1/usage/models)
   - [Batches](https://mozex.dev/docs/anthropic-php/v1/usage/batches)
+  - [Files](https://mozex.dev/docs/anthropic-php/v1/usage/files)
   - [Completions](https://mozex.dev/docs/anthropic-php/v1/usage/completions)
 - Reference
   - [Configuration](https://mozex.dev/docs/anthropic-php/v1/reference/configuration)
