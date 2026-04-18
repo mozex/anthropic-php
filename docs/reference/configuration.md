@@ -115,6 +115,8 @@ Global and per-request combine. If you set `anthropic-beta: interleaved-thinking
 
 Some resources require a specific beta header to work at all. The SDK auto-injects those for you, so you never have to type the version string for the resource you're already using. You only pass `betas` when you want to add additional ones on top.
 
+For how beta headers work, multi-beta syntax, and version naming conventions, see the [Beta headers reference](https://platform.claude.com/docs/en/api/beta-headers) on the Anthropic docs. Individual beta feature names are documented on the page for the feature they gate (Files API, extended cache TTL, interleaved thinking, and so on).
+
 ## HTTP client setup
 
 ### Guzzle
