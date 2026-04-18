@@ -22,12 +22,14 @@ final class Payload
      * Creates a new Request value object.
      *
      * @param  array<string, mixed>  $parameters
+     * @param  list<string>  $betas
      */
     private function __construct(
         private readonly ContentType $contentType,
         private readonly Method $method,
         private readonly ResourceUri $uri,
         private readonly array $parameters = [],
+        private readonly array $betas = [],
     ) {
         // ..
     }
@@ -39,11 +41,9 @@ final class Payload
      */
     public static function list(string $resource, array $parameters = []): self
     {
-        $contentType = ContentType::JSON;
-        $method = Method::GET;
-        $uri = ResourceUri::list($resource);
+        [$parameters, $betas] = self::splitBetas($parameters);
 
-        return new self($contentType, $method, $uri, $parameters);
+        return new self(ContentType::JSON, Method::GET, ResourceUri::list($resource), $parameters, $betas);
     }
 
     /**
@@ -53,11 +53,9 @@ final class Payload
      */
     public static function retrieve(string $resource, string $id, string $suffix = '', array $parameters = []): self
     {
-        $contentType = ContentType::JSON;
-        $method = Method::GET;
-        $uri = ResourceUri::retrieve($resource, $id, $suffix);
+        [$parameters, $betas] = self::splitBetas($parameters);
 
-        return new self($contentType, $method, $uri, $parameters);
+        return new self(ContentType::JSON, Method::GET, ResourceUri::retrieve($resource, $id, $suffix), $parameters, $betas);
     }
 
     /**
@@ -67,11 +65,9 @@ final class Payload
      */
     public static function modify(string $resource, string $id, array $parameters = []): self
     {
-        $contentType = ContentType::JSON;
-        $method = Method::POST;
-        $uri = ResourceUri::modify($resource, $id);
+        [$parameters, $betas] = self::splitBetas($parameters);
 
-        return new self($contentType, $method, $uri, $parameters);
+        return new self(ContentType::JSON, Method::POST, ResourceUri::modify($resource, $id), $parameters, $betas);
     }
 
     /**
@@ -79,11 +75,7 @@ final class Payload
      */
     public static function retrieveContent(string $resource, string $id): self
     {
-        $contentType = ContentType::JSON;
-        $method = Method::GET;
-        $uri = ResourceUri::retrieveContent($resource, $id);
-
-        return new self($contentType, $method, $uri);
+        return new self(ContentType::JSON, Method::GET, ResourceUri::retrieveContent($resource, $id));
     }
 
     /**
@@ -93,11 +85,9 @@ final class Payload
      */
     public static function create(string $resource, array $parameters): self
     {
-        $contentType = ContentType::JSON;
-        $method = Method::POST;
-        $uri = ResourceUri::create($resource);
+        [$parameters, $betas] = self::splitBetas($parameters);
 
-        return new self($contentType, $method, $uri, $parameters);
+        return new self(ContentType::JSON, Method::POST, ResourceUri::create($resource), $parameters, $betas);
     }
 
     /**
@@ -107,11 +97,9 @@ final class Payload
      */
     public static function upload(string $resource, array $parameters): self
     {
-        $contentType = ContentType::MULTIPART;
-        $method = Method::POST;
-        $uri = ResourceUri::upload($resource);
+        [$parameters, $betas] = self::splitBetas($parameters);
 
-        return new self($contentType, $method, $uri, $parameters);
+        return new self(ContentType::MULTIPART, Method::POST, ResourceUri::upload($resource), $parameters, $betas);
     }
 
     /**
@@ -119,11 +107,7 @@ final class Payload
      */
     public static function cancel(string $resource, string $id): self
     {
-        $contentType = ContentType::JSON;
-        $method = Method::POST;
-        $uri = ResourceUri::cancel($resource, $id);
-
-        return new self($contentType, $method, $uri);
+        return new self(ContentType::JSON, Method::POST, ResourceUri::cancel($resource, $id));
     }
 
     /**
@@ -131,11 +115,25 @@ final class Payload
      */
     public static function delete(string $resource, string $id): self
     {
-        $contentType = ContentType::JSON;
-        $method = Method::DELETE;
-        $uri = ResourceUri::delete($resource, $id);
+        return new self(ContentType::JSON, Method::DELETE, ResourceUri::delete($resource, $id));
+    }
 
-        return new self($contentType, $method, $uri);
+    /**
+     * Returns a new Payload with the given betas merged into this one.
+     *
+     * Resources use this to auto-inject the beta header they need (e.g. `files-api-2025-04-14`) while keeping any betas the user already passed via the `betas` parameter.
+     *
+     * @param  list<string>  $betas
+     */
+    public function withBetas(array $betas): self
+    {
+        return new self(
+            $this->contentType,
+            $this->method,
+            $this->uri,
+            $this->parameters,
+            self::dedupeBetas([...$this->betas, ...$betas]),
+        );
     }
 
     /**
@@ -201,6 +199,65 @@ final class Payload
             $request = $request->withHeader($name, $value);
         }
 
+        if ($this->betas !== []) {
+            $request = $request->withHeader('anthropic-beta', self::mergeBetaHeader($request->getHeaderLine('anthropic-beta'), $this->betas));
+        }
+
         return $request;
+    }
+
+    /**
+     * Splits out the `betas` parameter from the request body, turning it into a per-request header.
+     *
+     * @param  array<string, mixed>  $parameters
+     * @return array{0: array<string, mixed>, 1: list<string>}
+     */
+    private static function splitBetas(array $parameters): array
+    {
+        if (! isset($parameters['betas']) || ! is_array($parameters['betas'])) {
+            return [$parameters, []];
+        }
+
+        /** @var array<array-key, mixed> $rawBetas */
+        $rawBetas = $parameters['betas'];
+        unset($parameters['betas']);
+
+        $betas = [];
+        foreach ($rawBetas as $beta) {
+            if (is_string($beta) && trim($beta) !== '') {
+                $betas[] = trim($beta);
+            }
+        }
+
+        return [$parameters, self::dedupeBetas($betas)];
+    }
+
+    /**
+     * Merges a comma-separated beta header string with additional betas, de-duplicating in order of appearance.
+     *
+     * @param  list<string>  $betas
+     */
+    private static function mergeBetaHeader(string $existing, array $betas): string
+    {
+        $existingList = [];
+        if ($existing !== '') {
+            foreach (explode(',', $existing) as $item) {
+                $trimmed = trim($item);
+                if ($trimmed !== '') {
+                    $existingList[] = $trimmed;
+                }
+            }
+        }
+
+        return implode(',', self::dedupeBetas([...$existingList, ...$betas]));
+    }
+
+    /**
+     * @param  list<string>  $betas
+     * @return list<string>
+     */
+    private static function dedupeBetas(array $betas): array
+    {
+        return array_values(array_unique($betas));
     }
 }

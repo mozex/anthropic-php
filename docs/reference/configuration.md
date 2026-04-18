@@ -82,6 +82,39 @@ Custom handler for streaming requests. The handler receives a PSR-7 `RequestInte
 
 You only need this for HTTP clients other than Guzzle or Symfony. Both of those are detected automatically and handled without any extra configuration.
 
+## Beta features
+
+Anthropic's beta features are opt-in via the `anthropic-beta` header. This SDK lets you enable them per request by passing a `betas` array alongside your normal parameters:
+
+```php
+$response = $client->messages()->create([
+    'model' => 'claude-opus-4-6',
+    'max_tokens' => 1024,
+    'messages' => [
+        ['role' => 'user', 'content' => 'Hello!'],
+    ],
+    'betas' => [
+        'interleaved-thinking-2025-05-14',
+        'extended-cache-ttl-2025-04-11',
+    ],
+]);
+```
+
+The SDK pulls `betas` out of the parameters before serialization, so nothing leaks into the JSON body or query string. It becomes a comma-separated `anthropic-beta` header on that one request only.
+
+If some beta is enabled for every request in your app, set it globally on the factory and skip the per-call array:
+
+```php
+$client = Anthropic::factory()
+    ->withApiKey('your-api-key')
+    ->withHttpHeader('anthropic-beta', 'interleaved-thinking-2025-05-14')
+    ->make();
+```
+
+Global and per-request combine. If you set `anthropic-beta: interleaved-thinking-2025-05-14` globally and pass `betas: ['files-api-2025-04-14']` on one call, that call sends both, de-duplicated.
+
+Some resources require a specific beta header to work at all. The SDK auto-injects those for you, so you never have to type the version string for the resource you're already using. You only pass `betas` when you want to add additional ones on top.
+
 ## HTTP client setup
 
 ### Guzzle
