@@ -2,6 +2,14 @@
 
 All notable changes to `anthropic-php` will be documented in this file.
 
+## 1.6.0 - 2026-04-18
+
+### What's Changed
+
+* Add `betas` parameter for per-request beta feature opt-in by @mozex in https://github.com/mozex/anthropic-php/pull/16
+
+**Full Changelog**: https://github.com/mozex/anthropic-php/compare/1.5.0...1.6.0
+
 ## 1.5.0 - 2026-04-14
 
 ### What's Changed
