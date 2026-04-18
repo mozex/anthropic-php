@@ -162,7 +162,7 @@ final class Payload
             if ($this->contentType === ContentType::MULTIPART) {
                 $streamBuilder = new MultipartStreamBuilder($psr17Factory);
 
-                /** @var array<string, StreamInterface|string|int|float|bool|array<int, string>> $parameters */
+                /** @var array<string, StreamInterface|resource|string|int|float|bool|array<int, string>> $parameters */
                 $parameters = $this->parameters;
 
                 foreach ($parameters as $key => $value) {
