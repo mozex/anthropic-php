@@ -8,6 +8,7 @@ use Anthropic\Contracts\ClientContract;
 use Anthropic\Contracts\TransporterContract;
 use Anthropic\Resources\Batches;
 use Anthropic\Resources\Completions;
+use Anthropic\Resources\Files;
 use Anthropic\Resources\Messages;
 use Anthropic\Resources\Models;
 
@@ -60,5 +61,15 @@ final class Client implements ClientContract
     public function batches(): Batches
     {
         return new Batches($this->transporter);
+    }
+
+    /**
+     * Upload, list, retrieve, download, and delete files.
+     *
+     * @see https://platform.claude.com/docs/en/build-with-claude/files
+     */
+    public function files(): Files
+    {
+        return new Files($this->transporter);
     }
 }

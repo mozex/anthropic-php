@@ -10,6 +10,7 @@ use Anthropic\Responses\Messages\StreamResponse as MessagesStreamResponse;
 use Anthropic\Testing\Requests\TestRequest;
 use Anthropic\Testing\Resources\BatchesTestResource;
 use Anthropic\Testing\Resources\CompletionsTestResource;
+use Anthropic\Testing\Resources\FilesTestResource;
 use Anthropic\Testing\Resources\MessagesTestResource;
 use Anthropic\Testing\Resources\ModelsTestResource;
 use PHPUnit\Framework\Assert as PHPUnit;
@@ -139,5 +140,10 @@ class ClientFake implements ClientContract
     public function batches(): BatchesTestResource
     {
         return new BatchesTestResource($this);
+    }
+
+    public function files(): FilesTestResource
+    {
+        return new FilesTestResource($this);
     }
 }
