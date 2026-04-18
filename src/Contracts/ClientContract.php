@@ -4,6 +4,7 @@ namespace Anthropic\Contracts;
 
 use Anthropic\Contracts\Resources\BatchesContract;
 use Anthropic\Contracts\Resources\CompletionsContract;
+use Anthropic\Contracts\Resources\FilesContract;
 use Anthropic\Contracts\Resources\MessagesContract;
 use Anthropic\Contracts\Resources\ModelsContract;
 
@@ -37,4 +38,11 @@ interface ClientContract
      * @see https://platform.claude.com/docs/en/api/messages/batches/create
      */
     public function batches(): BatchesContract;
+
+    /**
+     * Upload, list, retrieve, download, and delete files.
+     *
+     * @see https://platform.claude.com/docs/en/build-with-claude/files
+     */
+    public function files(): FilesContract;
 }
