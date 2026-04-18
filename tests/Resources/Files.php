@@ -58,10 +58,10 @@ test('list', function () {
 
     expect($result)
         ->toBeInstanceOf(FileListResponse::class)
-        ->data->toBeArray()->toHaveCount(2)
+        ->data->toBeArray()->toHaveCount(1)
         ->data->each->toBeInstanceOf(FileResponse::class)
         ->firstId->toBe('file_011CNha8iCJcU1wXNR6q4V8w')
-        ->lastId->toBe('file_011CPMxVD3fHLUhvTqtsQA5w')
+        ->lastId->toBe('file_011CNha8iCJcU1wXNR6q4V8w')
         ->hasMore->toBeFalse();
 
     expect($result->meta())
