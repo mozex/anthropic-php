@@ -12,6 +12,8 @@ permissions:
 jobs:
   lint:
     name: Lint
+    permissions:
+      contents: write
     uses: mozex/reusable-workflows/.github/workflows/code-styling.yml@0cbd7ab3ff42b431460c2438badd2a077ed58222 # main
     with:
       php_version: '8.5'
