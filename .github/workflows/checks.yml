@@ -1,0 +1,68 @@
+name: Checks
+
+on:
+  push:
+    branches: [main, '*.x']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint
+    uses: mozex/reusable-workflows/.github/workflows/code-styling.yml@0cbd7ab3ff42b431460c2438badd2a077ed58222 # main
+    with:
+      php_version: '8.5'
+      test_mode: true
+
+  types:
+    name: Types
+    uses: mozex/reusable-workflows/.github/workflows/code-analysis.yml@0cbd7ab3ff42b431460c2438badd2a077ed58222 # main
+    with:
+      php_version: '8.5'
+
+  type-coverage:
+    name: Type Coverage
+    uses: mozex/reusable-workflows/.github/workflows/type-coverage.yml@0cbd7ab3ff42b431460c2438badd2a077ed58222 # main
+    with:
+      php_version: '8.5'
+      phpunit_config_file: 'phpunit.xml.dist'
+      min: 100
+
+  tests:
+    name: Tests P${{ matrix.php }} - Pest ${{ matrix.pest }} - ${{ matrix.dependency-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        php: [8.2, 8.3, 8.4, 8.5]
+        pest: [3, 4]
+        dependency-version: [prefer-lowest, prefer-stable]
+        exclude:
+          - php: 8.5
+            pest: 3
+          - php: 8.2
+            pest: 4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@7c071dfe9dc99bdf297fa79cb49ea005b9fcadbc # v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, mbstring, zip
+          coverage: none
+
+      - name: Install Pest
+        run: composer require "pestphp/pest:^${{ matrix.pest }}" --dev --no-update --with-all-dependencies
+
+      - name: Install dependencies
+        run: composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction --no-progress
+
+      - name: Tests
+        run: vendor/bin/pest --colors=always
