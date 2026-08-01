@@ -1,5 +1,6 @@
 <?php
 
+use Anthropic\Responses\Messages\CreateResponseContentFallbackModel;
 use Anthropic\Responses\Messages\CreateStreamedResponseContentBlockStart;
 
 test('from first chunk', function () {
@@ -100,5 +101,42 @@ test('to array for a content chunk', function () {
             'name' => null,
             'input' => null,
             'thinking' => null,
+        ]);
+});
+
+test('from first chunk of compaction', function () {
+    $result = CreateStreamedResponseContentBlockStart::from(messagesCompletionStreamCompactionContentBlockStartChunk()['content_block']);
+
+    expect($result)
+        ->type->toBe('compaction')
+        ->text->toBeNull()
+        ->from->toBeNull()
+        ->to->toBeNull();
+});
+
+test('from first chunk of fallback', function () {
+    $result = CreateStreamedResponseContentBlockStart::from(messagesCompletionStreamFallbackContentBlockStartChunk()['content_block']);
+
+    expect($result)
+        ->type->toBe('fallback')
+        ->from->toBeInstanceOf(CreateResponseContentFallbackModel::class)
+        ->from->model->toBe('claude-fable-5')
+        ->to->toBeInstanceOf(CreateResponseContentFallbackModel::class)
+        ->to->model->toBe('claude-opus-4-8');
+});
+
+test('to array from first chunk of fallback', function () {
+    $result = CreateStreamedResponseContentBlockStart::from(messagesCompletionStreamFallbackContentBlockStartChunk()['content_block']);
+
+    expect($result->toArray())
+        ->toBe([
+            'id' => null,
+            'type' => 'fallback',
+            'text' => null,
+            'name' => null,
+            'input' => null,
+            'thinking' => null,
+            'from' => ['model' => 'claude-fable-5'],
+            'to' => ['model' => 'claude-opus-4-8'],
         ]);
 });

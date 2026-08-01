@@ -1,6 +1,8 @@
 <?php
 
 use Anthropic\Responses\Messages\CreateResponseUsageCacheCreation;
+use Anthropic\Responses\Messages\CreateResponseUsageIteration;
+use Anthropic\Responses\Messages\CreateResponseUsageOutputTokensDetails;
 use Anthropic\Responses\Messages\CreateResponseUsageServerToolUse;
 use Anthropic\Responses\Messages\CreateStreamedResponseUsage;
 
@@ -174,5 +176,64 @@ test('to array from last chunk with extended usage', function () {
             'server_tool_use' => [
                 'web_search_requests' => 3,
             ],
+        ]);
+});
+
+test('from last chunk with output tokens details', function () {
+    $result = CreateStreamedResponseUsage::from(messagesCompletionStreamLastChunkWithOutputTokensDetails()['usage']);
+
+    expect($result)
+        ->inputTokens->toBeNull()
+        ->outputTokens->toBe(200)
+        ->outputTokensDetails->toBeInstanceOf(CreateResponseUsageOutputTokensDetails::class)
+        ->outputTokensDetails->thinkingTokens->toBe(150)
+        ->speed->toBeNull()
+        ->iterations->toBeNull();
+});
+
+test('from last chunk with iterations', function () {
+    $result = CreateStreamedResponseUsage::from(messagesCompletionStreamLastChunkWithIterations()['usage']);
+
+    expect($result)
+        ->inputTokens->toBeNull()
+        ->outputTokens->toBe(264)
+        ->speed->toBe('standard')
+        ->iterations->toBeArray()
+        ->iterations->toHaveCount(2);
+
+    expect($result->iterations[1])
+        ->toBeInstanceOf(CreateResponseUsageIteration::class)
+        ->type->toBe('fallback_message')
+        ->model->toBe('claude-opus-4-8')
+        ->inputTokens->toBe(412)
+        ->outputTokens->toBe(264);
+});
+
+test('to array from last chunk with output tokens details', function () {
+    $result = CreateStreamedResponseUsage::from(messagesCompletionStreamLastChunkWithOutputTokensDetails()['usage']);
+
+    expect($result->toArray())
+        ->toBe([
+            'input_tokens' => null,
+            'output_tokens' => 200,
+            'cache_creation_input_tokens' => null,
+            'cache_read_input_tokens' => null,
+            'output_tokens_details' => [
+                'thinking_tokens' => 150,
+            ],
+        ]);
+});
+
+test('to array from last chunk with iterations', function () {
+    $result = CreateStreamedResponseUsage::from(messagesCompletionStreamLastChunkWithIterations()['usage']);
+
+    expect($result->toArray())
+        ->toBe([
+            'input_tokens' => null,
+            'output_tokens' => 264,
+            'cache_creation_input_tokens' => null,
+            'cache_read_input_tokens' => null,
+            'speed' => 'standard',
+            'iterations' => messagesCompletionStreamLastChunkWithIterations()['usage']['iterations'],
         ]);
 });

@@ -9,7 +9,7 @@ final class CreateResponseContent
     /**
      * @param  array<string, mixed>|null  $input
      * @param  array<int|string, mixed>|null  $citations
-     * @param  array<int|string, mixed>|null  $content
+     * @param  array<int|string, mixed>|string|null  $content
      */
     private function __construct(
         public readonly string $type,
@@ -21,14 +21,16 @@ final class CreateResponseContent
         public readonly ?string $signature,
         public readonly ?string $data,
         public readonly ?string $tool_use_id,
-        public readonly ?array $content,
+        public readonly array|string|null $content,
         public readonly ?array $citations,
         public readonly ?CreateResponseContentCaller $caller,
         public readonly ?string $file_id,
+        public readonly ?CreateResponseContentFallbackModel $from,
+        public readonly ?CreateResponseContentFallbackModel $to,
     ) {}
 
     /**
-     * @param  array{type: string, text?: string|null, id?: string|null, name?: string|null, input?: array<string, mixed>|null, thinking?: string|null, signature?: string|null, data?: string|null, tool_use_id?: string|null, content?: array<int|string, mixed>|null, citations?: array<int|string, mixed>|null, caller?: array{type: string, tool_id?: string|null}|null, file_id?: string|null}  $attributes
+     * @param  array{type: string, text?: string|null, id?: string|null, name?: string|null, input?: array<string, mixed>|null, thinking?: string|null, signature?: string|null, data?: string|null, tool_use_id?: string|null, content?: array<int|string, mixed>|string|null, citations?: array<int|string, mixed>|null, caller?: array{type: string, tool_id?: string|null}|null, file_id?: string|null, from?: array{model: string}|null, to?: array{model: string}|null}  $attributes
      */
     public static function from(array $attributes): self
     {
@@ -46,11 +48,13 @@ final class CreateResponseContent
             $attributes['citations'] ?? null,
             isset($attributes['caller']) ? CreateResponseContentCaller::from($attributes['caller']) : null,
             $attributes['file_id'] ?? null,
+            isset($attributes['from']) ? CreateResponseContentFallbackModel::from($attributes['from']) : null,
+            isset($attributes['to']) ? CreateResponseContentFallbackModel::from($attributes['to']) : null,
         );
     }
 
     /**
-     * @return array{type: string, text?: string|null, id?: string|null, name?: string|null, input?: array<string, mixed>|null, thinking?: string|null, signature?: string|null, data?: string|null, tool_use_id?: string|null, content?: array<int|string, mixed>|null, citations?: array<int|string, mixed>|null, caller?: array{type: string, tool_id?: string}, file_id?: string|null}
+     * @return array{type: string, text?: string|null, id?: string|null, name?: string|null, input?: array<string, mixed>|null, thinking?: string|null, signature?: string|null, data?: string|null, tool_use_id?: string|null, content?: array<int|string, mixed>|string|null, citations?: array<int|string, mixed>|null, caller?: array{type: string, tool_id?: string}, file_id?: string|null, from?: array{model: string}, to?: array{model: string}}
      */
     public function toArray(): array
     {
@@ -85,6 +89,15 @@ final class CreateResponseContent
                 'type' => $this->type,
                 'file_id' => $this->file_id,
             ],
+            'compaction' => [
+                'type' => $this->type,
+                'content' => $this->content,
+            ],
+            'fallback' => array_filter([
+                'type' => $this->type,
+                'from' => $this->from?->toArray(),
+                'to' => $this->to?->toArray(),
+            ], fn (mixed $value): bool => ! is_null($value)),
             default => array_filter([
                 'type' => $this->type,
                 'text' => $this->text,

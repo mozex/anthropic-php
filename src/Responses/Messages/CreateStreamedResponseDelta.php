@@ -18,10 +18,11 @@ final class CreateStreamedResponseDelta
         public readonly ?string $thinking,
         public readonly ?string $signature,
         public readonly ?array $citation,
+        public readonly ?string $content,
     ) {}
 
     /**
-     * @param  array{type?: string, text?: string|null, partial_json?: string|null, stop_reason?: string, stop_sequence?: string|null, thinking?: string|null, signature?: string|null, citation?: array<string, mixed>|null}  $attributes
+     * @param  array{type?: string, text?: string|null, partial_json?: string|null, stop_reason?: string, stop_sequence?: string|null, thinking?: string|null, signature?: string|null, citation?: array<string, mixed>|null, content?: string|null}  $attributes
      */
     public static function from(array $attributes): self
     {
@@ -34,11 +35,12 @@ final class CreateStreamedResponseDelta
             $attributes['thinking'] ?? null,
             $attributes['signature'] ?? null,
             $attributes['citation'] ?? null,
+            $attributes['content'] ?? null,
         );
     }
 
     /**
-     * @return array{type: string|null, text: string|null, partial_json?: string|null, stop_reason: string|null, stop_sequence: string|null, thinking?: string|null, signature?: string|null, citation?: array<string, mixed>}
+     * @return array{type: string|null, text: string|null, partial_json?: string|null, stop_reason: string|null, stop_sequence: string|null, thinking?: string|null, signature?: string|null, citation?: array<string, mixed>, content?: string}
      */
     public function toArray(): array
     {
@@ -63,6 +65,10 @@ final class CreateStreamedResponseDelta
 
         if ($this->citation !== null) {
             $data['citation'] = $this->citation;
+        }
+
+        if ($this->content !== null) {
+            $data['content'] = $this->content;
         }
 
         return $data;

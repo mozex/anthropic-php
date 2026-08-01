@@ -180,3 +180,27 @@ test('to array from last chunk', function () {
             'stop_sequence' => null,
         ]);
 });
+
+test('from compaction delta chunk', function () {
+    $result = CreateStreamedResponseDelta::from(messagesCompletionStreamCompactionDeltaChunk()['delta']);
+
+    expect($result)
+        ->type->toBe('compaction_delta')
+        ->content->toBe('Summary of the conversation: The user requested help building a web scraper')
+        ->text->toBeNull()
+        ->stop_reason->toBeNull()
+        ->stop_sequence->toBeNull();
+});
+
+test('to array for a compaction delta chunk', function () {
+    $result = CreateStreamedResponseDelta::from(messagesCompletionStreamCompactionDeltaChunk()['delta']);
+
+    expect($result->toArray())
+        ->toBe([
+            'type' => 'compaction_delta',
+            'text' => null,
+            'stop_reason' => null,
+            'stop_sequence' => null,
+            'content' => 'Summary of the conversation: The user requested help building a web scraper',
+        ]);
+});

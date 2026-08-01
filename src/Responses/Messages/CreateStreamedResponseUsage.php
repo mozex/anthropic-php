@@ -6,6 +6,9 @@ namespace Anthropic\Responses\Messages;
 
 final class CreateStreamedResponseUsage
 {
+    /**
+     * @param  array<int, CreateResponseUsageIteration>|null  $iterations
+     */
     private function __construct(
         public readonly ?int $inputTokens,
         public readonly ?int $outputTokens,
@@ -15,10 +18,13 @@ final class CreateStreamedResponseUsage
         public readonly ?string $serviceTier,
         public readonly ?CreateResponseUsageServerToolUse $serverToolUse,
         public readonly ?string $inferenceGeo,
+        public readonly ?CreateResponseUsageOutputTokensDetails $outputTokensDetails,
+        public readonly ?string $speed,
+        public readonly ?array $iterations,
     ) {}
 
     /**
-     * @param  array{input_tokens?: int, output_tokens?: int, cache_creation_input_tokens?: int, cache_read_input_tokens?: int, cache_creation?: array{ephemeral_5m_input_tokens: int, ephemeral_1h_input_tokens: int}, service_tier?: string, server_tool_use?: array{web_search_requests?: int, web_fetch_requests?: int, code_execution_requests?: int, tool_search_requests?: int}, inference_geo?: string|null}  $attributes
+     * @param  array{input_tokens?: int, output_tokens?: int, cache_creation_input_tokens?: int, cache_read_input_tokens?: int, cache_creation?: array{ephemeral_5m_input_tokens: int, ephemeral_1h_input_tokens: int}, service_tier?: string, server_tool_use?: array{web_search_requests?: int, web_fetch_requests?: int, code_execution_requests?: int, tool_search_requests?: int}, inference_geo?: string|null, output_tokens_details?: array{thinking_tokens?: int}|null, speed?: string|null, iterations?: array<int, array{type: string, model?: string|null, input_tokens: int, output_tokens: int, cache_read_input_tokens?: int, cache_creation_input_tokens?: int, cache_creation?: array{ephemeral_5m_input_tokens: int, ephemeral_1h_input_tokens: int}|null}>|null}  $attributes
      */
     public static function from(array $attributes): self
     {
@@ -31,11 +37,17 @@ final class CreateStreamedResponseUsage
             $attributes['service_tier'] ?? null,
             isset($attributes['server_tool_use']) ? CreateResponseUsageServerToolUse::from($attributes['server_tool_use']) : null,
             $attributes['inference_geo'] ?? null,
+            isset($attributes['output_tokens_details']) ? CreateResponseUsageOutputTokensDetails::from($attributes['output_tokens_details']) : null,
+            $attributes['speed'] ?? null,
+            isset($attributes['iterations']) ? array_map(
+                static fn (array $iteration): CreateResponseUsageIteration => CreateResponseUsageIteration::from($iteration),
+                $attributes['iterations'],
+            ) : null,
         );
     }
 
     /**
-     * @return array{input_tokens: int|null, output_tokens: int|null, cache_creation_input_tokens: int|null, cache_read_input_tokens: int|null, cache_creation?: array{ephemeral_5m_input_tokens: int, ephemeral_1h_input_tokens: int}, service_tier?: string, server_tool_use?: array<string, int>, inference_geo?: string}
+     * @return array{input_tokens: int|null, output_tokens: int|null, cache_creation_input_tokens: int|null, cache_read_input_tokens: int|null, cache_creation?: array{ephemeral_5m_input_tokens: int, ephemeral_1h_input_tokens: int}, service_tier?: string, server_tool_use?: array<string, int>, inference_geo?: string, output_tokens_details?: array{thinking_tokens: int}, speed?: string, iterations?: array<int, array{type: string, model?: string, input_tokens: int, output_tokens: int, cache_read_input_tokens: int, cache_creation_input_tokens: int, cache_creation?: array{ephemeral_5m_input_tokens: int, ephemeral_1h_input_tokens: int}}>}
      */
     public function toArray(): array
     {
@@ -60,6 +72,21 @@ final class CreateStreamedResponseUsage
 
         if ($this->inferenceGeo !== null) {
             $data['inference_geo'] = $this->inferenceGeo;
+        }
+
+        if ($this->outputTokensDetails !== null) {
+            $data['output_tokens_details'] = $this->outputTokensDetails->toArray();
+        }
+
+        if ($this->speed !== null) {
+            $data['speed'] = $this->speed;
+        }
+
+        if ($this->iterations !== null) {
+            $data['iterations'] = array_map(
+                static fn (CreateResponseUsageIteration $iteration): array => $iteration->toArray(),
+                $this->iterations,
+            );
         }
 
         return $data;

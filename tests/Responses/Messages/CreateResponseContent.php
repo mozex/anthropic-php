@@ -1,6 +1,7 @@
 <?php
 
 use Anthropic\Responses\Messages\CreateResponseContent;
+use Anthropic\Responses\Messages\CreateResponseContentFallbackModel;
 
 test('from', function () {
     $result = CreateResponseContent::from(messagesCompletion()['content'][0]);
@@ -63,4 +64,39 @@ test('to array from redacted thinking response', function () {
 
     expect($result->toArray())
         ->toBe(messagesCompletionWithThinking()['content'][1]);
+});
+
+test('from fallback block', function () {
+    $result = CreateResponseContent::from(messagesCompletionWithFallback()['content'][0]);
+
+    expect($result)
+        ->type->toBe('fallback')
+        ->from->toBeInstanceOf(CreateResponseContentFallbackModel::class)
+        ->from->model->toBe('claude-fable-5')
+        ->to->toBeInstanceOf(CreateResponseContentFallbackModel::class)
+        ->to->model->toBe('claude-opus-4-8');
+});
+
+test('to array from fallback block', function () {
+    $result = CreateResponseContent::from(messagesCompletionWithFallback()['content'][0]);
+
+    expect($result->toArray())
+        ->toBe(messagesCompletionWithFallback()['content'][0]);
+});
+
+test('from compaction block', function () {
+    $result = CreateResponseContent::from(messagesCompletionWithCompaction()['content'][0]);
+
+    expect($result)
+        ->type->toBe('compaction')
+        ->content->toBe('Summary of the conversation: The user requested help building a web scraper')
+        ->from->toBeNull()
+        ->to->toBeNull();
+});
+
+test('to array from compaction block', function () {
+    $result = CreateResponseContent::from(messagesCompletionWithCompaction()['content'][0]);
+
+    expect($result->toArray())
+        ->toBe(messagesCompletionWithCompaction()['content'][0]);
 });

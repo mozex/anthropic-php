@@ -793,3 +793,372 @@ function messagesCompletionStreamWithAdaptiveThinking()
 {
     return fopen(__DIR__.'/Streams/MessagesCompletionCreateWithAdaptiveThinking.txt', 'r');
 }
+
+/**
+ * @return array<string, mixed>
+ */
+function messagesCompletionWithFastMode(): array
+{
+    return [
+        'id' => 'msg_01XFDUDYJgAACzvnptvVoYEL',
+        'type' => 'message',
+        'role' => 'assistant',
+        'model' => 'claude-opus-5',
+        'stop_sequence' => null,
+        'usage' => [
+            'input_tokens' => 8,
+            'output_tokens' => 12,
+            'cache_creation_input_tokens' => 0,
+            'cache_read_input_tokens' => 0,
+            'speed' => 'fast',
+        ],
+        'content' => [
+            [
+                'type' => 'text',
+                'text' => "Hello! I'm Claude, an AI assistant. How can I help you today?",
+            ],
+        ],
+        'stop_reason' => 'end_turn',
+    ];
+}
+
+/**
+ * @return array<string, mixed>
+ */
+function messagesCompletionWithThinkingTokens(): array
+{
+    return [
+        'id' => 'msg_019hiOHAEXQwq1PTeETNEBWe',
+        'type' => 'message',
+        'role' => 'assistant',
+        'model' => 'claude-opus-5',
+        'stop_sequence' => null,
+        'usage' => [
+            'input_tokens' => 10,
+            'output_tokens' => 200,
+            'cache_creation_input_tokens' => 0,
+            'cache_read_input_tokens' => 0,
+            'output_tokens_details' => [
+                'thinking_tokens' => 150,
+            ],
+        ],
+        'content' => [
+            [
+                'type' => 'thinking',
+                'thinking' => 'Let me analyze this step by step...',
+                'signature' => 'WaUjzkypQ2mUEVM36O2Txu',
+            ],
+            [
+                'type' => 'text',
+                'text' => "Hello! I'm Claude, an AI assistant. How can I help you today?",
+            ],
+        ],
+        'stop_reason' => 'end_turn',
+    ];
+}
+
+/**
+ * @return array<string, mixed>
+ */
+function messagesCompletionWithFallback(): array
+{
+    return [
+        'id' => 'msg_01XFUDYJgAACzvnptvVoYEL',
+        'type' => 'message',
+        'role' => 'assistant',
+        'model' => 'claude-opus-4-8',
+        'stop_sequence' => null,
+        'usage' => [
+            'input_tokens' => 412,
+            'output_tokens' => 264,
+            'cache_creation_input_tokens' => 0,
+            'cache_read_input_tokens' => 0,
+            'iterations' => [
+                [
+                    'type' => 'message',
+                    'model' => 'claude-fable-5',
+                    'input_tokens' => 535,
+                    'output_tokens' => 0,
+                    'cache_read_input_tokens' => 0,
+                    'cache_creation_input_tokens' => 0,
+                ],
+                [
+                    'type' => 'fallback_message',
+                    'model' => 'claude-opus-4-8',
+                    'input_tokens' => 412,
+                    'output_tokens' => 264,
+                    'cache_read_input_tokens' => 0,
+                    'cache_creation_input_tokens' => 0,
+                ],
+            ],
+        ],
+        'content' => [
+            [
+                'type' => 'fallback',
+                'from' => ['model' => 'claude-fable-5'],
+                'to' => ['model' => 'claude-opus-4-8'],
+            ],
+            [
+                'type' => 'text',
+                'text' => 'Hi! How can I help you today?',
+            ],
+        ],
+        'stop_reason' => 'end_turn',
+    ];
+}
+
+/**
+ * @return array<string, mixed>
+ */
+function messagesCompletionWithRefusalAndRecommendedModel(): array
+{
+    return [
+        'id' => 'msg_01XFUDYJgAACzvnptvVoYEL',
+        'type' => 'message',
+        'role' => 'assistant',
+        'model' => 'claude-fable-5',
+        'stop_sequence' => null,
+        'usage' => [
+            'input_tokens' => 412,
+            'output_tokens' => 0,
+            'cache_creation_input_tokens' => 0,
+            'cache_read_input_tokens' => 0,
+        ],
+        'content' => [],
+        'stop_reason' => 'refusal',
+        'stop_details' => [
+            'type' => 'refusal',
+            'category' => 'cyber',
+            'explanation' => 'This request was declined because it could enable cyber harm.',
+            'recommended_model' => 'claude-opus-4-8',
+        ],
+    ];
+}
+
+/**
+ * @return array<string, mixed>
+ */
+function messagesCompletionWithCompaction(): array
+{
+    return [
+        'id' => 'msg_019hiOHAEXQwq1PTeETNEBWe',
+        'type' => 'message',
+        'role' => 'assistant',
+        'model' => 'claude-opus-5',
+        'stop_sequence' => null,
+        'usage' => [
+            'input_tokens' => 10,
+            'output_tokens' => 20,
+            'cache_creation_input_tokens' => 0,
+            'cache_read_input_tokens' => 0,
+        ],
+        'content' => [
+            [
+                'type' => 'compaction',
+                'content' => 'Summary of the conversation: The user requested help building a web scraper',
+            ],
+            [
+                'type' => 'text',
+                'text' => "Hello! I'm Claude, an AI assistant. How can I help you today?",
+            ],
+        ],
+        'stop_reason' => 'end_turn',
+    ];
+}
+
+/**
+ * @return array<string, mixed>
+ */
+function messagesCompletionWithDiagnostics(): array
+{
+    return [
+        'id' => 'msg_01Xyz',
+        'type' => 'message',
+        'role' => 'assistant',
+        'model' => 'claude-opus-5',
+        'stop_sequence' => null,
+        'usage' => [
+            'input_tokens' => 42,
+            'output_tokens' => 210,
+            'cache_creation_input_tokens' => 41850,
+            'cache_read_input_tokens' => 0,
+        ],
+        'content' => [
+            [
+                'type' => 'text',
+                'text' => "Hello! I'm Claude, an AI assistant. How can I help you today?",
+            ],
+        ],
+        'stop_reason' => 'end_turn',
+        'diagnostics' => [
+            'cache_miss_reason' => [
+                'type' => 'system_changed',
+                'cache_missed_input_tokens' => 41850,
+            ],
+        ],
+    ];
+}
+
+/**
+ * Usage/context_management shape captured from a live API response on 2026-08-01
+ * (compact-2026-01-12 beta, trigger not reached, claude-sonnet-4-6).
+ *
+ * @return array<string, mixed>
+ */
+function messagesCompletionWithContextManagement(): array
+{
+    return [
+        'id' => 'msg_019hiOHAEXQwq1PTeETNEBWe',
+        'type' => 'message',
+        'role' => 'assistant',
+        'model' => 'claude-sonnet-4-6',
+        'stop_sequence' => null,
+        'usage' => [
+            'input_tokens' => 45989,
+            'output_tokens' => 43,
+            'cache_creation_input_tokens' => 0,
+            'cache_read_input_tokens' => 0,
+            'cache_creation' => [
+                'ephemeral_5m_input_tokens' => 0,
+                'ephemeral_1h_input_tokens' => 0,
+            ],
+            'service_tier' => 'standard',
+            'inference_geo' => 'global',
+            'iterations' => [
+                [
+                    'type' => 'message',
+                    'input_tokens' => 45989,
+                    'output_tokens' => 43,
+                    'cache_read_input_tokens' => 0,
+                    'cache_creation_input_tokens' => 0,
+                    'cache_creation' => [
+                        'ephemeral_5m_input_tokens' => 0,
+                        'ephemeral_1h_input_tokens' => 0,
+                    ],
+                ],
+            ],
+        ],
+        'content' => [
+            [
+                'type' => 'text',
+                'text' => 'The text repeats a single sentence about a fox and an observatory throughout.',
+            ],
+        ],
+        'stop_reason' => 'end_turn',
+        'context_management' => [
+            'applied_edits' => [],
+        ],
+    ];
+}
+
+function messagesCompletionStreamCompactionContentBlockStartChunk(): array
+{
+    return [
+        'type' => 'content_block_start',
+        'index' => 0,
+        'content_block' => [
+            'type' => 'compaction',
+        ],
+    ];
+}
+
+function messagesCompletionStreamCompactionDeltaChunk(): array
+{
+    return [
+        'type' => 'content_block_delta',
+        'index' => 0,
+        'delta' => [
+            'type' => 'compaction_delta',
+            'content' => 'Summary of the conversation: The user requested help building a web scraper',
+        ],
+    ];
+}
+
+function messagesCompletionStreamFallbackContentBlockStartChunk(): array
+{
+    return [
+        'type' => 'content_block_start',
+        'index' => 0,
+        'content_block' => [
+            'type' => 'fallback',
+            'from' => ['model' => 'claude-fable-5'],
+            'to' => ['model' => 'claude-opus-4-8'],
+        ],
+    ];
+}
+
+function messagesCompletionStreamFirstChunkWithDiagnostics(): array
+{
+    return [
+        'type' => 'message_start',
+        'message' => [
+            'id' => 'msg_01YS82gyNJHzAN1xVt2ymmTN',
+            'type' => 'message',
+            'role' => 'assistant',
+            'content' => [],
+            'model' => 'claude-opus-5',
+            'stop_reason' => null,
+            'stop_sequence' => null,
+            'usage' => [
+                'input_tokens' => 42,
+                'output_tokens' => 1,
+            ],
+            'diagnostics' => [
+                'cache_miss_reason' => [
+                    'type' => 'system_changed',
+                    'cache_missed_input_tokens' => 41850,
+                ],
+            ],
+        ],
+    ];
+}
+
+function messagesCompletionStreamLastChunkWithOutputTokensDetails(): array
+{
+    return [
+        'type' => 'message_delta',
+        'delta' => [
+            'stop_reason' => 'end_turn',
+            'stop_sequence' => null,
+        ],
+        'usage' => [
+            'output_tokens' => 200,
+            'output_tokens_details' => [
+                'thinking_tokens' => 150,
+            ],
+        ],
+    ];
+}
+
+function messagesCompletionStreamLastChunkWithIterations(): array
+{
+    return [
+        'type' => 'message_delta',
+        'delta' => [
+            'stop_reason' => 'end_turn',
+            'stop_sequence' => null,
+        ],
+        'usage' => [
+            'output_tokens' => 264,
+            'speed' => 'standard',
+            'iterations' => [
+                [
+                    'type' => 'message',
+                    'model' => 'claude-fable-5',
+                    'input_tokens' => 535,
+                    'output_tokens' => 0,
+                    'cache_read_input_tokens' => 0,
+                    'cache_creation_input_tokens' => 0,
+                ],
+                [
+                    'type' => 'fallback_message',
+                    'model' => 'claude-opus-4-8',
+                    'input_tokens' => 412,
+                    'output_tokens' => 264,
+                    'cache_read_input_tokens' => 0,
+                    'cache_creation_input_tokens' => 0,
+                ],
+            ],
+        ],
+    ];
+}
