@@ -81,6 +81,18 @@ $response->usage->serverToolUse; // null or CreateResponseUsageServerToolUse
 $response->usage->serverToolUse?->webSearchRequests; // 3
 ```
 
+With [thinking](./thinking.md) enabled, `outputTokensDetails` breaks out how many of the billed output tokens went to reasoning:
+
+```php
+$response->usage->outputTokensDetails?->thinkingTokens; // 150
+```
+
+On [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) requests, `speed` reports which speed actually served the response. This matters on models where a fast request silently runs at standard speed instead of erroring:
+
+```php
+$response->usage->speed; // 'fast', 'standard', or null
+```
+
 ### Converting to an array
 
 Every response object has a `toArray()` method that returns the raw data as a PHP array:
@@ -255,12 +267,58 @@ $response = $client->messages()->create([
 
 if ($response->stop_reason === 'refusal') {
     $response->stop_details->type;        // 'refusal'
-    $response->stop_details->category;    // 'cyber', 'bio', or null
+    $response->stop_details->category;    // 'cyber', 'bio', 'frontier_llm', 'reasoning_extraction', 'general_harms', or null
     $response->stop_details->explanation; // human-readable text, or null
 }
 ```
 
 `stop_details` is only populated on refusal responses; on a normal completion it's `null`. The `explanation` text isn't guaranteed to be stable between requests, so don't parse it. Treat `category` as the machine-readable signal and show `explanation` to the user if you need to display something.
+
+### Falling back to another model
+
+On Claude Fable 5 and Opus 5, the API can retry a refused request on another model instead of handing you the refusal. This is in beta. Pass the `fallbacks` parameter with the matching beta header:
+
+```php
+$response = $client->messages()->create([
+    'model' => 'claude-fable-5',
+    'max_tokens' => 1024,
+    'fallbacks' => 'default',
+    'betas' => ['server-side-fallback-2026-07-01'],
+    'messages' => [
+        ['role' => 'user', 'content' => $userPrompt],
+    ],
+]);
+```
+
+The `'default'` mode routes by refusal category, so you never maintain a model list. If you'd rather name the substitutes yourself, pass an array like `[['model' => 'claude-opus-4-8']]` with the `server-side-fallback-2026-06-01` header instead.
+
+When a fallback served the request, the response tells you in three places:
+
+```php
+// The model that actually answered
+$response->model; // 'claude-opus-4-8'
+
+// A fallback content block marks the handoff
+$response->content[0]->type;        // 'fallback'
+$response->content[0]->from->model; // 'claude-fable-5'
+$response->content[0]->to->model;   // 'claude-opus-4-8'
+
+// usage.iterations records every attempt
+foreach ($response->usage->iterations ?? [] as $iteration) {
+    $iteration->type;         // 'message' (declined) or 'fallback_message' (served)
+    $iteration->model;        // which model ran this attempt
+    $iteration->inputTokens;  // billed per attempt, at that model's rates
+    $iteration->outputTokens;
+}
+```
+
+Two edge cases worth knowing. A sticky-served turn (the API remembers this conversation already fell back and routes straight to the fallback model) carries no `fallback` block; detect it by the `fallback_message` entry in `usage->iterations`. And when the fallback model was rate limited, the refusal comes back as-is with `stop_details->recommended_model` naming a model you can retry directly:
+
+```php
+$response->stop_details?->recommended_model; // 'claude-opus-4-8' or null
+```
+
+On the next turn, echo the assistant content back with the `fallback` block exactly where it appeared. The API uses its position to validate the surrounding blocks.
 
 ## The `pause_turn` stop reason
 
@@ -298,6 +356,68 @@ $response->usage->inferenceGeo; // 'us', 'eu', or null
 ```
 
 Useful for data-residency logging or routing decisions. The field is `null` when the API doesn't report a region.
+
+## Server-side compaction
+
+For conversations that grow toward the context window, the compaction beta (`compact-2026-01-12`) lets the API summarize earlier context into a `compaction` content block instead of failing. Enable it through `context_management`:
+
+```php
+$response = $client->messages()->create([
+    'model' => 'claude-opus-5',
+    'max_tokens' => 4096,
+    'betas' => ['compact-2026-01-12'],
+    'context_management' => [
+        'edits' => [
+            ['type' => 'compact_20260112'],
+        ],
+    ],
+    'messages' => $messages,
+]);
+
+foreach ($response->content as $block) {
+    if ($block->type === 'compaction') {
+        $block->content; // 'Summary of the conversation: ...'
+    }
+}
+```
+
+Send `compaction` blocks back unchanged on the next turn. The API uses them to replace the compacted history, so dropping the block, or keeping only its text, silently loses the compaction state.
+
+Under this beta, responses also carry a `context_management` field listing which edits were applied, and `usage->iterations` entries appear even when nothing was compacted. With `pause_after_compaction` enabled, a turn that compacts stops with `stop_reason: 'compaction'` so you can resume on your own terms. Two practical notes from testing this live: the compaction trigger has a 50,000 input-token minimum, and iteration entries here carry no `model` field (unlike fallback iterations).
+
+```php
+$response->context_management; // ['applied_edits' => [...]] or null
+$response->stop_reason;        // 'compaction' when paused after compacting
+```
+
+## Cache diagnostics
+
+If your prompt cache hit rate drops and you don't know why, cache diagnostics tells you where two consecutive requests diverged. It's in beta behind the `cache-diagnosis-2026-04-07` header. Pass the previous response's `id`, and the API compares the two request fingerprints:
+
+```php
+$first = $client->messages()->create([
+    'model' => 'claude-opus-5',
+    'max_tokens' => 1024,
+    'betas' => ['cache-diagnosis-2026-04-07'],
+    'diagnostics' => ['previous_message_id' => null], // opt in on the first turn
+    'messages' => $messages,
+]);
+
+$second = $client->messages()->create([
+    'model' => 'claude-opus-5',
+    'max_tokens' => 1024,
+    'betas' => ['cache-diagnosis-2026-04-07'],
+    'diagnostics' => ['previous_message_id' => $first->id],
+    'messages' => $updatedMessages,
+]);
+
+$second->diagnostics?->cache_miss_reason?->type;                      // 'system_changed'
+$second->diagnostics?->cache_miss_reason?->cache_missed_input_tokens; // 41850
+```
+
+`diagnostics` is `null` when nothing diverged. When it's set but `cache_miss_reason` is `null`, the comparison was still running when the response was built; check the next turn. The reason `type` is one of `model_changed`, `system_changed`, `tools_changed`, `messages_changed`, `previous_message_not_found`, or `unavailable`, and the four `*_changed` types include a `cache_missed_input_tokens` estimate of how much cacheable prefix was lost.
+
+When streaming, `diagnostics` arrives on the `message_start` event's message object.
 
 ---
 

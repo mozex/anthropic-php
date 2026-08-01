@@ -217,6 +217,27 @@ foreach ($stream as $response) {
 
 When using `'display' => 'omitted'`, no `thinking_delta` events are emitted. You'll only get the `signature_delta` followed by text deltas, which gives a faster time-to-first-text-token.
 
+With thinking enabled, the final `message_delta` usage also carries the thinking-token breakdown:
+
+```php
+$response->usage->outputTokensDetails?->thinkingTokens; // 150
+```
+
+## Streaming with compaction
+
+With the [compaction beta](./messages.md#server-side-compaction) enabled, a compacted conversation opens with a `compaction` content block. Unlike text, the whole summary arrives in a single delta:
+
+```php
+// content_block_start
+$response->content_block_start->type; // 'compaction'
+
+// One content_block_delta carrying the full summary
+$response->delta->type;    // 'compaction_delta'
+$response->delta->content; // 'Summary of the conversation: ...'
+```
+
+A `content_block_stop` follows, then the regular blocks begin.
+
 ## Meta information on streams
 
 You can access rate limit headers and request metadata on the stream object itself:

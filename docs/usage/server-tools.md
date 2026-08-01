@@ -24,7 +24,7 @@ $response = $client->messages()->create([
 ]);
 ```
 
-A newer version `web_search_20260209` adds dynamic filtering, where Claude writes code to filter search results before they reach the context window. This requires the [code execution](#code-execution) tool to be enabled alongside it.
+A newer version `web_search_20260209` adds dynamic filtering, where Claude writes code to filter search results before they reach the context window. This requires the [code execution](#code-execution) tool to be enabled alongside it. The latest versions, `web_search_20260318` and `web_fetch_20260318`, add a `response_inclusion` parameter that drops already-consumed result blocks from the response, which keeps agentic conversations smaller.
 
 ### Web search options
 
@@ -111,7 +111,7 @@ $response = $client->messages()->create([
 ]);
 ```
 
-A newer version `code_execution_20260120` adds REPL state persistence and programmatic tool calling from within the sandbox. It's available on Claude Opus 4.5+ and Sonnet 4.5+.
+A newer version `code_execution_20260120` adds REPL state persistence and programmatic tool calling from within the sandbox. It's available on Claude Opus 4.5+ and Sonnet 4.5+. The latest version, `code_execution_20260521`, also discloses the 90-second per-cell execution limit in the tool description so Claude can budget long-running cells.
 
 The response includes the tool call and its result:
 

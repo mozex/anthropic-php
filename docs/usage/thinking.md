@@ -130,6 +130,17 @@ $response = $client->messages()->create([
 
 The `budget_tokens` value must be less than `max_tokens`. This is the maximum number of tokens Claude can use for thinking; it may use fewer.
 
+## Thinking token usage
+
+Thinking is billed as output tokens, even when the text is summarized or omitted. To see how much of the bill was reasoning, read `outputTokensDetails` on the usage object:
+
+```php
+$response->usage->outputTokens;                         // 200
+$response->usage->outputTokensDetails?->thinkingTokens; // 150
+```
+
+When streaming, this breakdown arrives only on the final `message_delta` event.
+
 ## Thinking with tool use
 
 When using adaptive thinking with [tool use](./tool-use.md), interleaved thinking is enabled automatically. This means Claude can reason between tool calls, making it effective for agentic workflows where the model needs to plan its next step based on a tool's result.
