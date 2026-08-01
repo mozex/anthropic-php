@@ -2,6 +2,64 @@
 
 All notable changes to `anthropic-php` will be documented in this file.
 
+## 1.8.0 - 2026-08-01
+
+### What's New
+
+This release brings the response layer up to date with the Anthropic API changes shipped between April and July 2026: new usage fields, server-side fallback, compaction, and cache diagnostics.
+
+#### New usage fields
+
+Three additions to `usage` on Messages responses:
+
+```php
+$response->usage->outputTokensDetails?->thinkingTokens; // how many billed output tokens were reasoning
+$response->usage->speed;                                // 'fast' or 'standard' on fast mode requests
+$response->usage->iterations;                           // per-attempt records under the fallback and compaction betas
+
+```
+When streaming, `outputTokensDetails` arrives on the final `message_delta` event.
+
+#### Server-side fallback (beta)
+
+When a refused request is retried on another model (the `fallbacks` parameter with the `server-side-fallback-2026-07-01` beta header), the response now parses fully:
+
+- `fallback` content blocks mark the handoff: `$block->from->model` and `$block->to->model`
+- `usage->iterations` records every attempt: a `message` entry for a declined model, a `fallback_message` entry for the model that served the turn
+- `stop_details->recommended_model` names a model to retry directly when the fallback itself was rate limited
+- `stop_details->category` now covers `frontier_llm`, `reasoning_extraction`, and `general_harms` alongside `cyber` and `bio`
+
+#### Compaction (beta)
+
+Under the `compact-2026-01-12` beta, responses can include a `compaction` content block whose `content` is a string summary. The SDK now handles that block, the `compaction_delta` stream event, the top-level `context_management` response field, and the `stop_reason: 'compaction'` value that appears with `pause_after_compaction`. All of it was verified against live API responses, including the quirk that iteration entries under this beta carry no `model` key.
+
+```php
+foreach ($response->content as $block) {
+    if ($block->type === 'compaction') {
+        $block->content; // 'Summary of the conversation: ...'
+    }
+}
+
+$response->context_management; // ['applied_edits' => [...]] or null
+
+```
+#### Cache diagnostics (beta)
+
+With the `cache-diagnosis-2026-04-07` header and a `diagnostics` request parameter, the API reports where two consecutive requests diverged:
+
+```php
+$response->diagnostics?->cache_miss_reason?->type;                      // 'system_changed'
+$response->diagnostics?->cache_miss_reason?->cache_missed_input_tokens; // 41850
+
+```
+On streams, `diagnostics` arrives on the `message_start` event.
+
+#### Documentation
+
+The [Messages](https://mozex.dev/docs/anthropic-php/v1/usage/messages), [Thinking](https://mozex.dev/docs/anthropic-php/v1/usage/thinking), [Streaming](https://mozex.dev/docs/anthropic-php/v1/usage/streaming), and [Server Tools](https://mozex.dev/docs/anthropic-php/v1/usage/server-tools) guides now cover refusal handling with fallback, compaction, cache diagnostics, thinking token usage, and the latest server tool versions (`web_search_20260318`, `web_fetch_20260318`, `code_execution_20260521`).
+
+**Full Changelog**: https://github.com/mozex/anthropic-php/compare/1.7.0...1.8.0
+
 ## 1.7.0 - 2026-04-18
 
 ### What's New
@@ -35,6 +93,7 @@ $response = $client->messages()->create([
         ],
     ]],
 ]);
+
 
 ```
 Anthropic currently flags the Files endpoints as beta. The SDK auto-injects the required `anthropic-beta: files-api-2025-04-14` header on every `$client->files()` call, so you don't type the version string. When you reference a `file_id` inside a Messages call, pass `'betas' => ['files-api-2025-04-14']` on that call too; the Messages endpoint also needs the header when a file is referenced.
