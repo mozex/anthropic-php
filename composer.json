@@ -26,9 +26,9 @@
         "laravel/pint": "^1.25.1",
         "mockery/mockery": "^1.6.12",
         "nunomaduro/collision": "^8.8.3",
-        "pestphp/pest": "^3.8.2|^4.1.4",
-        "pestphp/pest-plugin-arch": "^3.1.1|^4.0.0",
-        "pestphp/pest-plugin-type-coverage": "^3.6.1|^4.0.0",
+        "pestphp/pest": "^3.8.2|^4.1.4|^5.0.0",
+        "pestphp/pest-plugin-arch": "^3.1.1|^4.0.0|^5.0.0",
+        "pestphp/pest-plugin-type-coverage": "^3.6.1|^4.0.0|^5.0.1",
         "phpstan/phpstan": "^2.1.45",
         "symfony/var-dumper": "^7.3.5"
     },
