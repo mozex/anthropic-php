@@ -84,7 +84,7 @@ After every documentation change in this package, open the matching Laravel wrap
 - **Facade-first.** Every example starts with `use Anthropic\Laravel\Facades\Anthropic;` and calls `Anthropic::messages()->create([...])` rather than `$client->messages()->create(...)`.
 - **Laravel primitives in examples.** Reach for `Log::warning`, `Cache::remember`, `Storage::disk`, `ShouldQueue` jobs, Eloquent relationships, `auth()->id()`, `now()->addHour()`. A plain PHP code sample is a signal the content probably belongs in the PHP docs, not here.
 - **Footer pointer, every page.** Each page ends with a line like: `For ... see the [X page in the PHP docs](https://mozex.dev/docs/anthropic-php/v1/...) or the [Anthropic reference](https://platform.claude.com/docs/en/...)`.
-- **Follow the `human-writing` skill.** No em dashes, no AI-flavored filler ("delve into", "leverage", "it's important to note"), mixed sentence rhythm, contractions on.
+- **Plain, human prose.** No em dashes, no AI-flavored filler ("delve into", "leverage", "it's important to note"), mixed sentence rhythm, contractions on.
 - **Match the existing voice.** Read a neighboring section before writing a new one so the tone and code-comment style are consistent.
 
 ### When in doubt
