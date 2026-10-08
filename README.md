@@ -1,4 +1,4 @@
-![Anthropic PHP](https://raw.githubusercontent.com/mozex/anthropic-php/main/art/banner.png)
+[![Anthropic PHP](https://raw.githubusercontent.com/mozex/anthropic-php/main/art/banner.png)](https://mozex.dev/docs/anthropic-php)
 
 # Anthropic PHP
 
