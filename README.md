@@ -1,3 +1,5 @@
+![Anthropic PHP](https://raw.githubusercontent.com/mozex/anthropic-php/main/art/banner.png)
+
 # Anthropic PHP
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/mozex/anthropic-php.svg?style=flat-square)](https://packagist.org/packages/mozex/anthropic-php)
