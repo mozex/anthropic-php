@@ -32,12 +32,15 @@ class BaseUri implements StringableContract
      */
     public function toString(): string
     {
+        // A trailing slash would double the one added below.
+        $baseUri = rtrim($this->baseUri, '/');
+
         foreach (['http://', 'https://'] as $protocol) {
-            if (str_starts_with($this->baseUri, $protocol)) {
-                return "{$this->baseUri}/";
+            if (str_starts_with($baseUri, $protocol)) {
+                return "{$baseUri}/";
             }
         }
 
-        return "https://{$this->baseUri}/";
+        return "https://{$baseUri}/";
     }
 }

@@ -149,6 +149,9 @@ class ClientFake implements ClientContract
         return $response;
     }
 
+    /**
+     * @deprecated The Text Completions API is deprecated. Use messages() instead.
+     */
     public function completions(): CompletionsTestResource
     {
         return new CompletionsTestResource($this);

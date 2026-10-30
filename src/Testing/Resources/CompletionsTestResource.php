@@ -10,6 +10,9 @@ use Anthropic\Responses\Completions\CreateResponse;
 use Anthropic\Responses\Completions\StreamResponse;
 use Anthropic\Testing\Resources\Concerns\Testable;
 
+/**
+ * @deprecated The Text Completions API is deprecated. Use the Messages API instead.
+ */
 class CompletionsTestResource implements CompletionsContract
 {
     use Testable;

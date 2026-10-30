@@ -8,6 +8,9 @@ use Anthropic\Responses\Completions\CreateResponse;
 use Anthropic\Responses\Completions\CreateStreamedResponse;
 use Anthropic\Responses\Completions\StreamResponse;
 
+/**
+ * @deprecated The Text Completions API is deprecated. Use the Messages API instead.
+ */
 interface CompletionsContract
 {
     /**

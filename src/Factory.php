@@ -26,6 +26,11 @@ class Factory
     private ?string $apiKey = null;
 
     /**
+     * The API version for the requests.
+     */
+    private ?string $apiVersion = null;
+
+    /**
      * The HTTP client for the requests.
      */
     private ?ClientInterface $httpClient = null;
@@ -62,6 +67,17 @@ class Factory
     }
 
     /**
+     * Sets the API version sent in the anthropic-version header.
+     * If no version is provided the factory will use 2023-06-01.
+     */
+    public function withApiVersion(string $apiVersion): self
+    {
+        $this->apiVersion = trim($apiVersion);
+
+        return $this;
+    }
+
+    /**
      * Sets the HTTP client for the requests.
      * If no client is provided the factory will try to find one using PSR-18 HTTP Client Discovery.
      */
@@ -83,7 +99,7 @@ class Factory
     }
 
     /**
-     * Sets the base URI for the requests.
+     * Sets the base URI for the requests, the full API root including any version path (api.anthropic.com/v1).
      * If no URI is provided the factory will use the default Anthropic API URI.
      */
     public function withBaseUri(string $baseUri): self
@@ -124,7 +140,7 @@ class Factory
             $headers = Headers::withAuthorization(ApiKey::from($this->apiKey));
         }
 
-        $headers = $headers->withCustomHeader('anthropic-version', '2023-06-01');
+        $headers = $headers->withCustomHeader('anthropic-version', $this->apiVersion ?: '2023-06-01');
 
         foreach ($this->headers as $name => $value) {
             $headers = $headers->withCustomHeader($name, $value);

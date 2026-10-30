@@ -16,6 +16,7 @@ interface ClientContract
      * The Text Completions API is a legacy API. We recommend using the Messages API going forward.
      *
      * @see https://platform.claude.com/docs/en/api/completions/create
+     * @deprecated The Text Completions API is deprecated. Use messages() instead.
      */
     public function completions(): CompletionsContract;
 

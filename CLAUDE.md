@@ -105,6 +105,10 @@ Layered design with strict dependency boundaries enforced by architecture tests 
 
 **Entry points:** `Anthropic::client($apiKey)` for quick setup, `Anthropic::factory()` for configurable builder.
 
+**Version and base URI:** `withApiVersion()` sets `anthropic-version` (default `2023-06-01`; a blank value keeps it, and a `withHttpHeader('anthropic-version', ...)` still wins, as custom headers are applied last). `withBaseUri()` takes the full API root, `/v1` included, and `BaseUri` only drops a trailing slash: it never adds a path, so a proxy serving the API at its root keeps working. `ANTHROPIC_BASE_URL` means something else: the official SDKs read it as the URL without `/v1` and always append `/v1/...`, path or not (`https://openrouter.ai/api` becomes `.../api/v1/messages`), so code that reads it appends `/v1` before calling `withBaseUri()`.
+
+**Completions is deprecated:** the resource, `CompletionsContract` and both clients' `completions()` carry `@deprecated`, and PHPStan's deprecation rules fail any caller in `src` outside `src/Testing` that isn't deprecated itself. It gets no new features.
+
 **Request flow:** Parameters pass through as-is to the API. `Payload::create()` wraps them, `HttpTransporter` JSON-encodes and sends them. No parameter validation or transformation happens in this client. This means new API parameters (like `thinking.type`, `output_config.effort`) work automatically without code changes on the request side. New features usually only need response DTO updates, tests, and documentation.
 
 **Errors:** `HttpTransporter::throwIfError()` throws for every status of 400 and above, whatever the body: the API's `error` object when there is one, otherwise an `ErrorException` carrying the status and the first line of the body's text (`RateLimitException` for any 429). Guzzle's streamed requests throw on 4xx and 5xx, so `sendRequest()` unwraps any `BadResponseException` into the same check; any other client exception is a `TransporterException`.

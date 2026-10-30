@@ -11,6 +11,9 @@ use Anthropic\Responses\Completions\StreamResponse;
 use Anthropic\ValueObjects\Transporter\Payload;
 use Anthropic\ValueObjects\Transporter\Response;
 
+/**
+ * @deprecated The Text Completions API is deprecated. Use the Messages API instead.
+ */
 class Completions implements CompletionsContract
 {
     use Concerns\Streamable;
