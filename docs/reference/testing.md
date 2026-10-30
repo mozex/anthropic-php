@@ -144,64 +144,86 @@ $client = new ClientFake([
 ]);
 ```
 
-### Building a stream from text chunks
+### Building a stream from a response or from events
 
-For tests that need predictable streamed text (without a fixture file), you can build a fake stream in memory. This helper takes an array of text parts and returns a resource with the full SSE event sequence:
+To stream a message without a fixture file, pass `fake()` the `CreateResponse` it should stream. The fake sends the events the API would for it: `message_start`, each block opened and filled by its deltas (text, thinking and its signature, a tool call's input as JSON), `message_delta` with the stop reason, then `message_stop`:
 
 ```php
-function fakeStream(array $parts)
-{
-    $events = [];
+use Anthropic\Responses\Messages\CreateResponse;
+use Anthropic\Responses\Messages\CreateStreamedResponse;
+use Anthropic\Testing\Blocks;
 
-    $events[] = [
-        'type' => 'message_start',
-        'message' => [
-            'id' => 'msg_test',
-            'type' => 'message',
-            'role' => 'assistant',
-            'model' => 'claude-sonnet-5-5',
-            'content' => [],
-            'stop_reason' => null,
-            'stop_sequence' => null,
-            'usage' => ['input_tokens' => 10, 'output_tokens' => 1],
-        ],
-    ];
-
-    foreach ($parts as $part) {
-        $events[] = [
-            'type' => 'content_block_delta',
-            'index' => 0,
-            'delta' => ['type' => 'text_delta', 'text' => $part],
-        ];
-    }
-
-    $events[] = [
-        'type' => 'message_delta',
-        'delta' => ['stop_reason' => 'end_turn', 'stop_sequence' => null],
-        'usage' => ['output_tokens' => 12],
-    ];
-
-    $events[] = ['type' => 'message_stop'];
-
-    $body = implode("\n\n", array_map(
-        fn (array $event): string => "event: {$event['type']}\ndata: " . json_encode($event),
-        $events,
-    ));
-
-    $handle = fopen('php://memory', 'r+');
-    fwrite($handle, $body);
-    rewind($handle);
-
-    return $handle;
-}
-
-// Use it in a test
 $client = new ClientFake([
-    CreateStreamedResponse::fake(fakeStream(['Hello', ', ', 'world!'])),
+    CreateStreamedResponse::fake(CreateResponse::fake([
+        'content' => [Blocks::text('Hello, world!')],
+    ])),
 ]);
 ```
 
-The stream emits `message_start`, three `content_block_delta` events with the text parts, `message_delta`, and `message_stop`. This is enough to test code that reads incremental text without needing an external fixture file.
+For exact control, pass the events themselves, each an array with its `type`:
+
+```php
+CreateStreamedResponse::fake([
+    ['type' => 'message_start', 'message' => [...]],
+    ['type' => 'content_block_delta', 'index' => 0, 'delta' => ['type' => 'text_delta', 'text' => 'Hello']],
+    ['type' => 'message_stop'],
+]);
+```
+
+A stream fake carries the same rate-limit headers and request ID as the other fakes, so `meta()` works on it. Pass your own as the second argument: `CreateStreamedResponse::fake($response, ['request-id' => 'req_018EeWyXxfu5pfWkrYcMdjWG'])`.
+
+## Content blocks
+
+`Blocks` builds the content blocks a fake's `content` holds, in the shapes the API sends, with the IDs from the API docs' examples:
+
+```php
+use Anthropic\Testing\Blocks;
+
+CreateResponse::fake([
+    'content' => [
+        Blocks::thinking('Let me check the weather.'),
+        Blocks::toolUse('get_weather', ['location' => 'San Francisco, CA']),
+    ],
+    'stop_reason' => 'tool_use',
+]);
+```
+
+There are `text()` (with optional citations), `toolUse()`, `thinking()`, `serverToolUse()`, `webSearchToolResult()` and `webSearchResult()`. Each takes its fields as arguments, with defaults for the rest.
+
+## Faking batch results
+
+`BatchResultResponse::fake()` takes a list of result lines, as the results endpoint sends them:
+
+```php
+use Anthropic\Responses\Batches\BatchResultResponse;
+
+$client = new ClientFake([
+    BatchResultResponse::fake([
+        ['custom_id' => 'my-first-request', 'result' => ['type' => 'succeeded', 'message' => CreateResponse::fake()->toArray()]],
+        ['custom_id' => 'my-second-request', 'result' => ['type' => 'canceled']],
+    ]),
+]);
+```
+
+Like a stream fake, it takes headers for `meta()` as a second argument.
+
+## Record and replay
+
+`Recorder` runs a test against the real API once and saves what came back to a cassette file, then replays the file on every later run, with no HTTP call and no key. Add it as the client's last middleware, so any middleware before it runs on replays too:
+
+```php
+use Anthropic\Testing\Recorder;
+
+$client = Anthropic::factory()
+    ->withApiKey(getenv('ANTHROPIC_API_KEY') ?: 'replaying')
+    ->withMiddleware(Recorder::cassette(__DIR__.'/cassettes/summary.json', record: getenv('ANTHROPIC_RECORD') ? true : null))
+    ->withRetrySleep(fn (int $milliseconds) => null)
+    ->make();
+```
+
+While the file is missing, the recorder sends each request and saves the answer. Once it exists, it answers each request from the file, in order. A request to another method or path than the one recorded throws, so a test that calls something new tells you to record again. Request bodies and queries aren't saved, so a changed prompt replays the old answer: record again with `record: true` (here, `ANTHROPIC_RECORD=1`). A key the API refuses (a 401) throws, and the cassette is left as it was. For a stream, set `withStreamHandler()` too unless your HTTP client is Guzzle or Symfony.
+
+A cassette keeps each request's method and path, and each answer's status, body (byte for byte: JSON that PHP would write differently and binary bodies are kept as text and base64) and the headers the client reads: `content-type`, `request-id`, `retry-after` and the `anthropic-` rate-limit headers, without `anthropic-organization-id` and `anthropic-workspace-id`. It never keeps a request's headers or body, so your key and prompts stay out of it, but an answer's body is kept as sent, so look a cassette over before you commit it. A retried request is two entries, so a replay retries the same way, and waits its `retry-after` unless `withRetrySleep()` skips the wait as above. The path includes a proxy's prefix, so record and replay with the same base URL.
 
 ## Testing errors
 
