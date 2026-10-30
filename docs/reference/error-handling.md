@@ -14,7 +14,7 @@ use Anthropic\Exceptions\ErrorException;
 
 try {
     $response = $client->messages()->create([
-        'model' => 'claude-sonnet-4-6',
+        'model' => 'claude-sonnet-5-5',
         'max_tokens' => 1024,
         'messages' => [
             ['role' => 'user', 'content' => 'Hello'],
@@ -52,7 +52,7 @@ $e->response; // Psr\Http\Message\ResponseInterface or null
 | 402 | `billing_error` | Issue with billing or payment information |
 | 403 | `permission_error` | API key doesn't have access to the requested resource |
 | 404 | `not_found_error` | Invalid model name or resource ID |
-| 413 | `request_too_large` | Request exceeds the maximum allowed size (32 MB for Messages, 256 MB for Batches) |
+| 413 | `request_too_large` | Request exceeds the maximum allowed size (128 MB for Messages and Token Counting, 256 MB for Batches, on the Claude API; cloud platforms set their own limits) |
 | 429 | `rate_limit_error` | Too many requests (see below) |
 | 500 | `api_error` | Server-side issue |
 | 504 | `timeout_error` | Request timed out while processing; consider using [streaming](../usage/streaming.md) |
@@ -79,7 +79,20 @@ try {
 }
 ```
 
-The `Retry-After` header tells you how many seconds to wait before retrying. It's available on the PSR-7 `response` object.
+The `Retry-After` header tells you how many seconds to wait before retrying. It's available on the PSR-7 `response` object. Not every 429 carries it: once the organization reaches its tier's monthly spend cap, the 429 (with `error.details.error_code` set to `enforced_spend_limit_reached`) has no `Retry-After`, since retrying won't help until access resumes. A spend limit you set yourself returns a 400 instead.
+
+To read it and the other headers as typed values, build a `MetaInformation` from the exception's response:
+
+```php
+use Anthropic\Responses\Meta\MetaInformation;
+
+$meta = MetaInformation::from($e->response?->getHeaders() ?? []);
+
+$meta->retryAfter; // 30, or null without the header
+$meta->requestId;  // 'req_012nTzj6kLoP8vZ1SGANvcgR'
+```
+
+`$e->response` is set on every `ErrorException` the client throws. It's `null` only on one you build yourself with a status code, as in older tests, hence the `?->`.
 
 For more on rate limits, see [Meta Information](./meta-information.md), which covers how to read your current limits and remaining quota from response headers.
 

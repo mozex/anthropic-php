@@ -39,7 +39,7 @@ Create a client with your API key and send a message:
 $client = Anthropic::client('your-api-key');
 
 $response = $client->messages()->create([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'max_tokens' => 1024,
     'messages' => [
         ['role' => 'user', 'content' => 'Hello!'],
@@ -53,7 +53,7 @@ That's the simplest case. The `create` method returns a `CreateResponse` object 
 
 ```php
 $response->id;          // 'msg_01BSy0WCV7QR2adFBauynAX7'
-$response->model;       // 'claude-sonnet-4-6'
+$response->model;       // 'claude-sonnet-5-5'
 $response->stop_reason; // 'end_turn'
 $response->usage->inputTokens;  // 10
 $response->usage->outputTokens; // 19
@@ -66,6 +66,7 @@ For most use cases, `Anthropic::client()` is all you need. When you need more co
 ```php
 $client = Anthropic::factory()
     ->withApiKey('your-api-key')
+    ->withApiVersion('2026-10-21')
     ->withBaseUri('anthropic.example.com/v1')
     ->withHttpClient(new \GuzzleHttp\Client(['timeout' => 120]))
     ->withHttpHeader('X-Custom-Header', 'value')
@@ -79,7 +80,8 @@ $client = Anthropic::factory()
 | Method | Purpose |
 |--------|---------|
 | `withApiKey()` | Your Anthropic API key. Required. |
-| `withBaseUri()` | Override the API endpoint. Defaults to `api.anthropic.com/v1`. Useful for proxies or self-hosted setups. |
+| `withApiVersion()` | The `anthropic-version` header. Defaults to `2023-06-01`; `2026-10-21` rejects some requests the older version accepts. |
+| `withBaseUri()` | Override the API endpoint, `/v1` included. Defaults to `api.anthropic.com/v1`. Useful for proxies or self-hosted setups. |
 | `withHttpClient()` | Provide your own PSR-18 HTTP client instead of auto-discovery. |
 | `withHttpHeader()` | Add custom HTTP headers to every request. |
 | `withQueryParam()` | Add query parameters to every request URL. |
@@ -97,12 +99,12 @@ This documentation covers every feature the client supports:
 - [Streaming](./usage/streaming.md): Stream responses token by token
 - [Tool Use](./usage/tool-use.md): Give Claude custom functions to call
 - [Thinking](./usage/thinking.md): Adaptive and extended thinking for complex reasoning
-- [Server Tools](./usage/server-tools.md): Web search and sandboxed code execution
+- [Server Tools](./usage/server-tools.md): Web search, sandboxed code execution, the MCP connector and the advisor tool
 - [Citations](./usage/citations.md): Source citations from documents and web search
 - [Token Counting](./usage/token-counting.md): Count tokens before sending
 - [Models](./usage/models.md): List and inspect available models
 - [Batches](./usage/batches.md): Process large volumes of requests asynchronously
-- [Completions](./usage/completions.md): Legacy Text Completions API
+- [Completions](./usage/completions.md): The deprecated Text Completions API
 
 **Reference** covers cross-cutting concerns:
 

@@ -13,7 +13,7 @@ Tools are defined in the `tools` array. Each tool needs a `name`, `description`,
 
 ```php
 $response = $client->messages()->create([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'max_tokens' => 1024,
     'tools' => [
         [
@@ -69,7 +69,7 @@ $response->stop_reason; // 'tool_use'
 
 ### Who invoked the tool
 
-Every `tool_use` block also carries a `caller` object that says whether Claude asked for the tool directly or whether another server-side tool triggered it:
+Every `tool_use` block also carries a `caller` object that says whether Claude asked for the tool directly or called it from code it runs in the code execution sandbox ([programmatic tool calling](./server-tools.md#calling-your-tools-from-code-execution)):
 
 ```php
 $block = $response->content[1];
@@ -78,7 +78,7 @@ $block->caller->type;    // 'direct' for normal tool calls
 $block->caller->tool_id; // null when type is 'direct'
 ```
 
-When a server tool like code execution calls another tool on your behalf, `caller->type` is a versioned identifier (for example `code_execution_20250825` or `code_execution_20260120`) and `caller->tool_id` points at the parent block's ID. If you've built a tool runner that executes every `tool_use` block it sees, check `caller->type === 'direct'` first so you only run tools Claude asked you to run, not tools the server already handled.
+For a call made from code, `caller->type` is `code_execution_20260120` and `caller->tool_id` is the `id` of the code execution block that made it. Run it like any other call: the sandbox is paused until your result arrives, and it gives up after about four minutes. Only the answer differs, as the [server tools page](./server-tools.md#calling-your-tools-from-code-execution) explains.
 
 ## Sending tool results back
 
@@ -87,7 +87,7 @@ After executing the tool, you send the result back to Claude in a `tool_result` 
 ```php
 // 1. First request: Claude asks to call a tool
 $response = $client->messages()->create([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'max_tokens' => 1024,
     'tools' => $tools, // same tools array as before
     'messages' => [
@@ -100,7 +100,7 @@ $weatherData = getWeather('San Francisco, CA', 'fahrenheit');
 
 // 3. Second request: send the result back
 $followUp = $client->messages()->create([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'max_tokens' => 1024,
     'tools' => $tools,
     'messages' => [
@@ -147,6 +147,60 @@ foreach ($response->content as $block) {
 ```
 
 Send all results back in a single message.
+
+## Computer and browser toolsets
+
+Computer use and browser use come as toolsets: one entry in `tools` gives Claude a family of member tools (`screenshot`, `left_click`, `navigate`, `read_page` and so on), which your code carries out. Neither needs a beta header:
+
+```php
+$response = $client->messages()->create([
+    'model' => 'claude-opus-5-5',
+    'max_tokens' => 4096,
+    'tools' => [
+        ['type' => 'computer_toolset_20260801'],
+        ['type' => 'browser_toolset_20260801'],
+    ],
+    'messages' => [
+        ['role' => 'user', 'content' => 'Find a picture of a cat.'],
+    ],
+]);
+```
+
+`configs` turns members on or off (`'configs' => ['zoom' => ['enabled' => false]]`). Claude 5.5 models take computer use only through `computer_toolset_20260801` on the Claude API; older models such as Opus 4.6 and Sonnet 4.6 use `computer_20251124` with the `computer-use-2025-11-24` beta.
+
+A call to a member tool has its toolset's name in `toolset_name`:
+
+```php
+$response->content[1]->type;                // 'tool_use'
+$response->content[1]->name;                // 'left_click'
+$response->content[1]->toolset_name;        // 'computer'
+$response->content[1]->input['coordinate']; // [512, 742]
+```
+
+Dispatch on the pair of `toolset_name` and `name`, never on `name` alone: a custom tool in the same request can share a member's name, `screenshot` exists in both toolsets, and a later toolset version can add members. A custom tool's call has `toolset_name` set to `null`. Every result for a member tool must echo the same `toolset_name`, and only member results carry it; the API rejects a result that leaves it out or names another toolset:
+
+```php
+foreach ($response->content as $block) {
+    if ($block->type !== 'tool_use') {
+        continue;
+    }
+
+    $result = match ($block->toolset_name) {
+        'computer' => $computer->run($block->name, $block->input),
+        'browser' => $browser->run($block->name, $block->input),
+        null => executeMyTool($block->name, $block->input),
+    };
+
+    $results[] = array_filter([
+        'type' => 'tool_result',
+        'tool_use_id' => $block->id,
+        'toolset_name' => $block->toolset_name,
+        'content' => $result,
+    ], fn ($value) => $value !== null);
+}
+```
+
+A computer member's result can hold only `text` and `image` blocks. A browser member's can also hold a `browser_state` block, and the tab tools answer with exactly one `browser_state` block.
 
 ## Error results
 
@@ -208,7 +262,7 @@ $response = $client->messages()->create([
 'tool_choice' => ['type' => 'none']
 ```
 
-When using [extended thinking](./thinking.md), only `auto` and `none` are supported. Using `any` or `tool` with thinking enabled returns an error.
+Forcing a tool doesn't work everywhere. Claude Opus 5.5, Sonnet 5.5, Fable 5.1 and Mythos 5.1 return a 400 for `any` and `tool`; use `auto` with [strict tool use](#strict-schema-validation) or structured outputs there. Budget-based [thinking](./thinking.md#budget-based-thinking) (`'type' => 'enabled'`) also supports only `auto` and `none`. Where forcing is accepted, the response starts with the `tool_use` block and has no `thinking` block.
 
 ## Streaming with tool use
 

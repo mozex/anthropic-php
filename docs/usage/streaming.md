@@ -11,7 +11,7 @@ Use `createStreamed()` instead of `create()`. The parameters are the same:
 
 ```php
 $stream = $client->messages()->createStreamed([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'max_tokens' => 1024,
     'messages' => [
         ['role' => 'user', 'content' => 'Hello!'],
@@ -35,7 +35,7 @@ As you iterate, you'll receive events in this order:
 | `content_block_start` | Start of each content block | Block type and index (e.g., `text`, `tool_use`, `thinking`) |
 | `content_block_delta` | Multiple times per block | Incremental content (text chunks, JSON fragments, thinking) |
 | `content_block_stop` | End of each content block | Block index |
-| `message_delta` | Once, near the end | Stop reason and final usage |
+| `message_delta` | Once, near the end | Stop reason, `stop_details` on a refusal, the code execution container, and final usage |
 
 The client skips `ping` events and ends the loop at `message_stop`, which your loop doesn't receive. Any other event type reaches your loop, including types the API adds later, so check `$response->type` rather than assuming this table is complete. If an error occurs mid-stream, the client throws an `ErrorException` (see [Error Handling](../reference/error-handling.md)).
 
@@ -43,7 +43,7 @@ Here's a practical example that prints text as it arrives:
 
 ```php
 $stream = $client->messages()->createStreamed([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'max_tokens' => 1024,
     'messages' => [
         ['role' => 'user', 'content' => 'Tell me a short story.'],
@@ -71,7 +71,7 @@ Here's what a complete streamed text response looks like when you call `toArray(
         'type' => 'message',
         'role' => 'assistant',
         'content' => [],
-        'model' => 'claude-sonnet-4-6',
+        'model' => 'claude-sonnet-5-5',
         'stop_reason' => null,
         'stop_sequence' => null,
     ],
@@ -125,7 +125,7 @@ When Claude calls a tool during streaming, you'll see `tool_use` content blocks 
 
 ```php
 $stream = $client->messages()->createStreamed([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'max_tokens' => 1024,
     'tools' => [
         [
@@ -187,10 +187,11 @@ When [extended thinking](./thinking.md) is enabled, the stream includes `thinkin
 
 ```php
 $stream = $client->messages()->createStreamed([
-    'model' => 'claude-opus-4-6',
+    'model' => 'claude-opus-5-5',
     'max_tokens' => 16000,
     'thinking' => [
         'type' => 'adaptive',
+        'display' => 'summarized',
     ],
     'messages' => [
         ['role' => 'user', 'content' => 'What is the greatest common divisor of 1071 and 462?'],
@@ -215,7 +216,19 @@ foreach ($stream as $response) {
 }
 ```
 
-When using `'display' => 'omitted'`, no `thinking_delta` events are emitted. You'll only get the `signature_delta` followed by text deltas, which gives a faster time-to-first-text-token.
+With `'display' => 'omitted'`, the default on Claude 5 models, the thinking text isn't streamed: any `thinking_delta` that arrives has an empty `thinking`, and the `signature_delta` and the text deltas follow. That gives a faster time to the first text token. The thinking block start already carries a `signature` field, empty until the delta fills it:
+
+```php
+$response->content_block_start->signature; // ''
+```
+
+To show progress while the model thinks with its text omitted, the `thinking-token-count-2026-05-13` beta can add an `estimated_tokens` count to a `thinking_delta`, whose `thinking` stays empty. It's sent only with `display` set to `omitted`, and not every delta carries one, so treat `null` as no estimate:
+
+```php
+$response->delta->type;             // 'thinking_delta'
+$response->delta->thinking;         // ''
+$response->delta->estimated_tokens; // an integer, or null
+```
 
 With thinking enabled, the final `message_delta` usage also carries the thinking-token breakdown:
 
@@ -225,7 +238,7 @@ $response->usage->outputTokensDetails?->thinkingTokens; // 150
 
 ## Streaming with compaction
 
-With the [compaction beta](./messages.md#server-side-compaction) enabled, a compacted conversation opens with a `compaction` content block. Unlike text, the whole summary arrives in a single delta:
+With [threshold compaction](./messages.md#compaction-at-a-threshold) enabled, a compacted conversation opens with a `compaction` content block. Unlike text, the whole summary arrives in a single delta:
 
 ```php
 // content_block_start
@@ -238,13 +251,59 @@ $response->delta->content; // 'Summary of the conversation: ...'
 
 A `content_block_stop` follows, then the regular blocks begin.
 
+[Compaction on demand](./messages.md#compaction-on-demand) works differently: the block arrives whole in its `content_block_start` event, with no deltas, so `content` there is the summary string and `signature` is set:
+
+```php
+$response->content_block_start->type;      // 'compaction'
+$response->content_block_start->content;   // 'Summary of the conversation: ...'
+$response->content_block_start->signature; // 'EuYBCkQY...'
+```
+
+The `fallback` block and an `advisor_tool_result` arrive whole the same way. A block start types every field the block can carry, as the non-streamed content blocks do: `caller`, `toolset_name`, `server_name`, `is_error`, `citations`, `encrypted_content` and the rest.
+
+## Refusals while streaming
+
+A refusal can arrive before any output, or after part of the answer has streamed. Either way, the `message_delta` event carries `stop_reason: 'refusal'` and the `stop_details` that explain it:
+
+```php
+$text = '';
+
+foreach ($stream as $response) {
+    if ($response->type === 'content_block_delta' && $response->delta->type === 'text_delta') {
+        $text .= $response->delta->text;
+    }
+
+    if ($response->type === 'message_delta' && $response->delta->stop_reason === 'refusal') {
+        $response->delta->stop_details?->category;    // 'cyber'
+        $response->delta->stop_details?->explanation; // 'This request was declined because it could enable cyber harm.'
+
+        $text = ''; // the partial answer is incomplete: discard it
+    }
+}
+```
+
+Treat any text already streamed as incomplete and drop it, from your screen too. The [Messages page](./messages.md#handling-refusals) covers the categories, billing and what to do next.
+
+## Other fields on stream events
+
+The `message_start` event's message carries the fields known when the response begins: `diagnostics` (see [cache diagnostics](./messages.md#cache-diagnostics)), and, under the matching betas, `context_management` and `input_transformations`. `container` is `null` there. The `message_delta` event carries the rest:
+
+```php
+// message_delta
+$response->delta->container;      // ['id' => 'container_...', 'expires_at' => '...'] once code execution ran
+$response->context_management;    // ['applied_edits' => [...]] under the context editing beta
+$response->input_transformations; // set only after a fallback in the middle of the stream
+```
+
+Keep the `container` ID to reuse the sandbox on the next request, as [Server Tools](./server-tools.md#container-persistence) shows.
+
 ## Meta information on streams
 
 You can access rate limit headers and request metadata on the stream object itself:
 
 ```php
 $stream = $client->messages()->createStreamed([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'max_tokens' => 1024,
     'messages' => [
         ['role' => 'user', 'content' => 'Hello!'],

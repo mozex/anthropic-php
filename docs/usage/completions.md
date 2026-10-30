@@ -3,9 +3,9 @@ title: Completions
 weight: 10
 ---
 
-> **Legacy API.** The Text Completions API is Anthropic's older generation interface. For all new projects, use the [Messages API](./messages.md) instead. It supports newer models, multi-turn conversations, tool use, thinking, and all other current features.
+> **Deprecated.** The API now rejects Text Completions requests on current models: a request to `/v1/complete` returns a 400 saying the endpoint has been deprecated and pointing to `/v1/messages`. Use the [Messages API](./messages.md) instead. It supports every current model, multi-turn conversations, tool use, thinking, and the rest of the API's features.
 
-The Completions resource is included for backward compatibility with projects that still use it.
+The Completions resource stays in the package for code that still references it. It's marked `@deprecated`, so IDEs and `phpstan/phpstan-deprecation-rules` flag every call to `completions()`. The examples below show its request and response shapes; they use `claude-2.1`, a retired model, and don't run against today's API.
 
 ## Creating a completion
 
@@ -46,6 +46,26 @@ foreach ($stream as $response) {
 ```
 
 Each iteration gives you the next chunk of the completion text.
+
+## Moving to Messages
+
+A completion prompt maps to a single user message, and `max_tokens_to_sample` becomes `max_tokens`. Leave `temperature` out: current models return a 400 for it.
+
+```php
+$response = $client->messages()->create([
+    'model' => 'claude-sonnet-5-5',
+    'max_tokens' => 100,
+    'messages' => [
+        ['role' => 'user', 'content' => 'Hello, Claude'],
+    ],
+]);
+
+foreach ($response->content as $block) {
+    if ($block->type === 'text') {
+        echo $block->text; // 'Hello! How can I help you today?'
+    }
+}
+```
 
 ---
 

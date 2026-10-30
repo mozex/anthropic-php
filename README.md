@@ -60,7 +60,7 @@ $client = new ClientFake([
 $response = $client->messages()->create([...]);
 
 $client->assertSent(Messages::class, function (string $method, array $parameters): bool {
-    return $parameters['model'] === 'claude-sonnet-4-6';
+    return $parameters['model'] === 'claude-sonnet-5-5';
 });
 ```
 
@@ -90,7 +90,7 @@ Create a client, send a message, read the response:
 $client = Anthropic::client('your-api-key');
 
 $response = $client->messages()->create([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'max_tokens' => 1024,
     'messages' => [
         ['role' => 'user', 'content' => 'Hello!'],
@@ -106,7 +106,7 @@ Print text as it arrives:
 
 ```php
 $stream = $client->messages()->createStreamed([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'max_tokens' => 1024,
     'messages' => [
         ['role' => 'user', 'content' => 'Tell me a short story.'],
@@ -127,7 +127,7 @@ Give Claude tools to call, execute them in your code, send results back:
 
 ```php
 $response = $client->messages()->create([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'max_tokens' => 1024,
     'tools' => [
         [
@@ -157,9 +157,9 @@ Let Claude reason through complex problems before answering:
 
 ```php
 $response = $client->messages()->create([
-    'model' => 'claude-opus-4-6',
+    'model' => 'claude-opus-5-5',
     'max_tokens' => 16000,
-    'thinking' => ['type' => 'adaptive'],
+    'thinking' => ['type' => 'adaptive', 'display' => 'summarized'],
     'messages' => [
         ['role' => 'user', 'content' => 'What is the GCD of 1071 and 462?'],
     ],

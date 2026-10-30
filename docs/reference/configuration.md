@@ -20,6 +20,7 @@ The factory lets you configure every aspect of the client:
 ```php
 $client = Anthropic::factory()
     ->withApiKey('your-api-key')
+    ->withApiVersion('2026-10-21')
     ->withBaseUri('anthropic.example.com/v1')
     ->withHttpClient($httpClient)
     ->withHttpHeader('X-Custom-Header', 'value')
@@ -38,13 +39,31 @@ Call `make()` at the end to create the client. Each `with*` method returns the f
 
 Required. The client sends this as a `x-api-key` header on every request. Leading and trailing whitespace is trimmed automatically.
 
+### API version
+
+```php
+->withApiVersion('2026-10-21')
+```
+
+Sets the `anthropic-version` header sent on every request. It defaults to `2023-06-01`, and a blank value keeps that default.
+
+Version `2026-10-21` rejects some requests the older version accepts. Setting `temperature`, `top_p` or `top_k` returns a 400 on every model, and so do `document` blocks placed directly in an `assistant` message and non-empty `citations` on `text` blocks in a `user` message. Read the [migration guide](https://platform.claude.com/docs/en/api/migration-2026-10-21) before you switch. Message Batches keep the version of the request that created them, so their results come back under that version.
+
+A `withHttpHeader('anthropic-version', ...)` call still wins over this option, since custom headers are applied last.
+
 ### Base URI
 
 ```php
 ->withBaseUri('anthropic.example.com/v1')
 ```
 
-Defaults to `api.anthropic.com/v1`. Override this when you're routing through a proxy, a gateway, or a self-hosted endpoint.
+Defaults to `api.anthropic.com/v1`. Override this when you're routing through a proxy, a gateway, or a self-hosted endpoint. Pass the full API root, `/v1` included: the client adds only the endpoint path (`/messages`, `/models`) after it, and drops a trailing slash.
+
+The official Anthropic SDKs read a base URL from `ANTHROPIC_BASE_URL` with a different meaning: the URL without `/v1`, which they always add. If you take a value meant for them, such as a gateway's documented `https://gateway.example.com/anthropic`, add `/v1` yourself:
+
+```php
+->withBaseUri('https://gateway.example.com/anthropic/v1')
+```
 
 ### HTTP client
 
@@ -60,7 +79,7 @@ Provide your own PSR-18 HTTP client. If you don't set one, the factory uses `php
 ->withHttpHeader('X-Custom-Header', 'value')
 ```
 
-Adds a header to every request. Call it multiple times for multiple headers. The client always sends `anthropic-version: 2023-06-01` and the authorization header; your custom headers are added on top.
+Adds a header to every request. Call it multiple times for multiple headers. The client always sends the `anthropic-version` header (see [API version](#api-version)) and the authorization header; your custom headers are added on top, and one with the same name replaces the default.
 
 ### Query parameters
 
@@ -88,7 +107,7 @@ Anthropic's beta features are opt-in via the `anthropic-beta` header. This SDK l
 
 ```php
 $response = $client->messages()->create([
-    'model' => 'claude-opus-4-6',
+    'model' => 'claude-opus-5-5',
     'max_tokens' => 1024,
     'messages' => [
         ['role' => 'user', 'content' => 'Hello!'],

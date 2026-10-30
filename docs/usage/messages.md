@@ -11,7 +11,7 @@ Pass an array of parameters to `create()`. At minimum, you need a `model`, `max_
 
 ```php
 $response = $client->messages()->create([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'max_tokens' => 1024,
     'messages' => [
         ['role' => 'user', 'content' => 'Hello, world'],
@@ -29,7 +29,7 @@ The `create()` method returns a `CreateResponse` object. Here's what you get bac
 $response->id;            // 'msg_01BSy0WCV7QR2adFBauynAX7'
 $response->type;          // 'message'
 $response->role;          // 'assistant'
-$response->model;         // 'claude-sonnet-4-6'
+$response->model;         // 'claude-sonnet-5-5'
 $response->stop_reason;   // 'end_turn'
 $response->stop_sequence; // null
 ```
@@ -45,7 +45,19 @@ foreach ($response->content as $block) {
 }
 ```
 
-Different features produce different content block types. [Tool Use](./tool-use.md) adds `tool_use` blocks. [Thinking](./thinking.md) adds `thinking` blocks. [Server Tools](./server-tools.md) add `server_tool_use` and result blocks.
+Different features produce different content block types. [Tool Use](./tool-use.md) adds `tool_use` blocks. [Thinking](./thinking.md) adds `thinking` blocks. [Server Tools](./server-tools.md) add `server_tool_use` and result blocks, and the MCP connector its `mcp_tool_*` blocks.
+
+Every Claude 5 model thinks by default, so on a harder request the reply can start with a `thinking` block (its text empty unless you ask for it) before the answer. When you want the answer's text, collect the `text` blocks rather than assuming the answer is `content[0]`:
+
+```php
+$text = '';
+
+foreach ($response->content as $block) {
+    if ($block->type === 'text') {
+        $text .= $block->text;
+    }
+}
+```
 
 ### Token usage
 
@@ -104,13 +116,17 @@ $response->toArray();
 
 This is useful for logging, serialization, or when you need to pass the response to code that expects plain arrays.
 
+`toArray()` returns every field the API sent, including ones this package doesn't type yet and fields sent as `null`, in the API's order. That makes `$response->toArray()['content']` safe to send back as the assistant turn of the next request, with thinking signatures, compaction blocks and tool calls intact. Array access reads the same data, so `$response['some_new_field']` works before a release types it.
+
+One detail on the way back: in `toArray()`, a tool call without parameters has an `ArrayObject` as its `input`, which encodes as `{}`. A plain empty PHP array would encode as `"input": []`, which the API rejects. The typed `$block->input` is still `[]`.
+
 ## Multi-turn conversations
 
 To have a back-and-forth conversation, include the full message history in each request. The API is stateless, so you need to send the entire conversation every time:
 
 ```php
 $response = $client->messages()->create([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'max_tokens' => 1024,
     'messages' => [
         ['role' => 'user', 'content' => 'What is PHP?'],
@@ -128,7 +144,7 @@ Use the `system` parameter to give Claude instructions, persona, or context that
 
 ```php
 $response = $client->messages()->create([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'max_tokens' => 1024,
     'system' => 'You are a helpful PHP expert. Answer concisely.',
     'messages' => [
@@ -139,6 +155,43 @@ $response = $client->messages()->create([
 
 The system message isn't part of the `messages` array. It's a separate top-level parameter.
 
+### Mid-conversation system messages
+
+On newer models you can also add instructions partway through a conversation, as a message with the `system` role inside `messages`. No beta header is needed. It works on Claude Fable 5.1, Mythos 5.1, Fable 5, Mythos 5, Opus 5.5, Opus 5, Sonnet 5.5, Haiku 5.5 and Opus 4.8, but not on Sonnet 5:
+
+```php
+$response = $client->messages()->create([
+    'model' => 'claude-sonnet-5-5',
+    'max_tokens' => 1024,
+    'system' => 'You are a helpful PHP expert.',
+    'messages' => [
+        ['role' => 'user', 'content' => 'Write a function that sums an array.'],
+        ['role' => 'assistant', 'content' => 'function sum($items) { return array_sum($items); }'],
+        ['role' => 'user', 'content' => 'Now one that averages it.'],
+        ['role' => 'system', 'content' => 'From now on, every suggestion must include explicit type annotations.'],
+    ],
+]);
+```
+
+A `system` message can't be the first entry in `messages`. It goes right after a `user` turn (one carrying `tool_result` blocks counts) or after an `assistant` turn that ends in a server tool result, and before the next `assistant` turn or at the end of the array, never between a `tool_use` block and its `tool_result`. Once sent, keep it in the history unchanged: editing or removing it invalidates the prompt cache from that point.
+
+Three betas extend these messages:
+
+- **Turn-scoped instructions** (`mid-conversation-system-clear-at-2026-08-21`): `'clear_at' => 'next_user_message'` makes the message apply to one reply only. It takes text only. Keep sending it in the history as it was.
+- **Effort per message** (`mid-conversation-output-config-2026-07-01`): `['role' => 'system', 'content' => [], 'output_config' => ['effort' => 'low']]` changes the [effort level](./thinking.md#effort-levels) from that point, on Fable 5.1, Mythos 5.1, Opus 5.5, Opus 5, Sonnet 5.5 and Haiku 5.5.
+- **Tool changes** (`mid-conversation-tool-changes-2026-07-01` for changes by reference, which is also the header on Bedrock and Google Cloud; `inline-tools-2026-09-15` on the Claude API covers those and inline definitions): `tool_addition` and `tool_removal` blocks add or remove tools without editing `tools`, which would break the cache. They aren't accepted right after a paused `assistant` turn:
+
+```php
+$messages[] = [
+    'role' => 'system',
+    'content' => [
+        ['type' => 'tool_removal', 'tool' => ['type' => 'tool_reference', 'name' => 'get_weather']],
+    ],
+];
+```
+
+With `inline-tools-2026-09-15`, a `tool_addition` can carry a whole definition (`'tool' => ['type' => 'tool_definition', 'definition' => [...]]`); a tool added by reference must already be in `tools`, either with `'defer_loading' => true` or withdrawn by an earlier `tool_removal`. When a later compaction summarizes these messages, the `compaction` block lists the changes in `$block->tool_changes`.
+
 ## Vision
 
 Claude can read images in the same request as text. Instead of a string, pass an array of content blocks in the message's `content`:
@@ -147,7 +200,7 @@ Claude can read images in the same request as text. Instead of a string, pass an
 $imagePath = '/path/to/photo.jpg';
 
 $response = $client->messages()->create([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'max_tokens' => 1024,
     'messages' => [
         [
@@ -197,7 +250,7 @@ Pass a `metadata` object with a `user_id` to associate each request with a user 
 
 ```php
 $response = $client->messages()->create([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'max_tokens' => 1024,
     'metadata' => [
         'user_id' => $user->uuid,
@@ -218,19 +271,20 @@ This client doesn't validate or transform request parameters. Whatever you pass 
 - You can pass any parameter documented in the [Anthropic API reference](https://platform.claude.com/docs/en/api/messages/create)
 - If you pass an invalid parameter, the API returns an error (see [Error Handling](../reference/error-handling.md))
 
-For example, setting temperature and top_p:
+For example, setting `temperature` on a model that still accepts it:
 
 ```php
 $response = $client->messages()->create([
     'model' => 'claude-sonnet-4-6',
     'max_tokens' => 1024,
     'temperature' => 0.7,
-    'top_p' => 0.9,
     'messages' => [
         ['role' => 'user', 'content' => 'Write a haiku about PHP.'],
     ],
 ]);
 ```
+
+Sampling parameters are on their way out. Claude Fable 5.1, Mythos 5.1, Fable 5, Mythos 5, Opus 5.5, Opus 5, Opus 4.8, Opus 4.7, Sonnet 5.5, Sonnet 5 and Haiku 5.5 return a 400 for any non-default `temperature`, `top_p` or `top_k`, and for `temperature` and `top_p` sent together. Older models accept them while thinking is off, though Sonnet 4.5 and Haiku 4.5 reject `temperature` and `top_p` sent together. Under API version `2026-10-21` (see [Configuration](../reference/configuration.md#api-version)), all three are rejected on every model.
 
 ## Stop sequences
 
@@ -238,7 +292,7 @@ You can tell Claude to stop generating when it produces a specific string:
 
 ```php
 $response = $client->messages()->create([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'max_tokens' => 1024,
     'stop_sequences' => ['```'],
     'messages' => [
@@ -258,7 +312,7 @@ When safety classifiers intervene mid-generation, the API returns `stop_reason: 
 
 ```php
 $response = $client->messages()->create([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'max_tokens' => 1024,
     'messages' => [
         ['role' => 'user', 'content' => $userPrompt],
@@ -272,7 +326,19 @@ if ($response->stop_reason === 'refusal') {
 }
 ```
 
-`stop_details` is only populated on refusal responses; on a normal completion it's `null`. The `explanation` text isn't guaranteed to be stable between requests, so don't parse it. Treat `category` as the machine-readable signal and show `explanation` to the user if you need to display something.
+`stop_details` is only populated on refusal responses; on a normal completion it's `null`. The `explanation` text isn't guaranteed to be stable between requests, so don't parse it. Treat `category` as the machine-readable signal and show `explanation` to the user if you need to display something. Both are `null` when a refusal doesn't map to a named category.
+
+| Category | Billed when refused before any output |
+|----------|---------------------------------------|
+| `cyber` | No |
+| `bio` | Yes |
+| `frontier_llm` | Yes |
+| `reasoning_extraction` | Yes |
+| `general_harms` | No |
+
+A refusal with a `null` category before any output isn't billed either. A refusal that arrives after some output bills the input and the output produced so far. `reasoning_extraction` comes from asking the model to put its reasoning into the answer, a JSON field or a tool input; it has no recommended fallback model, so change the prompt instead of retrying.
+
+Sending the same conversation to the same model again usually gets another refusal. Remove or rephrase the turn that triggered it, or start the conversation over, before you continue. When you stream, the refusal arrives on the `message_delta` event, after any text already streamed; see [Streaming](./streaming.md#refusals-while-streaming).
 
 ### Falling back to another model
 
@@ -298,10 +364,12 @@ When a fallback served the request, the response tells you in three places:
 // The model that actually answered
 $response->model; // 'claude-opus-4-8'
 
-// A fallback content block marks the handoff
-$response->content[0]->type;        // 'fallback'
-$response->content[0]->from->model; // 'claude-fable-5'
-$response->content[0]->to->model;   // 'claude-opus-4-8'
+// A fallback content block marks the handoff, and what triggered it
+$response->content[0]->type;               // 'fallback'
+$response->content[0]->from->model;        // 'claude-fable-5'
+$response->content[0]->to->model;          // 'claude-opus-4-8'
+$response->content[0]->trigger?->type;     // 'refusal'
+$response->content[0]->trigger?->category; // 'cyber'
 
 // usage.iterations records every attempt
 foreach ($response->usage->iterations ?? [] as $iteration) {
@@ -318,7 +386,18 @@ Two edge cases worth knowing. A sticky-served turn (the API remembers this conve
 $response->stop_details?->recommended_model; // 'claude-opus-4-8' or null
 ```
 
-On the next turn, echo the assistant content back with the `fallback` block exactly where it appeared. The API uses its position to validate the surrounding blocks.
+On the next turn, echo the assistant content back with the `fallback` block exactly where it appeared. The API uses its position to validate the surrounding blocks. Message Batches reject `fallbacks`, and Claude Haiku 5.5 has no server-side fallback.
+
+When you retry a refusal on another model yourself, prompt caches don't carry over: the retry writes the whole conversation into the new model's cache, and cache writes cost more than reads. With the fallback credit beta (`fallback-credit-2026-07-01`), the refusal carries a token, and a retry that sends it back is billed as though the conversation had been on the new model from the start:
+
+```php
+$token = $response->stop_details?->fallback_credit_token;        // a string, or null without a credit
+$prefill = $response->stop_details?->fallback_has_prefill_claim; // true: the retry may continue the partial output
+
+$retry->usage->fallbackCredit; // the credit's status on the retry, or null
+```
+
+Send the token as the retry's top-level `fallback_credit_token` parameter, with the same beta header, within five minutes. The retry must keep the refused request's `system`, `messages`, `tools` and the other prompt fields exactly as they were; only the model and a few settings may change. The [fallback credit guide](https://platform.claude.com/docs/en/build-with-claude/fallback-credit) has the retry shapes and which fallback models each model accepts. Server-side fallback applies the credit for you. A Claude Haiku 5.5 refusal carries no credit.
 
 ## The `pause_turn` stop reason
 
@@ -326,7 +405,7 @@ Long-running turns that hit internal limits come back with `stop_reason: 'pause_
 
 ```php
 $response = $client->messages()->create([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'max_tokens' => 8192,
     'messages' => $messages,
 ]);
@@ -338,7 +417,7 @@ while ($response->stop_reason === 'pause_turn') {
     ];
 
     $response = $client->messages()->create([
-        'model' => 'claude-sonnet-4-6',
+        'model' => 'claude-sonnet-5-5',
         'max_tokens' => 8192,
         'messages' => $messages,
     ]);
@@ -359,11 +438,15 @@ Useful for data-residency logging or routing decisions. The field is `null` when
 
 ## Server-side compaction
 
-For conversations that grow toward the context window, the compaction beta (`compact-2026-01-12`) lets the API summarize earlier context into a `compaction` content block instead of failing. Enable it through `context_management`:
+For conversations that grow toward the context window, the API can summarize earlier context into a `compaction` content block. There are two betas: compaction when the input passes a threshold, and compaction on demand.
+
+### Compaction at a threshold
+
+The `compact-2026-01-12` beta compacts automatically once the input passes a token count. Enable it through `context_management`:
 
 ```php
 $response = $client->messages()->create([
-    'model' => 'claude-opus-5',
+    'model' => 'claude-opus-5-5',
     'max_tokens' => 4096,
     'betas' => ['compact-2026-01-12'],
     'context_management' => [
@@ -381,32 +464,65 @@ foreach ($response->content as $block) {
 }
 ```
 
-Send `compaction` blocks back unchanged on the next turn. The API uses them to replace the compacted history, so dropping the block, or keeping only its text, silently loses the compaction state.
+Send `compaction` blocks back unchanged on the next turn. The API uses them to replace the compacted history (it ignores every block before one), so dropping the block, or keeping only its text, silently loses the compaction state.
 
-Under this beta, responses also carry a `context_management` field listing which edits were applied, and `usage->iterations` entries appear even when nothing was compacted. With `pause_after_compaction` enabled, a turn that compacts stops with `stop_reason: 'compaction'` so you can resume on your own terms. Two practical notes from testing this live: the compaction trigger has a 50,000 input-token minimum, and iteration entries here carry no `model` field (unlike fallback iterations).
+The trigger defaults to 150,000 input tokens and can't go below 50,000 (`'trigger' => ['type' => 'input_tokens', 'value' => 100000]`). Under this beta, responses also carry a `context_management` field listing which edits were applied, and `usage->iterations` entries appear even when nothing was compacted; these iteration entries carry no `model` field, unlike fallback iterations. With `pause_after_compaction` enabled, a turn that compacts stops with `stop_reason: 'compaction'` so you can resume on your own terms.
 
 ```php
 $response->context_management; // ['applied_edits' => [...]] or null
 $response->stop_reason;        // 'compaction' when paused after compacting
 ```
 
+### Compaction on demand
+
+The `compact-2026-09-04` beta compacts when you ask. Send the conversation with a top-level `compaction` parameter, and the reply is a single signed `compaction` block with `stop_reason: 'compaction'`:
+
+```php
+$response = $client->messages()->create([
+    'model' => 'claude-opus-5-5',
+    'max_tokens' => 4096,
+    'betas' => ['compact-2026-09-04'],
+    'compaction' => ['type' => 'summarize'],
+    'messages' => $messages,
+]);
+
+$block = $response->content[0];
+
+$block->type;      // 'compaction'
+$block->content;   // 'Summary of the conversation: the user is designing the data model for a recipe app...'
+$block->signature; // 'EuYBCkQY...'
+```
+
+An optional `instructions` string replaces the summarizing prompt. A request can't combine `compaction` with `context_management`.
+
+On every later request, send the block exactly as `toArray()` returns it, `signature` included, and the same beta header. Put it first in `messages` (an `assistant` message of its own, or the first block of the first message), and drop the messages it summarized:
+
+```php
+$messages = [
+    ['role' => 'assistant', 'content' => [$block->toArray()]],
+    ['role' => 'user', 'content' => 'Now suggest field names for Ingredient.'],
+];
+```
+
+An edited block, an extra key, or a summarized message left in front of it returns a 400 with `error.details.error_code` such as `compaction_signature_invalid`, `compaction_content_mismatch` or `compaction_block_misplaced`. When the model didn't summarize, `content` is empty and `stop_reason` says why (`max_tokens`, `tool_use`, `refusal` and so on).
+
+When you stream either kind, see [Streaming](./streaming.md#streaming-with-compaction): an on-demand block arrives whole.
+
 ## Cache diagnostics
 
-If your prompt cache hit rate drops and you don't know why, cache diagnostics tells you where two consecutive requests diverged. It's in beta behind the `cache-diagnosis-2026-04-07` header. Pass the previous response's `id`, and the API compares the two request fingerprints:
+If your prompt cache hit rate drops and you don't know why, cache diagnostics tells you where two consecutive requests diverged. It's generally available on the Claude API, with no beta header. Send a `diagnostics` object on every turn, with `previous_message_id` set to `null` on the first and to the previous response's `id` after that, and the API compares the two request fingerprints:
 
 ```php
 $first = $client->messages()->create([
-    'model' => 'claude-opus-5',
+    'model' => 'claude-opus-5-5',
     'max_tokens' => 1024,
-    'betas' => ['cache-diagnosis-2026-04-07'],
     'diagnostics' => ['previous_message_id' => null], // opt in on the first turn
     'messages' => $messages,
 ]);
 
 $second = $client->messages()->create([
-    'model' => 'claude-opus-5',
+    'model' => 'claude-opus-5-5',
     'max_tokens' => 1024,
-    'betas' => ['cache-diagnosis-2026-04-07'],
     'diagnostics' => ['previous_message_id' => $first->id],
     'messages' => $updatedMessages,
 ]);
@@ -417,7 +533,24 @@ $second->diagnostics?->cache_miss_reason?->cache_missed_input_tokens; // 41850
 
 `diagnostics` is `null` when nothing diverged. When it's set but `cache_miss_reason` is `null`, the comparison was still running when the response was built; check the next turn. The reason `type` is one of `model_changed`, `system_changed`, `tools_changed`, `messages_changed`, `previous_message_not_found`, or `unavailable`, and the four `*_changed` types include a `cache_missed_input_tokens` estimate of how much cacheable prefix was lost.
 
-When streaming, `diagnostics` arrives on the `message_start` event's message object.
+When streaming, `diagnostics` arrives on the `message_start` event's message object. Every response carries the field, `null` when you didn't ask for diagnostics. Requests that still send the old `cache-diagnosis-2026-04-07` header keep working.
+
+## Fast mode
+
+Claude Opus 5.5 can answer faster at a higher price with `speed` set to `fast`. It's generally available on that model, with no beta header:
+
+```php
+$response = $client->messages()->create([
+    'model' => 'claude-opus-5-5',
+    'max_tokens' => 1024,
+    'speed' => 'fast',
+    'messages' => $messages,
+]);
+
+$response->usage->speed; // 'fast'
+```
+
+On Claude Opus 5 and Opus 4.8 it's a research preview behind the `fast-mode-2026-02-01` header, on the Claude API only. Opus 4.6 accepts the header but answers at standard speed, which `usage->speed` reports as `'standard'`. Fast requests have their own rate limits, read through [`meta()`](../reference/meta-information.md#fast-mode-limits); when they run out you get a 429 or a 529 rather than a slower answer, so retry without `speed` if you'd rather wait less. Fast mode isn't available with Message Batches or Priority Tier.
 
 ---
 

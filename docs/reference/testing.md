@@ -22,7 +22,7 @@ $client = new ClientFake([
 ]);
 
 $response = $client->messages()->create([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'max_tokens' => 1024,
     'messages' => [
         ['role' => 'user', 'content' => 'Hello!'],
@@ -43,8 +43,8 @@ Every response class has a `fake()` method:
 | `Messages\CreateResponse::fake()` | Messages create |
 | `Messages\CountTokensResponse::fake()` | Token counting |
 | `Messages\CreateStreamedResponse::fake()` | Messages streaming |
-| `Completions\CreateResponse::fake()` | Completions create |
-| `Completions\CreateStreamedResponse::fake()` | Completions streaming |
+| `Completions\CreateResponse::fake()` | Completions create (deprecated) |
+| `Completions\CreateStreamedResponse::fake()` | Completions streaming (deprecated) |
 | `Models\ListResponse::fake()` | Models list |
 | `Models\RetrieveResponse::fake()` | Models retrieve |
 | `Batches\BatchResponse::fake()` | Batch create/retrieve/cancel |
@@ -60,21 +60,25 @@ Every response class has a `fake()` method:
 Only override what matters for your test. Everything else gets default values:
 
 ```php
-use Anthropic\Responses\Completions\CreateResponse;
+use Anthropic\Responses\Messages\CreateResponse;
 
 $client = new ClientFake([
     CreateResponse::fake([
-        'completion' => 'PHP is awesome!',
+        'stop_reason' => 'max_tokens',
+        'usage' => ['output_tokens' => 1024],
     ]),
 ]);
 
-$response = $client->completions()->create([
-    'model' => 'claude-2.1',
-    'prompt' => '\n\nHuman: PHP is \n\nAssistant:',
-    'max_tokens_to_sample' => 100,
+$response = $client->messages()->create([
+    'model' => 'claude-sonnet-5-5',
+    'max_tokens' => 1024,
+    'messages' => [
+        ['role' => 'user', 'content' => 'Write a long story.'],
+    ],
 ]);
 
-expect($response->completion)->toBe('PHP is awesome!');
+expect($response->stop_reason)->toBe('max_tokens')
+    ->and($response->usage->outputTokens)->toBe(1024);
 ```
 
 ## Fake streamed responses
@@ -90,7 +94,7 @@ $client = new ClientFake([
 ]);
 
 $stream = $client->messages()->createStreamed([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'max_tokens' => 1024,
     'messages' => [
         ['role' => 'user', 'content' => 'Hello!'],
@@ -124,7 +128,7 @@ function fakeStream(array $parts)
             'id' => 'msg_test',
             'type' => 'message',
             'role' => 'assistant',
-            'model' => 'claude-sonnet-4-6',
+            'model' => 'claude-sonnet-5-5',
             'content' => [],
             'stop_reason' => null,
             'stop_sequence' => null,
@@ -175,23 +179,37 @@ To test error handling, pass an exception as a fake response. It will be thrown 
 ```php
 use Anthropic\Testing\ClientFake;
 use Anthropic\Exceptions\ErrorException;
+use GuzzleHttp\Psr7\Response;
 
 $client = new ClientFake([
     new ErrorException([
         'message' => 'Overloaded',
         'type' => 'overloaded_error',
-    ], 529),
+    ], new Response(529)),
 ]);
 
 // This will throw the ErrorException
 $client->messages()->create([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'max_tokens' => 1024,
     'messages' => [
         ['role' => 'user', 'content' => 'Hello'],
     ],
 ]);
 ```
+
+Like the client, pass any PSR-7 response as the second argument, such as Guzzle's. The status comes from it, and headers you add, such as a `Retry-After` on a `RateLimitException`, reach the code under test through `$e->response`:
+
+```php
+use Anthropic\Exceptions\RateLimitException;
+
+new RateLimitException(
+    ['message' => 'Rate limited', 'type' => 'rate_limit_error'],
+    new Response(429, ['retry-after' => '30']),
+);
+```
+
+An `int` status code still works in place of the response, but it's deprecated, and `$e->response` is `null` then.
 
 ## Assertions
 
@@ -210,7 +228,7 @@ $client->assertSent(Messages::class);
 // Assert with a callback for specific parameters
 $client->assertSent(Messages::class, function (string $method, array $parameters): bool {
     return $method === 'create'
-        && $parameters['model'] === 'claude-sonnet-4-6';
+        && $parameters['model'] === 'claude-sonnet-5-5';
 });
 
 // Assert a specific number of requests
@@ -222,14 +240,14 @@ $client->assertSent(Messages::class, 2);
 Check that no request was made to a resource:
 
 ```php
-use Anthropic\Resources\Completions;
+use Anthropic\Resources\Batches;
 use Anthropic\Resources\Messages;
 
-$client->assertNotSent(Completions::class);
+$client->assertNotSent(Batches::class);
 
 // With a callback: assert no request matched this condition
 $client->assertNotSent(Messages::class, function (string $method, array $parameters): bool {
-    return $parameters['model'] === 'claude-2.1';
+    return $parameters['model'] === 'claude-opus-5-5';
 });
 
 // With a number: assert the resource wasn't called exactly that many times
@@ -254,7 +272,7 @@ $client->messages()->assertSent(function (string $method, array $parameters): bo
         && $parameters['max_tokens'] === 1024;
 });
 
-$client->completions()->assertNotSent();
+$client->batches()->assertNotSent();
 ```
 
 ## Adding responses dynamically
@@ -265,8 +283,8 @@ If you need to add responses after creating the fake client (for example, in a l
 $client = new ClientFake();
 
 $client->addResponses([
-    CreateResponse::fake(['completion' => 'First response']),
-    CreateResponse::fake(['completion' => 'Second response']),
+    CreateResponse::fake(['content' => [['type' => 'text', 'text' => 'First response']]]),
+    CreateResponse::fake(['content' => [['type' => 'text', 'text' => 'Second response']]]),
 ]);
 ```
 

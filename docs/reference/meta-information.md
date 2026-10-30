@@ -11,7 +11,7 @@ Call `meta()` on any response:
 
 ```php
 $response = $client->messages()->create([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'max_tokens' => 1024,
     'messages' => [
         ['role' => 'user', 'content' => 'Hello, world'],
@@ -30,6 +30,17 @@ $meta->requestId; // 'req_012nTzj6kLoP8vZ1SGANvcgR'
 ```
 
 Include this when contacting support about a specific request.
+
+## Organization and workspace
+
+The API names the organization behind every response, and the workspace the key resolved to, the Default Workspace included:
+
+```php
+$meta->organizationId; // the organization's ID, or null
+$meta->workspaceId;    // the workspace's ID; null on Admin API requests
+```
+
+`workspaceId` is useful when one app holds keys for several workspaces and you want logs to say which one served a call.
 
 ## Rate limits
 
@@ -83,6 +94,30 @@ $meta->priorityOutputTokenLimit?->reset;     // '2024-05-01T13:29:17Z'
 
 These track your Priority Tier allocation separately from the shared standard pool. When you want to know whether a request drew from Priority capacity or spilled over into standard capacity, these are the fields to check.
 
+### Fast mode limits
+
+Requests sent with [fast mode](https://platform.claude.com/docs/en/build-with-claude/fast-mode) draw from their own token limits, reported in the `anthropic-fast-*` headers. The typed properties are `null` on other requests:
+
+```php
+$meta->fastInputTokenLimit?->limit;
+$meta->fastInputTokenLimit?->remaining;
+$meta->fastInputTokenLimit?->reset;
+
+$meta->fastOutputTokenLimit?->limit;
+$meta->fastOutputTokenLimit?->remaining;
+$meta->fastOutputTokenLimit?->reset;
+```
+
+## Retry-After
+
+`retryAfter` holds the `Retry-After` header as whole seconds:
+
+```php
+$meta->retryAfter; // 30, or null
+```
+
+A successful response rarely carries it: the API sends it with a 429, which throws an exception before you get a response object. Read it from the exception's response instead, as [Error Handling](./error-handling.md#rate-limit-errors) shows. A `Retry-After` given as an HTTP date leaves `retryAfter` `null`; the raw value stays in `custom`.
+
 ## Raw header format
 
 The `toArray()` method returns the meta information using the original HTTP header names:
@@ -103,19 +138,22 @@ $meta->toArray();
 //   'anthropic-ratelimit-output-tokens-limit' => 5000,
 //   'anthropic-ratelimit-output-tokens-remaining' => 4900,
 //   'anthropic-ratelimit-output-tokens-reset' => '2024-05-01T13:29:17Z',
+//   'anthropic-organization-id' => '...',
 //   'request-id' => 'req_012nTzj6kLoP8vZ1SGANvcgR',
 // ]
 ```
 
-Priority Tier headers (`anthropic-priority-input-tokens-*` and `anthropic-priority-output-tokens-*`) are included in the same array when they're present on the response.
+Priority Tier headers (`anthropic-priority-input-tokens-*` and `anthropic-priority-output-tokens-*`), the `anthropic-fast-*` headers, `anthropic-workspace-id` and `retry-after` are included in the same array when they're present on the response.
 
 ## Custom headers
 
-Non-standard headers (anything not covered by the typed properties above) are available via the `custom` property:
+Every other header the response carries is available via the `custom` property:
 
 ```php
 $meta->custom; // additional headers as a key-value object
 ```
+
+The organization and workspace IDs, `retry-after` and the fast mode headers stay in `custom` too, where earlier releases put them, so code that reads them there keeps working.
 
 ## Streaming responses
 
@@ -123,7 +161,7 @@ For streamed responses, call `meta()` on the stream object (not on individual ev
 
 ```php
 $stream = $client->messages()->createStreamed([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'max_tokens' => 1024,
     'messages' => [
         ['role' => 'user', 'content' => 'Hello, world'],

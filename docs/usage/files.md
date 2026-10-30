@@ -42,7 +42,7 @@ Once you have an `id`, drop it into a content block. For a PDF or text file, tha
 
 ```php
 $response = $client->messages()->create([
-    'model' => 'claude-opus-4-6',
+    'model' => 'claude-opus-5-5',
     'max_tokens' => 1024,
     'betas' => ['files-api-2025-04-14'],
     'messages' => [

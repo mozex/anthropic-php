@@ -3,20 +3,21 @@ title: Thinking
 weight: 4
 ---
 
-Extended thinking lets Claude show its reasoning process before answering. This is useful for complex tasks like math, logic, analysis, and code generation where step-by-step reasoning produces better results.
+Extended thinking lets Claude reason before answering. This is useful for complex tasks like math, logic, analysis, and code generation where step-by-step reasoning produces better results.
 
-There are two modes: **adaptive thinking** for newer models, and **budget-based thinking** for older ones. You can also explicitly disable thinking with `'type' => 'disabled'`.
+There are two modes: **adaptive thinking**, where the model decides how much to think, and **budget-based thinking** for older models. Every Claude 5 model uses adaptive thinking when you don't set `thinking` at all. Which models let you turn thinking off is covered in [Turning thinking off](#turning-thinking-off).
 
 ## Adaptive thinking
 
-Adaptive thinking is the recommended approach for Claude Opus 4.6 and Sonnet 4.6. The model decides when and how deeply to think based on the complexity of your request. Simple questions might get no thinking at all; hard problems get extensive reasoning.
+Adaptive thinking is the default on every Claude 5 model, and you opt into it on Opus 4.8, 4.7 and 4.6 and Sonnet 4.6. The model decides when and how deeply to think based on the complexity of your request. Simple questions might get no thinking at all; hard problems get extensive reasoning.
 
 ```php
 $response = $client->messages()->create([
-    'model' => 'claude-opus-4-6',
+    'model' => 'claude-opus-5-5',
     'max_tokens' => 16000,
     'thinking' => [
         'type' => 'adaptive',
+        'display' => 'summarized',
     ],
     'messages' => [
         ['role' => 'user', 'content' => 'Explain why the sum of two even numbers is always even.'],
@@ -45,15 +46,15 @@ foreach ($response->content as $block) {
 
 Three content block types can appear:
 
-- **`thinking`**: Claude's visible reasoning, with a cryptographic `signature` for verification
+- **`thinking`**: Claude's reasoning, with a cryptographic `signature` for verification
 - **`redacted_thinking`**: Internal reasoning that Anthropic has redacted for safety, returned as opaque `data`
 - **`text`**: The final answer
 
 ## Display options
 
-Control how thinking content appears in responses with the `display` option:
+Control how thinking content appears in responses with the `display` option. The default depends on the model: `omitted` on every Claude 5 model, Opus 4.8 and Opus 4.7, and `summarized` on Opus 4.6, Sonnet 4.6 and earlier.
 
-**Summarized** (default): Thinking blocks contain a summary of Claude's reasoning.
+**Summarized**: Thinking blocks contain a summary of Claude's reasoning.
 
 ```php
 'thinking' => [
@@ -66,7 +67,7 @@ Control how thinking content appears in responses with the `display` option:
 
 ```php
 $response = $client->messages()->create([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'max_tokens' => 16000,
     'thinking' => [
         'type' => 'adaptive',
@@ -83,13 +84,33 @@ $response->content[0]->signature; // 'EosnCkYICxIMMb3LzNrMu...' (always present)
 $response->content[1]->text;      // 'The answer is 12,231.'
 ```
 
+**Updates** (beta): Short progress notes before tool calls, on Fable 5.1, Mythos 5.1, Fable 5, Opus 5.5 and Sonnet 5.5:
+
+```php
+$response = $client->messages()->create([
+    'model' => 'claude-opus-5-5',
+    'max_tokens' => 16000,
+    'betas' => ['thinking-display-updates-2026-08-18'],
+    'thinking' => [
+        'type' => 'adaptive',
+        'display' => 'updates',
+    ],
+    'tools' => $tools,
+    'messages' => $messages,
+]);
+
+$response->content[1]->thinking; // 'Confirmed the retry path never refreshes the expired token. Editing auth.py to add the refresh call.'
+```
+
+Reasoning blocks stay empty, as with `omitted`; only the progress blocks right before a tool call carry text. An empty `thinking` block means there's nothing to show.
+
 ## Effort levels
 
 Use `output_config.effort` to guide how much the model thinks. Lower effort means faster responses and fewer tokens, but potentially less thorough reasoning.
 
 ```php
 $response = $client->messages()->create([
-    'model' => 'claude-opus-4-6',
+    'model' => 'claude-opus-5-5',
     'max_tokens' => 16000,
     'thinking' => [
         'type' => 'adaptive',
@@ -105,18 +126,40 @@ $response = $client->messages()->create([
 
 | Effort | Behavior | Best for |
 |--------|----------|----------|
-| `max` | No constraints on thinking depth. Opus 4.6 and Sonnet 4.6. | Hard math, complex analysis, multi-step reasoning |
-| `high` | Default. Thorough thinking. | Most tasks |
+| `max` | No constraints on thinking depth. | Hard math, complex analysis, multi-step reasoning |
+| `xhigh` | Between `high` and `max`. | Tasks where `high` isn't enough |
+| `high` | Thorough thinking. | Most tasks |
 | `medium` | Moderate thinking. May skip for simple queries. | Balanced speed and quality |
 | `low` | Minimal thinking. Skips entirely for trivial queries. | Simple questions, high-throughput use cases |
 
+The default depends on the model: `high` on Sonnet 5.5 and Fable 5.1, `medium` on Opus 5.5 and Haiku 5.5. Not every model accepts every level; the [Models API](./models.md#effort-levels) tells you which ones a model takes. With the `mid-conversation-output-config-2026-07-01` beta you can also change effort partway through a conversation, as the [Messages page](./messages.md#mid-conversation-system-messages) shows.
+
+## Turning thinking off
+
+The models differ here:
+
+| Model | `'type' => 'disabled'` | `'type' => 'enabled'` with `budget_tokens` |
+|-------|------------------------|--------------------------------------------|
+| Fable 5.1, Mythos 5.1, Fable 5, Mythos 5, Opus 5.5 | 400 error | 400 error |
+| Sonnet 5.5 | 400 error: send `between_tools` | 400 error |
+| Opus 5, Haiku 5.5 | Only at effort `high` or below | 400 error |
+| Sonnet 5, Opus 4.8, Opus 4.7 | Allowed | 400 error |
+| Opus 4.6, Sonnet 4.6 | Allowed | Deprecated, still works |
+| Opus 4.5, Sonnet 4.5, Haiku 4.5 | Allowed | Allowed |
+
+Only Claude Sonnet 5.5 accepts `between_tools`, in place of `disabled`. It works at effort `high` or below and takes no other field, `display` included. Progress updates still come back as `thinking` blocks with text:
+
+```php
+'thinking' => ['type' => 'between_tools']
+```
+
 ## Budget-based thinking
 
-For older models (Claude Sonnet 3.7, Opus 4.5, Sonnet 4.5), use `budget_tokens` to set a fixed token budget for thinking. This mode is deprecated on Opus 4.6 and Sonnet 4.6; use adaptive thinking with the `effort` parameter instead.
+The models in the last row of the table above (Opus 4.5, Sonnet 4.5, Haiku 4.5) take a fixed token budget for thinking, and they reject `adaptive`. The mode is deprecated on Opus 4.6 and Sonnet 4.6, and Claude 4.7 and later models return a 400 for it; use adaptive thinking with the `effort` parameter there.
 
 ```php
 $response = $client->messages()->create([
-    'model' => 'claude-sonnet-4-5',
+    'model' => 'claude-haiku-4-5',
     'max_tokens' => 16000,
     'thinking' => [
         'type' => 'enabled',
@@ -149,7 +192,7 @@ No extra configuration is needed. Just include both `thinking` and `tools` in yo
 
 ## Streaming with thinking
 
-Thinking works with streaming. See [Streaming](./streaming.md) for the full event sequence, including `thinking_delta` and `signature_delta` events.
+Thinking works with streaming. See [Streaming](./streaming.md#streaming-with-thinking) for the full event sequence, including `thinking_delta` and `signature_delta` events.
 
 ## Multi-turn with thinking
 
@@ -160,7 +203,7 @@ Pass the full content array (thinking blocks included) as the assistant's messag
 ```php
 // First turn
 $response = $client->messages()->create([
-    'model' => 'claude-opus-4-6',
+    'model' => 'claude-opus-5-5',
     'max_tokens' => 16000,
     'thinking' => ['type' => 'adaptive'],
     'messages' => [
@@ -170,7 +213,7 @@ $response = $client->messages()->create([
 
 // Second turn: include the full response content (with thinking blocks)
 $followUp = $client->messages()->create([
-    'model' => 'claude-opus-4-6',
+    'model' => 'claude-opus-5-5',
     'max_tokens' => 16000,
     'thinking' => ['type' => 'adaptive'],
     'messages' => [
@@ -181,8 +224,33 @@ $followUp = $client->messages()->create([
 ]);
 ```
 
-This is why the `signature` field exists even when `display` is set to `'omitted'`: it's needed for multi-turn continuity.
+This is why the `signature` field exists even when `display` is set to `'omitted'`: it's needed for multi-turn continuity. Send every block back unchanged and in order, thinking blocks with an empty `thinking` included; a block sent back with an empty `signature` fails. Keep `system` and `tools` fixed for the session and only append to `messages`.
+
+### Replayed thinking that the API drops
+
+On Claude Fable 5.1, Mythos 5.1, Opus 5.5, Sonnet 5.5 and Haiku 5.5, a thinking block is tied to the model and the conversation that produced it. When a replayed block doesn't match (sent to another model, or after the history before it changed), the API can drop it, and the model answers without that reasoning. The `thinking-binding-controls-2026-08-01` beta lets you choose what happens, and reports what it did in `input_transformations`:
+
+```php
+$response = $client->messages()->create([
+    'model' => 'claude-opus-5-5',
+    'max_tokens' => 16000,
+    'betas' => ['thinking-binding-controls-2026-08-01'],
+    'thinking' => [
+        'type' => 'adaptive',
+        'block_binding' => ['prefix_mismatch_behavior' => 'drop_block'],
+    ],
+    'messages' => $messages,
+]);
+
+foreach ($response->input_transformations ?? [] as $transformation) {
+    $transformation['type'];   // 'thinking_dropped'
+    $transformation['path'];   // 'messages.3.content.0'
+    $transformation['reason']; // 'model_binding_mismatch'
+}
+```
+
+`drop_block` drops each failing block and the thinking blocks after it, and the request goes on; dropped blocks aren't billed. `error` rejects the request with a 400 naming the first failing block. Without `block_binding`, the outcome depends on the model and the account, and a `thinking_mismatch_allowed` entry means a failing block was used and billed. With the header set, every response from a thinking model carries `input_transformations`, an empty array when nothing changed. A `model_binding_mismatch` after switching models is expected, not a bug in your code. The API may add other entry types, so skip the ones you don't recognize.
 
 ---
 
-For thinking token limits, pricing, and advanced patterns like interleaved thinking with tool use, see the [Extended thinking guide](https://platform.claude.com/docs/en/build-with-claude/extended-thinking) and [Adaptive thinking guide](https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking) on the Anthropic docs.
+For thinking token limits, pricing, and advanced patterns like interleaved thinking with tool use, see the [Extended thinking guide](https://platform.claude.com/docs/en/build-with-claude/extended-thinking), the [Adaptive thinking guide](https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking) and the [Preserved thinking guide](https://platform.claude.com/docs/en/build-with-claude/preserved-thinking) on the Anthropic docs.

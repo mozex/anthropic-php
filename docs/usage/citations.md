@@ -11,7 +11,7 @@ To enable citations, pass documents as content blocks with `'citations' => ['ena
 
 ```php
 $response = $client->messages()->create([
-    'model' => 'claude-opus-4-6',
+    'model' => 'claude-opus-5-5',
     'max_tokens' => 1024,
     'messages' => [
         [
@@ -78,7 +78,7 @@ When using [web search](./server-tools.md), citations are included automatically
 
 ```php
 $response = $client->messages()->create([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'max_tokens' => 1024,
     'tools' => [
         ['type' => 'web_search_20250305', 'name' => 'web_search'],
@@ -100,7 +100,7 @@ When [streaming](./streaming.md), citations arrive as `citations_delta` events o
 
 ```php
 $stream = $client->messages()->createStreamed([
-    'model' => 'claude-opus-4-6',
+    'model' => 'claude-opus-5-5',
     'max_tokens' => 1024,
     'messages' => [
         [

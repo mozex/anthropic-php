@@ -11,7 +11,7 @@ Use `countTokens()` with the same parameters you'd pass to `create()`:
 
 ```php
 $response = $client->messages()->countTokens([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'messages' => [
         ['role' => 'user', 'content' => 'Hello, world'],
     ],
@@ -28,7 +28,7 @@ If your request includes [tools](./tool-use.md), include them in the count. Tool
 
 ```php
 $response = $client->messages()->countTokens([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'tools' => [
         [
             'name' => 'get_weather',
@@ -56,7 +56,7 @@ System messages also contribute to the count:
 
 ```php
 $response = $client->messages()->countTokens([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'system' => 'You are a helpful PHP expert.',
     'messages' => [
         ['role' => 'user', 'content' => 'Explain generators.'],
@@ -64,13 +64,35 @@ $response = $client->messages()->countTokens([
 ]);
 ```
 
+## Counting with context editing
+
+With the context editing beta, the count reflects the edits the API would apply, and the response also tells you how many tokens the request had before them:
+
+```php
+$response = $client->messages()->countTokens([
+    'model' => 'claude-sonnet-5-5',
+    'betas' => ['context-management-2025-06-27'],
+    'context_management' => [
+        'edits' => [
+            ['type' => 'clear_tool_uses_20250919'],
+        ],
+    ],
+    'messages' => $messages,
+]);
+
+$response->inputTokens;       // 25000
+$response->contextManagement; // ['original_input_tokens' => 70000]
+```
+
+`contextManagement` is `null` on a count without the beta. Token counting ignores the `compaction` parameter of on-demand compaction.
+
 ## Practical use
 
 A common pattern is to check the token count before sending a long conversation, and trim older messages if you're close to the model's context limit:
 
 ```php
 $count = $client->messages()->countTokens([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'messages' => $conversationHistory,
 ]);
 
@@ -80,7 +102,7 @@ if ($count->inputTokens > 180000) {
 }
 
 $response = $client->messages()->create([
-    'model' => 'claude-sonnet-4-6',
+    'model' => 'claude-sonnet-5-5',
     'max_tokens' => 1024,
     'messages' => $conversationHistory,
 ]);

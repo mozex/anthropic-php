@@ -15,7 +15,7 @@ $response = $client->batches()->create([
         [
             'custom_id' => 'request-1',
             'params' => [
-                'model' => 'claude-sonnet-4-6',
+                'model' => 'claude-sonnet-5-5',
                 'max_tokens' => 1024,
                 'messages' => [
                     ['role' => 'user', 'content' => 'What is the capital of France?'],
@@ -25,7 +25,7 @@ $response = $client->batches()->create([
         [
             'custom_id' => 'request-2',
             'params' => [
-                'model' => 'claude-sonnet-4-6',
+                'model' => 'claude-sonnet-5-5',
                 'max_tokens' => 1024,
                 'messages' => [
                     ['role' => 'user', 'content' => 'What is the capital of Germany?'],
@@ -93,8 +93,9 @@ foreach ($response as $individual) {
     }
 
     if ($individual->result->type === 'errored') {
-        $individual->result->error->type;    // 'invalid_request_error'
-        $individual->result->error->message; // 'max_tokens: Field required'
+        $individual->result->error->type;      // 'invalid_request_error'
+        $individual->result->error->message;   // 'max_tokens: Field required'
+        $individual->result->error->requestId; // the failed request's ID, or null
     }
 }
 
@@ -104,6 +105,8 @@ $response->meta(); // [rate limit headers](../reference/meta-information.md)
 Results are streamed as JSONL, so you can process them one at a time without loading everything into memory.
 
 For succeeded requests, `$individual->result->message` is a full [message response](./messages.md) with the same structure you'd get from `$client->messages()->create()`.
+
+For errored requests, `error` is the API error that request got. Its `requestId` is the one to quote to support, though some errored results come back without one. Results are read under the API version of the request that created the batch.
 
 ## Listing batches
 

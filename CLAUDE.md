@@ -67,7 +67,7 @@ After every documentation change in this package, open the matching Laravel wrap
 
 **Add (or update) on the Laravel side when:**
 - The feature has a natural Laravel idiom — `Log`, `Cache`, `Queue`/`ShouldQueue`, `Storage`, Eloquent, `auth()`, `config()`, controllers, form requests, middleware.
-- An existing Laravel example would be subtly wrong without the new field. The `tool_use` dispatcher pattern needing a `$block->caller?->type === 'direct'` filter is the canonical example — miss that and users ship a duplicate-execution bug.
+- An existing Laravel example would be subtly wrong without the new field. The `tool_use` dispatcher keyed on the (`toolset_name`, `name`) pair is the canonical example: dispatch on `name` alone and a custom tool sharing a computer or browser member's name runs in its place. (A `tool_use` whose `caller` names code execution is a paused programmatic call: the dispatcher runs it too, and answers it in a message of `tool_result` blocks only.)
 - The feature changes control flow users must handle — new `stop_reason` values, refusal responses, pause-and-resume, rate-limit headers they should throttle on. These usually deserve a code snippet, not just a pointer.
 - The feature is something a Laravel dev will reach for in normal app flow (persisting `container_upload` file IDs on an Eloquent model, caching the model list, etc.).
 
