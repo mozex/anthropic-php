@@ -1,5 +1,15 @@
 # Upgrading
 
+## To 1.15.0
+
+### A Messages Response's stop_reason Can Be Null
+
+**Likelihood Of Impact: Low**
+
+`CreateResponse::$stop_reason` is `?string` now, as the API's own type is. A response from `create()` always has one. Only a message folded from a stream before its `message_delta` has `null`: `currentMessage()` mid-stream, `finalMessage()` on a stream cut off before it, or `MessageAccumulator::message()`. So code that reads it from `create()` keeps working. Static analysis may flag code that passes it where a `string` is needed: add `?? ''`, or compare it to a string, as before.
+
+The Messages `StreamResponse` gains `text()`, `finalMessage()`, `finalText()`, `currentMessage()`, `onEvent()`, `onText()`, `onThinking()`, `onContentBlock()`, `onMessage()` and `as()`, and its `getIterator()` is typed `Generator<int, TResponse>`. A subclass that declares one of them with another signature no longer loads. A fake stream built from a list of events without a `message_start` now reports no usage or model, as a real stream never lacks one.
+
 ## To 1.14.0
 
 ### The Transporter Contract Gains streamCompletionHandler()

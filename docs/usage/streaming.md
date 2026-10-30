@@ -25,6 +25,80 @@ foreach ($stream as $response) {
 
 The stream returns a `StreamResponse` object that you can iterate over. Each iteration yields a `CreateStreamedResponse` with the event data.
 
+## Just the text
+
+`text()` yields only the text deltas, so a chat UI doesn't have to pick them out of the events:
+
+```php
+foreach ($stream->text() as $delta) {
+    echo $delta; // 'Okay', ',', ' let', "'s" ...
+}
+```
+
+## The whole message
+
+`finalMessage()` reads the rest of the stream and gives you the message as the API would have sent it without streaming: a `CreateResponse` with every block filled in, tool inputs decoded, and the stop reason and usage from `message_delta`.
+
+```php
+$message = $stream->finalMessage();
+
+$message->content[1]->input; // ['location' => 'San Francisco, CA']
+$message->stop_reason;       // 'tool_use'
+$message->usage->outputTokens; // 89
+
+$stream->finalText(); // "Okay, let's check the weather for San Francisco, CA:"
+```
+
+`finalText()` joins the text blocks as they are, since a block split at a citation keeps its own spacing. It's an empty string when there's no text. You can read part of the stream yourself first: `finalMessage()` goes on from where you stopped. Its content keeps every key the stream sent and adds none, so it can go straight back into the next request.
+
+`currentMessage()` is the message so far, or `null` before `message_start`. Mid-stream its `stop_reason` is `null`, and a tool call's `input` is empty until its JSON is whole:
+
+```php
+foreach ($stream as $event) {
+    if ($event->type === 'content_block_delta' && $event->delta->type === 'text_delta') {
+        $draft = $stream->currentMessage()?->content[$event->index]->text;
+    }
+}
+```
+
+A stream that ended before `message_stop` gives what it had, and `completed()` returns `false`. One with no `message_start` at all throws a `LogicException`. After a server-side fallback, the message's `model` is the model that answered, as in a response that isn't streamed.
+
+## Callbacks
+
+Callbacks run as each event is read, before your loop gets it, so they also work when you only call `finalMessage()`:
+
+```php
+use Anthropic\Responses\Messages\CreateResponseContent;
+
+$message = $stream
+    ->onText(fn (string $delta) => print($delta))
+    ->onContentBlock(fn (CreateResponseContent $block) => $block->type === 'tool_use' ? $tools->queue($block) : null)
+    ->finalMessage();
+```
+
+There's `onEvent()` (each event object), `onText()` and `onThinking()` (each delta), `onContentBlock()` (each block once it stops, a tool call with its `input` decoded) and `onMessage()` (the whole message at `message_stop`). A callback only sees what's read after you add it. To get the message so far inside a text callback, call `currentMessage()`: a callback isn't handed a fresh copy on every delta, and it can't read the stream it's called from (that throws a `LogicException`).
+
+## Folding events yourself
+
+The same folding is a class of its own, `MessageAccumulator`, for events you read another way, like a recorded SSE stream or one relayed through a queue. Give it each event as the API sent it, the `data:` of each SSE event decoded as an array. An event object's `toArray()` has another shape, so save the raw `data:` instead:
+
+```php
+use Anthropic\Responses\Messages\MessageAccumulator;
+
+$accumulator = new MessageAccumulator;
+
+foreach ($storedEvents as $event) {
+    $accumulator->add(json_decode($event, true));
+}
+
+$accumulator->message();   // CreateResponse, or null before message_start
+$accumulator->completed(); // true once message_stop was added
+```
+
+It skips what it can't place, instead of throwing: an event before `message_start`, a second `message_start`, a block that skips an index, a delta for a block that never started, and event types it doesn't know.
+
+A framework that adds methods to streams can extend `StreamResponse` and hand any stream to its class, callbacks included, with `$stream->as(MyStream::class)`, before reading it (after, it throws a `LogicException`). The Laravel package does this for its browser responses.
+
 ## Event types
 
 As you iterate, you'll receive events in this order:

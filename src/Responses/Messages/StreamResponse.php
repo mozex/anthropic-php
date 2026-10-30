@@ -11,6 +11,7 @@ use Anthropic\Responses\Concerns\ReadsStreams;
 use Anthropic\Responses\Meta\MetaInformation;
 use Closure;
 use Generator;
+use LogicException;
 use Psr\Http\Message\ResponseInterface;
 use Throwable;
 
@@ -24,17 +25,21 @@ class StreamResponse implements ResponseHasMetaInformationContract, ResponseStre
     use ReadsStreams;
 
     /**
-     * The usage so far: `message_start`'s, with each `message_delta`'s cumulative counts over it.
-     *
-     * @var array<string, mixed>
+     * Not readonly, so a copy gets its own (`__clone`).
      */
-    private array $usage = [];
+    private MessageAccumulator $accumulator;
 
-    private ?string $model = null;
-
-    private bool $completed = false;
+    /**
+     * @var array{event: list<Closure(TResponse): void>, text: list<Closure(string): void>, thinking: list<Closure(string): void>, contentBlock: list<Closure(CreateResponseContent): void>, message: list<Closure(CreateResponse): void>}
+     */
+    private array $callbacks = ['event' => [], 'text' => [], 'thinking' => [], 'contentBlock' => [], 'message' => []];
 
     private bool $reported = false;
+
+    /**
+     * While a callback runs, which can't read the stream it's called from.
+     */
+    private bool $firing = false;
 
     private readonly int $startedAt;
 
@@ -50,13 +55,45 @@ class StreamResponse implements ResponseHasMetaInformationContract, ResponseStre
         private readonly ?Closure $onComplete = null,
     ) {
         $this->startedAt = hrtime(true);
+        $this->accumulator = new MessageAccumulator;
+    }
+
+    /**
+     * This stream as a class that extends it, over the same response and with its callbacks, for a framework that adds
+     * its own methods. The copy reports the call; this one then reports nothing.
+     *
+     * @template TStream of self
+     *
+     * @param  class-string<TStream>  $class
+     * @return TStream
+     *
+     * @throws LogicException once the stream was read, since the copy reads from where the response stands
+     */
+    public function as(string $class): self
+    {
+        if ($this->accumulator->toArray() !== null) {
+            throw new LogicException('Call as() before reading the stream.');
+        }
+
+        $copy = new $class($this->responseClass, $this->response, $this->onComplete);
+        $copy->callbacks = $this->callbacks;
+        $copy->reported = $this->reported;
+        $this->reported = true;
+
+        return $copy;
     }
 
     /**
      * {@inheritDoc}
+     *
+     * @return Generator<int, TResponse>
      */
     public function getIterator(): Generator
     {
+        if ($this->firing) {
+            throw new LogicException("A stream's callback can't read the stream: call currentMessage() for the message so far.");
+        }
+
         foreach ($this->readEvents($this->response->getBody()) as $data) {
             /** @var array{type: string, error?: string|array{type: ?string, message: string|array<int, string>, details?: mixed}, request_id?: ?string, message?: array{model?: string, usage?: array<string, mixed>}, usage?: array<string, mixed>} $response */
             $response = json_decode(trim($data), true, flags: JSON_THROW_ON_ERROR);
@@ -79,11 +116,11 @@ class StreamResponse implements ResponseHasMetaInformationContract, ResponseStre
                 throw $exception;
             }
 
-            $this->fold($response);
+            $this->accumulator->add($response);
 
             if ($response['type'] === 'message_stop') {
-                $this->completed = true;
                 $this->report();
+                $this->fire('message', fn (): ?CreateResponse => $this->accumulator->message($this->meta()));
 
                 break;
             }
@@ -92,8 +129,132 @@ class StreamResponse implements ResponseHasMetaInformationContract, ResponseStre
                 continue;
             }
 
-            yield $this->responseClass::from($response);
+            $event = $this->responseClass::from($response);
+            $this->fire('event', fn () => $event);
+            $this->fireFor($response);
+
+            yield $event;
         }
+    }
+
+    /**
+     * The text as it streams: each `text_delta`, read from where the stream stands.
+     *
+     * @return Generator<int, string>
+     */
+    public function text(): Generator
+    {
+        foreach ($this as $event) {
+            if ($event instanceof CreateStreamedResponse && $event->delta->type === 'text_delta') {
+                yield (string) $event->delta->text;
+            }
+        }
+    }
+
+    /**
+     * The whole message, as the API would have sent it without streaming: the rest of the stream is read first. A
+     * stream that ended before `message_stop` gives what it had (`completed()` says so).
+     *
+     * @throws LogicException when the stream had no `message_start`
+     */
+    public function finalMessage(): CreateResponse
+    {
+        foreach ($this as $event) {
+            // read to the end
+        }
+
+        return $this->accumulator->message($this->meta())
+            ?? throw new LogicException('The stream ended without a message_start, so it holds no message.');
+    }
+
+    /**
+     * The final message's text blocks, joined as they are (a block split at a citation keeps its own spacing); an
+     * empty string when it has none.
+     */
+    public function finalText(): string
+    {
+        $text = '';
+
+        foreach ($this->finalMessage()->content as $block) {
+            $text .= $block->type === 'text' ? (string) $block->text : '';
+        }
+
+        return $text;
+    }
+
+    /**
+     * The message so far, null before `message_start`: mid-stream, its stop reason is null and an open tool call's
+     * input is what its JSON decodes to so far, else the start's `{}`.
+     */
+    public function currentMessage(): ?CreateResponse
+    {
+        return $this->accumulator->message($this->meta());
+    }
+
+    /**
+     * Calls the callback with each event read after this, before the loop gets it (`ping` and `message_stop` aren't
+     * passed on).
+     *
+     * @param  Closure(TResponse): void  $callback
+     * @return $this
+     */
+    public function onEvent(Closure $callback): static
+    {
+        $this->callbacks['event'][] = $callback;
+
+        return $this;
+    }
+
+    /**
+     * Calls the callback with each text delta read after this. `currentMessage()` has the text so far.
+     *
+     * @param  Closure(string): void  $callback
+     * @return $this
+     */
+    public function onText(Closure $callback): static
+    {
+        $this->callbacks['text'][] = $callback;
+
+        return $this;
+    }
+
+    /**
+     * Calls the callback with each thinking delta read after this.
+     *
+     * @param  Closure(string): void  $callback
+     * @return $this
+     */
+    public function onThinking(Closure $callback): static
+    {
+        $this->callbacks['thinking'][] = $callback;
+
+        return $this;
+    }
+
+    /**
+     * Calls the callback with each block once it stops, whole: a tool call with its input decoded.
+     *
+     * @param  Closure(CreateResponseContent): void  $callback
+     * @return $this
+     */
+    public function onContentBlock(Closure $callback): static
+    {
+        $this->callbacks['contentBlock'][] = $callback;
+
+        return $this;
+    }
+
+    /**
+     * Calls the callback with the whole message at `message_stop`.
+     *
+     * @param  Closure(CreateResponse): void  $callback
+     * @return $this
+     */
+    public function onMessage(Closure $callback): static
+    {
+        $this->callbacks['message'][] = $callback;
+
+        return $this;
     }
 
     /**
@@ -104,7 +265,7 @@ class StreamResponse implements ResponseHasMetaInformationContract, ResponseStre
      */
     public function usage(): array
     {
-        return $this->usage;
+        return $this->accumulator->usage();
     }
 
     /**
@@ -113,7 +274,7 @@ class StreamResponse implements ResponseHasMetaInformationContract, ResponseStre
      */
     public function model(): ?string
     {
-        return $this->model;
+        return $this->accumulator->model();
     }
 
     /**
@@ -122,7 +283,7 @@ class StreamResponse implements ResponseHasMetaInformationContract, ResponseStre
      */
     public function completed(): bool
     {
-        return $this->completed;
+        return $this->accumulator->completed();
     }
 
     /**
@@ -139,6 +300,7 @@ class StreamResponse implements ResponseHasMetaInformationContract, ResponseStre
     public function __clone()
     {
         $this->reported = true;
+        $this->accumulator = clone $this->accumulator;
     }
 
     /**
@@ -154,31 +316,42 @@ class StreamResponse implements ResponseHasMetaInformationContract, ResponseStre
     }
 
     /**
-     * @param  array{type: string, message?: array{model?: string, usage?: array<string, mixed>}, usage?: array<string, mixed>, content_block?: mixed}  $event
+     * Calls the callbacks of a kind, building what they get only when there are some, and none for a block or message
+     * that isn't there.
+     *
+     * @param  'event'|'text'|'thinking'|'contentBlock'|'message'  $kind
+     * @param  Closure(): mixed  $value
      */
-    private function fold(array $event): void
+    private function fire(string $kind, Closure $value): void
     {
-        if ($event['type'] === 'message_start') {
-            $this->model = is_string($event['message']['model'] ?? null) ? $event['message']['model'] : null;
-            $this->usage = is_array($event['message']['usage'] ?? null) ? $event['message']['usage'] : [];
+        if ($this->callbacks[$kind] === [] || ($value = $value()) === null) {
+            return;
         }
 
-        // A fallback mid-output: message_start named the model that declined, this block the one that answers.
-        $block = $event['type'] === 'content_block_start' && is_array($event['content_block'] ?? null) ? $event['content_block'] : [];
+        $this->firing = true;
 
-        if (($block['type'] ?? null) === 'fallback' && is_array($block['to'] ?? null) && is_string($block['to']['model'] ?? null)) {
-            $this->model = $block['to']['model'];
-        }
-
-        if ($event['type'] === 'message_delta' && is_array($event['usage'] ?? null)) {
-            $this->usage = array_replace($this->usage, array_filter($event['usage'], fn (mixed $value): bool => $value !== null));
-
-            foreach (is_array($this->usage['iterations'] ?? null) ? $this->usage['iterations'] : [] as $iteration) {
-                if (is_array($iteration) && ($iteration['type'] ?? null) === 'fallback_message' && is_string($iteration['model'] ?? null)) {
-                    $this->model = $iteration['model'];
-                }
+        try {
+            foreach ($this->callbacks[$kind] as $callback) {
+                $callback($value);
             }
+        } finally {
+            $this->firing = false;
         }
+    }
+
+    /**
+     * @param  array<array-key, mixed>  $event
+     */
+    private function fireFor(array $event): void
+    {
+        $delta = is_array($event['delta'] ?? null) ? $event['delta'] : [];
+
+        match (true) {
+            $event['type'] === 'content_block_delta' && ($delta['type'] ?? null) === 'text_delta' => $this->fire('text', fn (): string => is_string($delta['text'] ?? null) ? $delta['text'] : ''),
+            $event['type'] === 'content_block_delta' && ($delta['type'] ?? null) === 'thinking_delta' => $this->fire('thinking', fn (): string => is_string($delta['thinking'] ?? null) ? $delta['thinking'] : ''),
+            $event['type'] === 'content_block_stop' && is_int($event['index'] ?? null) => $this->fire('contentBlock', fn (): ?CreateResponseContent => $this->accumulator->message()?->content[$event['index']] ?? null),
+            default => null,
+        };
     }
 
     private function report(): void

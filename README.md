@@ -114,12 +114,11 @@ $stream = $client->messages()->createStreamed([
     ],
 ]);
 
-foreach ($stream as $response) {
-    if ($response->type === 'content_block_delta'
-        && $response->delta->type === 'text_delta') {
-        echo $response->delta->text;
-    }
+foreach ($stream->text() as $delta) {
+    echo $delta;
 }
+
+$message = $stream->finalMessage(); // the whole CreateResponse, as if it hadn't streamed
 ```
 
 ### Tool Use
