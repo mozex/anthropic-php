@@ -45,3 +45,29 @@ test('fake with override', function () {
     expect($response)
         ->inputTokens->toBe(500);
 });
+
+test('the beta context management count round-trips', function () {
+    // https://platform.claude.com/docs/en/build-with-claude/context-editing
+    $json = <<<'JSON'
+        {
+          "input_tokens": 25000,
+          "context_management": {
+            "original_input_tokens": 70000
+          }
+        }
+        JSON;
+
+    $result = CountTokensResponse::from(json_decode($json, true, flags: JSON_THROW_ON_ERROR), meta());
+
+    expect($result)
+        ->inputTokens->toBe(25000)
+        ->contextManagement->toBe(['original_input_tokens' => 70000])
+        ->and(docsExampleJson($result->toArray()))->toBe(docsExampleJson($json));
+});
+
+test('a count without context management reads it as null', function () {
+    $result = CountTokensResponse::from(messagesCountTokens(), meta());
+
+    expect($result->contextManagement)->toBeNull()
+        ->and($result->toArray())->not->toHaveKey('context_management');
+});

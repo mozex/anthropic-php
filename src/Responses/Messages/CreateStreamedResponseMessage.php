@@ -8,7 +8,10 @@ class CreateStreamedResponseMessage
 {
     /**
      * @param  array<int, string>  $content
-     * @param  array{id?: string, type?: string, role?: string, content?: array<int, string>, model?: string, stop_reason?: string|null, stop_sequence?:string|null, diagnostics?: array{cache_miss_reason?: array{type: string, cache_missed_input_tokens?: int|null}|null}|null}  $attributes
+     * @param  array{id: string, expires_at: string, skills?: array<int, array{type: string, skill_id: string, version: string}>|null}|null  $container
+     * @param  array{applied_edits: array<int, array<string, mixed>>}|null  $context_management
+     * @param  array<int, array{type: string, path: string, reason: string}>|null  $input_transformations
+     * @param  array{id?: string, type?: string, role?: string, content?: array<int, string>, model?: string, stop_reason?: string|null, stop_sequence?:string|null, diagnostics?: array{cache_miss_reason?: array{type: string, cache_missed_input_tokens?: int|null}|null}|null, container?: array{id: string, expires_at: string, skills?: array<int, array{type: string, skill_id: string, version: string}>|null}|null, context_management?: array{applied_edits: array<int, array<string, mixed>>}|null, input_transformations?: array<int, array{type: string, path: string, reason: string}>|null}  $attributes
      */
     private function __construct(
         public readonly ?string $id,
@@ -19,11 +22,14 @@ class CreateStreamedResponseMessage
         public readonly ?string $stop_reason,
         public readonly ?string $stop_sequence,
         public readonly ?CreateResponseDiagnostics $diagnostics,
+        public readonly ?array $container,
+        public readonly ?array $context_management,
+        public readonly ?array $input_transformations,
         protected readonly array $attributes,
     ) {}
 
     /**
-     * @param  array{id?: string, type?: string, role?: string, content?: array<int, string>, model?: string, stop_reason?: string|null, stop_sequence?:string|null, diagnostics?: array{cache_miss_reason?: array{type: string, cache_missed_input_tokens?: int|null}|null}|null}  $attributes
+     * @param  array{id?: string, type?: string, role?: string, content?: array<int, string>, model?: string, stop_reason?: string|null, stop_sequence?:string|null, diagnostics?: array{cache_miss_reason?: array{type: string, cache_missed_input_tokens?: int|null}|null}|null, container?: array{id: string, expires_at: string, skills?: array<int, array{type: string, skill_id: string, version: string}>|null}|null, context_management?: array{applied_edits: array<int, array<string, mixed>>}|null, input_transformations?: array<int, array{type: string, path: string, reason: string}>|null}  $attributes
      */
     public static function from(array $attributes): self
     {
@@ -36,12 +42,15 @@ class CreateStreamedResponseMessage
             $attributes['stop_reason'] ?? null,
             $attributes['stop_sequence'] ?? null,
             isset($attributes['diagnostics']) ? CreateResponseDiagnostics::from($attributes['diagnostics']) : null,
+            $attributes['container'] ?? null,
+            $attributes['context_management'] ?? null,
+            $attributes['input_transformations'] ?? null,
             $attributes,
         );
     }
 
     /**
-     * @return array{id: string|null, type: string|null, role: string|null, content: array<int, string>|null, model: string|null, stop_reason: string|null, stop_sequence: string|null, diagnostics?: array{cache_miss_reason?: array{type: string, cache_missed_input_tokens?: int|null}|null}|null}
+     * @return array{id: string|null, type: string|null, role: string|null, content: array<int, string>|null, model: string|null, stop_reason: string|null, stop_sequence: string|null, diagnostics?: array{cache_miss_reason?: array{type: string, cache_missed_input_tokens?: int|null}|null}|null, container?: array{id: string, expires_at: string, skills?: array<int, array{type: string, skill_id: string, version: string}>|null}|null, context_management?: array{applied_edits: array<int, array<string, mixed>>}|null, input_transformations?: array<int, array{type: string, path: string, reason: string}>|null}
      */
     public function toArray(): array
     {

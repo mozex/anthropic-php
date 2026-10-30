@@ -72,29 +72,29 @@ test('responses keep the fields they do not type', function (Closure $build, arr
         fn (array $attributes) => CompletionsCreateStreamedResponse::from($attributes),
         [...completion(), 'future_field' => 'value'],
     ],
-    // https://platform.claude.com/docs/en/build-with-claude/context-editing
-    'count tokens with context management' => [
+    'count tokens' => [
         fn (array $attributes) => CountTokensResponse::from($attributes, meta()),
-        ['input_tokens' => 25000, 'context_management' => ['original_input_tokens' => 70000]],
+        [...messagesCountTokens(), 'future_field' => 'value'],
     ],
 ]);
 
 test('stream events keep the fields they do not type', function () {
-    // https://platform.claude.com/docs/en/build-with-claude/thinking
-    $start = CreateStreamedResponse::from(['type' => 'content_block_start', 'index' => 1, 'content_block' => ['type' => 'thinking', 'thinking' => '', 'signature' => '']]);
-
-    // composed: the docs elide applied_edits on the streamed message_delta; these are its non-streaming values
+    // composed: no docs example
+    $start = CreateStreamedResponse::from(['type' => 'content_block_start', 'index' => 1, 'content_block' => ['type' => 'thinking', 'thinking' => '', 'signature' => '', 'future_field' => 'value'], 'future_field' => 'value'])->toArray();
     $delta = CreateStreamedResponse::from([
         'type' => 'message_delta',
-        'delta' => ['stop_reason' => 'end_turn', 'stop_sequence' => null],
-        'usage' => ['output_tokens' => 1024],
-        'context_management' => ['applied_edits' => [['type' => 'clear_thinking_20251015', 'cleared_thinking_turns' => 3, 'cleared_input_tokens' => 15000]]],
-    ]);
+        'delta' => ['stop_reason' => 'end_turn', 'stop_sequence' => null, 'future_field' => 'value'],
+        'usage' => ['output_tokens' => 1024, 'future_field' => 'value'],
+        'future_field' => ['nested' => ['value' => 1]],
+    ])->toArray();
 
-    expect($start->toArray())
+    expect($start)
         ->not->toHaveKey('content_block')
-        ->and($start->toArray()['content_block_start'])->toHaveKey('signature', '')
-        ->and($delta->toArray()['context_management'])->toBe(['applied_edits' => [['type' => 'clear_thinking_20251015', 'cleared_thinking_turns' => 3, 'cleared_input_tokens' => 15000]]]);
+        ->toHaveKey('future_field', 'value')
+        ->and($start['content_block_start'])->toHaveKey('future_field', 'value')
+        ->and($delta)->toHaveKey('future_field', ['nested' => ['value' => 1]])
+        ->and($delta['delta'])->toHaveKey('future_field', 'value')
+        ->and($delta['usage'])->toHaveKey('future_field', 'value');
 });
 
 test('message_start keeps its usage once', function () {

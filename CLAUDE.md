@@ -160,6 +160,6 @@ Test fixture functions live in `tests/Helpers/` as PHP files returning arrays:
 - `tests/Helpers/Models.php` -- Models resource fixtures
 - `tests/Helpers/Meta.php` -- Meta/header fixtures
 
-Streaming fixtures are SSE text files in `tests/Helpers/Streams/` (opened with `fopen()` and wrapped in a PSR-7 Stream).
+Streaming fixtures are SSE text files in `tests/Helpers/Streams/` (opened with `fopen()` and wrapped in a PSR-7 Stream). `tests/Helpers/MessageStreamDocsExamples.php` holds Messages streams from the docs as SSE text (the raw streams the streaming page shows, and the documented blocks and event payloads composed into events, marked); `StreamDocsExamplesTest` checks that every event's `toArray()` keeps every value its payload sent.
 
 For consumer-facing tests, use `ClientFake` with `CreateResponse::fake()`.
