@@ -11,7 +11,7 @@ use Anthropic\Testing\Responses\Concerns\Completions\FakeableForStreamedResponse
 /**
  * @implements ResponseContract<array{type: string, id: string, completion: string, stop_reason: string|null, model: string, stop: string|null, log_id: string}>
  */
-final class CreateStreamedResponse implements ResponseContract
+class CreateStreamedResponse implements ResponseContract
 {
     /**
      * @use ArrayAccessible<array{type: string, id: string, completion: string, stop_reason: string|null, model: string, stop: string|null, log_id: string}>

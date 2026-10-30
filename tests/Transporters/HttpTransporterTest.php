@@ -1,0 +1,573 @@
+<?php
+
+declare(strict_types=1);
+
+use Anthropic\Enums\Transporter\ContentType;
+use Anthropic\Exceptions\ErrorException;
+use Anthropic\Exceptions\RateLimitException;
+use Anthropic\Exceptions\TransporterException;
+use Anthropic\Exceptions\UnserializableResponse;
+use Anthropic\Transporters\HttpTransporter;
+use Anthropic\ValueObjects\ApiKey;
+use Anthropic\ValueObjects\Transporter\BaseUri;
+use Anthropic\ValueObjects\Transporter\Headers;
+use Anthropic\ValueObjects\Transporter\Payload;
+use Anthropic\ValueObjects\Transporter\QueryParams;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Psr7\Request as Psr7Request;
+use GuzzleHttp\Psr7\Response;
+use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
+
+beforeEach(function () {
+    $this->client = Mockery::mock(ClientInterface::class);
+
+    $apiKey = ApiKey::from('foo');
+
+    $this->http = new HttpTransporter(
+        $this->client,
+        BaseUri::from('api.anthropic.com/v1'),
+        Headers::withAuthorization($apiKey)->withContentType(ContentType::JSON),
+        QueryParams::create()->withParam('foo', 'bar'),
+        fn (RequestInterface $request): ResponseInterface => $this->client->sendAsyncRequest($request, ['stream' => true]),
+    );
+});
+
+test('request object', function () {
+    $payload = Payload::list('models');
+
+    $response = new Response(200, ['Content-Type' => 'application/json; charset=utf-8', ...metaHeaders()], json_encode([
+        'qdwq',
+    ]));
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->withArgs(function (Psr7Request $request) {
+            expect($request->getMethod())->toBe('GET')
+                ->and($request->getUri())
+                ->getHost()->toBe('api.anthropic.com')
+                ->getScheme()->toBe('https')
+                ->getPath()->toBe('/v1/models');
+
+            return true;
+        })->andReturn($response);
+
+    $this->http->requestObject($payload);
+});
+
+test('request object response', function () {
+    $payload = Payload::list('models');
+
+    $response = new Response(200, ['Content-Type' => 'application/json; charset=utf-8', ...metaHeaders()], json_encode([
+        [
+            'text' => 'Hey!',
+            'index' => 0,
+            'logprobs' => null,
+            'finish_reason' => 'length',
+        ],
+    ]));
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    $response = $this->http->requestObject($payload);
+
+    expect($response->data())->toBe([
+        [
+            'text' => 'Hey!',
+            'index' => 0,
+            'logprobs' => null,
+            'finish_reason' => 'length',
+        ],
+    ]);
+});
+
+test('request object server user errors', function () {
+    $payload = Payload::list('models');
+
+    $response = new Response(401, ['Content-Type' => 'application/json; charset=utf-8'], json_encode([
+        'error' => [
+            'message' => 'Incorrect API key provided: foo.',
+            'type' => 'invalid_request_error',
+        ],
+    ]));
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    expect(fn () => $this->http->requestObject($payload))
+        ->toThrow(function (ErrorException $e) {
+            expect($e->getMessage())->toBe('Incorrect API key provided: foo.')
+                ->and($e->getErrorMessage())->toBe('Incorrect API key provided: foo.')
+                ->and($e->getErrorType())->toBe('invalid_request_error')
+                ->and($e->getStatusCode())->toBe(401);
+        });
+});
+
+test('request object server errors', function () {
+    $payload = Payload::create('complete', ['model' => 'claude-2.1']);
+
+    $response = new Response(401, ['Content-Type' => 'application/json'], json_encode([
+        'error' => [
+            'message' => 'That model is currently overloaded with other requests. You can ...',
+            'type' => 'server_error',
+        ],
+    ]));
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    expect(fn () => $this->http->requestObject($payload))
+        ->toThrow(function (ErrorException $e) {
+            expect($e->getMessage())->toBe('That model is currently overloaded with other requests. You can ...')
+                ->and($e->getErrorMessage())->toBe('That model is currently overloaded with other requests. You can ...')
+                ->and($e->getErrorType())->toBe('server_error');
+        });
+});
+
+test('error type may be null', function () {
+    $payload = Payload::list('models');
+
+    $response = new Response(422, ['Content-Type' => 'application/json; charset=utf-8'], json_encode([
+        'error' => [
+            'message' => 'You exceeded your current quota, please check',
+            'type' => null,
+        ],
+    ]));
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    expect(fn () => $this->http->requestObject($payload))
+        ->toThrow(function (ErrorException $e) {
+            expect($e->getMessage())->toBe('You exceeded your current quota, please check')
+                ->and($e->getErrorMessage())->toBe('You exceeded your current quota, please check')
+                ->and($e->getErrorType())->toBeNull();
+        });
+});
+
+test('error message may be an array', function () {
+    $payload = Payload::create('complete', ['model' => 'claude-2.1']);
+
+    $response = new Response(404, ['Content-Type' => 'application/json; charset=utf-8'], json_encode([
+        'error' => [
+            'message' => [
+                'Invalid schema for function \'get_current_weather\':',
+                'In context=(\'properties\', \'location\'), array schema missing items',
+            ],
+            'type' => 'invalid_request_error',
+        ],
+    ]));
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    expect(fn () => $this->http->requestObject($payload))
+        ->toThrow(function (ErrorException $e) {
+            expect($e->getMessage())->toBe('Invalid schema for function \'get_current_weather\':'.PHP_EOL.'In context=(\'properties\', \'location\'), array schema missing items')
+                ->and($e->getErrorMessage())->toBe('Invalid schema for function \'get_current_weather\':'.PHP_EOL.'In context=(\'properties\', \'location\'), array schema missing items')
+                ->and($e->getErrorType())->toBe('invalid_request_error');
+        });
+});
+
+test('error message may be empty', function () {
+    $payload = Payload::create('complete', ['model' => 'claude-2.1']);
+
+    $response = new Response(404, ['Content-Type' => 'application/json; charset=utf-8'], json_encode([
+        'error' => [
+            'message' => '',
+            'type' => 'invalid_request_error',
+        ],
+    ]));
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    expect(fn () => $this->http->requestObject($payload))
+        ->toThrow(function (ErrorException $e) {
+            expect($e->getMessage())->toBe('Unknown error')
+                ->and($e->getErrorMessage())->toBe('Unknown error')
+                ->and($e->getErrorType())->toBe('invalid_request_error');
+        });
+});
+
+test('request object client errors', function () {
+    $payload = Payload::list('models');
+
+    $baseUri = BaseUri::from('api.anthropic.com');
+    $headers = Headers::withAuthorization(ApiKey::from('foo'));
+    $queryParams = QueryParams::create();
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andThrow(new ConnectException('Could not resolve host.', $payload->toRequest($baseUri, $headers, $queryParams)));
+
+    expect(fn () => $this->http->requestObject($payload))->toThrow(function (TransporterException $e) {
+        expect($e->getMessage())->toBe('Could not resolve host.')
+            ->and($e->getCode())->toBe(0)
+            ->and($e->getPrevious())->toBeInstanceOf(ConnectException::class);
+    });
+});
+
+test('request object client error in response', function () {
+    $payload = Payload::list('models');
+
+    $baseUri = BaseUri::from('api.anthropic.com');
+    $headers = Headers::withAuthorization(ApiKey::from('foo'));
+    $queryParams = QueryParams::create();
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andThrow(new ClientException(
+            message: 'Could not resolve host.',
+            request: $payload->toRequest($baseUri, $headers, $queryParams),
+            response: new Response(401, ['Content-Type' => 'application/json; charset=utf-8'], json_encode([
+                'error' => [
+                    'message' => 'Incorrect API key provided: foo.',
+                    'type' => 'invalid_request_error',
+                ],
+            ]))
+        ));
+
+    expect(fn () => $this->http->requestObject($payload))->toThrow(function (ErrorException $e) {
+        expect($e->getMessage())
+            ->toBe('Incorrect API key provided: foo.');
+    });
+});
+
+test('request object serialization errors', function () {
+    $payload = Payload::list('models');
+
+    $response = new Response(200, ['Content-Type' => 'application/json; charset=utf-8'], 'err');
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    $this->http->requestObject($payload);
+})->throws(UnserializableResponse::class, 'Syntax error', 0);
+
+test('request plain text', function () {
+    $payload = Payload::upload('audio/transcriptions', []);
+
+    $response = new Response(200, ['Content-Type' => 'text/plain; charset=utf-8', ...metaHeaders()], 'Hello, how are you?');
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    $response = $this->http->requestObject($payload);
+
+    expect($response->data())->toBe('Hello, how are you?');
+});
+
+test('request content', function () {
+    $payload = Payload::list('models');
+
+    $response = new Response(200, [], json_encode([
+        'qdwq',
+    ]));
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->withArgs(function (Psr7Request $request) {
+            expect($request->getMethod())->toBe('GET')
+                ->and($request->getUri())
+                ->getHost()->toBe('api.anthropic.com')
+                ->getScheme()->toBe('https')
+                ->getPath()->toBe('/v1/models');
+
+            return true;
+        })->andReturn($response);
+
+    $this->http->requestContent($payload);
+});
+
+test('request content response', function () {
+    $payload = Payload::list('models');
+
+    $response = new Response(200, [], 'My response content');
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    $response = $this->http->requestContent($payload);
+
+    expect($response)->toBe('My response content');
+});
+
+test('request content client errors', function () {
+    $payload = Payload::list('models');
+
+    $baseUri = BaseUri::from('api.anthropic.com');
+    $headers = Headers::withAuthorization(ApiKey::from('foo'));
+    $queryParams = QueryParams::create();
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andThrow(new ConnectException('Could not resolve host.', $payload->toRequest($baseUri, $headers, $queryParams)));
+
+    expect(fn () => $this->http->requestContent($payload))->toThrow(function (TransporterException $e) {
+        expect($e->getMessage())->toBe('Could not resolve host.')
+            ->and($e->getCode())->toBe(0)
+            ->and($e->getPrevious())->toBeInstanceOf(ConnectException::class);
+    });
+});
+
+test('request content server errors', function () {
+    $payload = Payload::list('models');
+
+    $response = new Response(401, ['Content-Type' => 'application/json; charset=utf-8'], json_encode([
+        'error' => [
+            'message' => 'Incorrect API key provided: foo.',
+            'type' => 'invalid_request_error',
+        ],
+    ]));
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    expect(fn () => $this->http->requestContent($payload))
+        ->toThrow(function (ErrorException $e) {
+            expect($e->getMessage())->toBe('Incorrect API key provided: foo.')
+                ->and($e->getErrorMessage())->toBe('Incorrect API key provided: foo.')
+                ->and($e->getErrorType())->toBe('invalid_request_error');
+        });
+});
+
+test('request stream', function () {
+    $payload = Payload::create('complete', []);
+
+    $response = new Response(200, [], json_encode([
+        'qdwq',
+    ]));
+
+    $this->client
+        ->shouldReceive('sendAsyncRequest')
+        ->once()
+        ->withArgs(function (Psr7Request $request) {
+            expect($request->getMethod())->toBe('POST')
+                ->and($request->getUri())
+                ->getHost()->toBe('api.anthropic.com')
+                ->getScheme()->toBe('https')
+                ->getPath()->toBe('/v1/complete');
+
+            return true;
+        })->andReturn($response);
+
+    $response = $this->http->requestStream($payload);
+
+    expect($response->getBody()->eof())
+        ->toBeFalse();
+});
+
+test('request stream server errors', function () {
+    $payload = Payload::create('complete', []);
+
+    $response = new Response(401, ['Content-Type' => 'application/json; charset=utf-8'], json_encode([
+        'error' => [
+            'message' => 'Incorrect API key provided: foo.',
+            'type' => 'invalid_request_error',
+        ],
+    ]));
+
+    $this->client
+        ->shouldReceive('sendAsyncRequest')
+        ->once()
+        ->andReturn($response);
+
+    expect(fn () => $this->http->requestStream($payload))
+        ->toThrow(function (ErrorException $e) {
+            expect($e->getMessage())->toBe('Incorrect API key provided: foo.')
+                ->and($e->getErrorMessage())->toBe('Incorrect API key provided: foo.')
+                ->and($e->getErrorType())->toBe('invalid_request_error');
+        });
+});
+
+test('request object rate limit', function () {
+    $payload = Payload::list('models');
+
+    $response = new Response(429, ['Content-Type' => 'application/json; charset=utf-8'], json_encode([
+        'error' => [
+            'message' => 'Rate limit exceeded',
+            'type' => 'rate_limit_error',
+        ],
+    ]));
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    expect(fn () => $this->http->requestObject($payload))
+        ->toThrow(function (RateLimitException $e) {
+            expect($e->getMessage())->toBe('Rate limit exceeded')
+                ->and($e->getErrorType())->toBe('rate_limit_error')
+                ->and($e->getStatusCode())->toBe(429)
+                ->and($e->response->getStatusCode())->toBe(429);
+        });
+});
+
+test('rate limit exception is catchable as error exception', function () {
+    $payload = Payload::list('models');
+
+    $response = new Response(429, ['Content-Type' => 'application/json; charset=utf-8'], '');
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    expect(fn () => $this->http->requestObject($payload))
+        ->toThrow(ErrorException::class);
+});
+
+test('request content rate limit', function () {
+    $payload = Payload::list('models');
+
+    $response = new Response(429, ['Content-Type' => 'application/json; charset=utf-8'], '');
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    expect(fn () => $this->http->requestContent($payload))
+        ->toThrow(RateLimitException::class, 'Request rate limit has been exceeded.');
+});
+
+test('request stream rate limit', function () {
+    $payload = Payload::create('complete', []);
+
+    $response = new Response(429, ['Content-Type' => 'application/json; charset=utf-8'], '');
+
+    $this->client
+        ->shouldReceive('sendAsyncRequest')
+        ->once()
+        ->andReturn($response);
+
+    expect(fn () => $this->http->requestStream($payload))
+        ->toThrow(RateLimitException::class, 'Request rate limit has been exceeded.');
+});
+
+test('add header', function () {
+    $payload = Payload::list('models');
+
+    $response = new Response(200, ['Content-Type' => 'application/json; charset=utf-8', ...metaHeaders()], json_encode([
+        'data' => 'test',
+    ]));
+
+    $this->http->addHeader('X-Custom', 'custom-value');
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->withArgs(function (Psr7Request $request) {
+            expect($request->getHeaderLine('X-Custom'))->toBe('custom-value');
+
+            return true;
+        })->andReturn($response);
+
+    $this->http->requestObject($payload);
+});
+
+test('error exception provides response', function () {
+    $payload = Payload::list('models');
+
+    $response = new Response(401, ['Content-Type' => 'application/json; charset=utf-8', 'X-Request-Id' => 'req-123'], json_encode([
+        'error' => [
+            'message' => 'Unauthorized',
+            'type' => 'authentication_error',
+        ],
+    ]));
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    expect(fn () => $this->http->requestObject($payload))
+        ->toThrow(function (ErrorException $e) {
+            expect($e->response)->toBeInstanceOf(ResponseInterface::class)
+                ->and($e->response->getStatusCode())->toBe(401)
+                ->and($e->response->getHeaderLine('X-Request-Id'))->toBe('req-123');
+        });
+});
+
+test('error exception accepts string contents', function () {
+    $response = new Response(500);
+
+    $e = new ErrorException('Something went wrong', $response);
+
+    expect($e->getMessage())->toBe('Something went wrong')
+        ->and($e->getErrorType())->toBeNull()
+        ->and($e->getStatusCode())->toBe(500);
+});
+
+test('error exception accepts int status code for backwards compatibility', function () {
+    $e = new ErrorException(['message' => 'Bad request', 'type' => 'invalid_request_error'], 400);
+
+    expect($e->getMessage())->toBe('Bad request')
+        ->and($e->getErrorType())->toBe('invalid_request_error')
+        ->and($e->getStatusCode())->toBe(400)
+        ->and($e->response)->toBeNull();
+});
+
+test('unserializable response provides response', function () {
+    $payload = Payload::list('models');
+
+    $response = new Response(200, ['Content-Type' => 'application/json; charset=utf-8'], 'not-json');
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    expect(fn () => $this->http->requestObject($payload))
+        ->toThrow(function (UnserializableResponse $e) {
+            expect($e->response)->toBeInstanceOf(ResponseInterface::class)
+                ->and($e->response->getStatusCode())->toBe(200);
+        });
+});
+
+test('rate limit with no json body', function () {
+    $payload = Payload::list('models');
+
+    $response = new Response(429, [], '');
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    expect(fn () => $this->http->requestObject($payload))
+        ->toThrow(function (RateLimitException $e) {
+            expect($e->getMessage())->toBe('Request rate limit has been exceeded.')
+                ->and($e->getStatusCode())->toBe(429);
+        });
+});

@@ -11,7 +11,7 @@ use Anthropic\Responses\Meta\MetaInformation;
  *
  * @internal
  */
-final class Response
+class Response
 {
     /**
      * Creates a new Response value object.

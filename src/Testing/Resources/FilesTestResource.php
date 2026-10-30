@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Anthropic\Testing\Resources;
 
 use Anthropic\Contracts\Resources\FilesContract;
@@ -9,7 +11,7 @@ use Anthropic\Responses\Files\FileListResponse;
 use Anthropic\Responses\Files\FileResponse;
 use Anthropic\Testing\Resources\Concerns\Testable;
 
-final class FilesTestResource implements FilesContract
+class FilesTestResource implements FilesContract
 {
     use Testable;
 

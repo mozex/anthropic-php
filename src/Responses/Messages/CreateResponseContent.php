@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Anthropic\Responses\Messages;
 
-final class CreateResponseContent
+class CreateResponseContent
 {
     /**
      * @param  array<string, mixed>|null  $input

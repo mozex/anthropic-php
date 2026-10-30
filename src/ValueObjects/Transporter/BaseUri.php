@@ -9,7 +9,7 @@ use Anthropic\Contracts\StringableContract;
 /**
  * @internal
  */
-final class BaseUri implements StringableContract
+class BaseUri implements StringableContract
 {
     /**
      * Creates a new Base URI value object.

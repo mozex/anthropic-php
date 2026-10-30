@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Anthropic\Responses\Messages;
 
-final class CreateStreamedResponseMessage
+class CreateStreamedResponseMessage
 {
     /**
      * @param  array<int, string>  $content

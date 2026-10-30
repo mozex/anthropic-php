@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Anthropic\Testing\Responses\Fixtures\Models;
 
-final class ListResponseFixture
+class ListResponseFixture
 {
     public const ATTRIBUTES = [
         'data' => [

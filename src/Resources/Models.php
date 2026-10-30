@@ -10,7 +10,7 @@ use Anthropic\Responses\Models\RetrieveResponse;
 use Anthropic\ValueObjects\Transporter\Payload;
 use Anthropic\ValueObjects\Transporter\Response;
 
-final class Models implements ModelsContract
+class Models implements ModelsContract
 {
     use Concerns\Transportable;
 

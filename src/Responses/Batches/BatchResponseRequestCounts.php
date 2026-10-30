@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Anthropic\Responses\Batches;
 
-final class BatchResponseRequestCounts
+class BatchResponseRequestCounts
 {
     private function __construct(
         public readonly int $processing,

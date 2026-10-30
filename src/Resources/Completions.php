@@ -11,7 +11,7 @@ use Anthropic\Responses\Completions\StreamResponse;
 use Anthropic\ValueObjects\Transporter\Payload;
 use Anthropic\ValueObjects\Transporter\Response;
 
-final class Completions implements CompletionsContract
+class Completions implements CompletionsContract
 {
     use Concerns\Streamable;
     use Concerns\Transportable;

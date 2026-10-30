@@ -1,7 +1,8 @@
 {
     "name": "mozex/anthropic-php",
     "description": "PHP client for the Anthropic API: messages, streaming, tool use, thinking, web search, code execution, batches, and more.",
-    "keywords": ["php", "anthropic", "claude", "sdk", "api", "client", "ai", "llm", "streaming", "tool-use", "thinking", "generative-ai", "text-generation", "claude-opus", "claude-sonnet", "claude-haiku"],
+    "keywords": ["php", "anthropic", "claude", "sdk", "api", "client", "ai", "llm", "streaming", "tool-use", "thinking", "generative-ai", "text-generation", "claude-opus", "claude-sonnet", "claude-haiku", "mozex"],
+    "homepage": "https://github.com/mozex/anthropic-php",
     "license": "MIT",
     "authors": [
         {
@@ -25,11 +26,12 @@
         "guzzlehttp/psr7": "^2.8.0",
         "laravel/pint": "^1.25.1",
         "mockery/mockery": "^1.6.12",
-        "nunomaduro/collision": "^8.8.3",
-        "pestphp/pest": "^3.8.2|^4.1.4|^5.0.0",
-        "pestphp/pest-plugin-arch": "^3.1.1|^4.0.0|^5.0.0",
-        "pestphp/pest-plugin-type-coverage": "^3.6.1|^4.0.0|^5.0.1",
+        "pestphp/pest": "^3.8.2|^4.0.0|^5.0.0",
+        "pestphp/pest-plugin-type-coverage": "^3.5|^4.0.0|^5.0.1",
+        "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan": "^2.1.45",
+        "phpstan/phpstan-deprecation-rules": "^2.0",
+        "phpstan/phpstan-phpunit": "^2.0",
         "symfony/var-dumper": "^7.3.5"
     },
     "autoload": {
@@ -52,12 +54,13 @@
         "preferred-install": "dist",
         "allow-plugins": {
             "pestphp/pest-plugin": true,
-            "php-http/discovery": false
+            "php-http/discovery": false,
+            "phpstan/extension-installer": true
         }
     },
     "scripts": {
-        "lint": "pint -v --parallel",
-        "test:lint": "pint --test -v --parallel",
+        "lint": "pint",
+        "test:lint": "pint --test",
         "test:types": "phpstan analyse --ansi",
         "test:type-coverage": "pest --type-coverage --min=100",
         "test:unit": "pest --colors=always",

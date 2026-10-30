@@ -6,4 +6,4 @@ namespace Anthropic\Exceptions;
 
 use Exception;
 
-final class InvalidArgumentException extends Exception {}
+class InvalidArgumentException extends Exception {}

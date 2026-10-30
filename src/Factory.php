@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Anthropic;
 
 use Anthropic\Transporters\HttpTransporter;
@@ -16,7 +18,7 @@ use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\HttpClient\Psr18Client;
 
-final class Factory
+class Factory
 {
     /**
      * The API key for the requests.

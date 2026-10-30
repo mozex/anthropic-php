@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Anthropic\Testing\Resources;
 
 use Anthropic\Contracts\Resources\ModelsContract;
@@ -8,7 +10,7 @@ use Anthropic\Responses\Models\ListResponse;
 use Anthropic\Responses\Models\RetrieveResponse;
 use Anthropic\Testing\Resources\Concerns\Testable;
 
-final class ModelsTestResource implements ModelsContract
+class ModelsTestResource implements ModelsContract
 {
     use Testable;
 

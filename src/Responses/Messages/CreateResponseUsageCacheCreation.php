@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Anthropic\Responses\Messages;
 
-final class CreateResponseUsageCacheCreation
+class CreateResponseUsageCacheCreation
 {
     private function __construct(
         public readonly int $ephemeral5mInputTokens,

@@ -16,7 +16,7 @@ use Anthropic\Responses\Meta\MetaInformation;
  * - "canceled": no additional fields
  * - "expired": no additional fields
  */
-final class BatchResult
+class BatchResult
 {
     private function __construct(
         public readonly string $type,

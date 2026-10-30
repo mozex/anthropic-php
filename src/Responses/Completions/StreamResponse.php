@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Anthropic\Responses\Completions;
 
 use Anthropic\Contracts\ResponseStreamContract;
@@ -13,7 +15,7 @@ use Psr\Http\Message\StreamInterface;
  *
  * @implements ResponseStreamContract<TResponse>
  */
-final class StreamResponse implements ResponseStreamContract
+class StreamResponse implements ResponseStreamContract
 {
     /**
      * Creates a new Stream Response instance.

@@ -7,7 +7,7 @@ namespace Anthropic\Responses\Batches;
 /**
  * Represents the error details for a failed batch result.
  */
-final class BatchResultError
+class BatchResultError
 {
     /**
      * @param  string  $type  The inner error type (e.g., "invalid_request_error")

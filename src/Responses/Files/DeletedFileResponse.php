@@ -14,7 +14,7 @@ use Anthropic\Testing\Responses\Concerns\Files\Fakeable;
 /**
  * @implements ResponseContract<array{id: string, type: string}>
  */
-final class DeletedFileResponse implements ResponseContract, ResponseHasMetaInformationContract
+class DeletedFileResponse implements ResponseContract, ResponseHasMetaInformationContract
 {
     /**
      * @use ArrayAccessible<array{id: string, type: string}>

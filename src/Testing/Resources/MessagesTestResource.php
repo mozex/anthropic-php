@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Anthropic\Testing\Resources;
 
 use Anthropic\Contracts\Resources\MessagesContract;
@@ -9,7 +11,7 @@ use Anthropic\Responses\Messages\CreateResponse;
 use Anthropic\Responses\Messages\StreamResponse;
 use Anthropic\Testing\Resources\Concerns\Testable;
 
-final class MessagesTestResource implements MessagesContract
+class MessagesTestResource implements MessagesContract
 {
     use Testable;
 

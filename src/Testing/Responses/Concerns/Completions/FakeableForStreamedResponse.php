@@ -15,7 +15,7 @@ trait FakeableForStreamedResponse
     public static function fake($resource = null): StreamResponse
     {
         if ($resource === null) {
-            $filename = str_replace(['Anthropic\Responses', '\\'], [__DIR__.'/../../Fixtures/', '/'], static::class).'Fixture.txt';
+            $filename = str_replace(['Anthropic\Responses', '\\'], [__DIR__.'/../../Fixtures/', '/'], self::class).'Fixture.txt';
             $resource = fopen($filename, 'r');
         }
 
@@ -26,6 +26,6 @@ trait FakeableForStreamedResponse
             ->createResponse()
             ->withBody($stream);
 
-        return new StreamResponse(static::class, $response);
+        return new StreamResponse(self::class, $response);
     }
 }

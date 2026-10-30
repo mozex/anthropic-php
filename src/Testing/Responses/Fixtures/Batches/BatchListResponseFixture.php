@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Anthropic\Testing\Responses\Fixtures\Batches;
 
-final class BatchListResponseFixture
+class BatchListResponseFixture
 {
     public const ATTRIBUTES = [
         'data' => [

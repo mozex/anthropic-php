@@ -9,7 +9,7 @@ use Anthropic\Contracts\StringableContract;
 /**
  * @internal
  */
-final class ResourceUri implements StringableContract
+class ResourceUri implements StringableContract
 {
     /**
      * Creates a new ResourceUri value object.

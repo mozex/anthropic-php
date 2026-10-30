@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Anthropic\Responses\Meta;
 
-final class MetaInformationRateLimit
+class MetaInformationRateLimit
 {
     private function __construct(
         public readonly ?int $limit,

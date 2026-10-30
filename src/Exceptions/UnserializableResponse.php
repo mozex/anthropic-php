@@ -8,7 +8,7 @@ use Exception;
 use JsonException;
 use Psr\Http\Message\ResponseInterface;
 
-final class UnserializableResponse extends Exception
+class UnserializableResponse extends Exception
 {
     /**
      * Creates a new Exception instance.

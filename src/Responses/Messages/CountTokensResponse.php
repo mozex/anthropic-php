@@ -14,7 +14,7 @@ use Anthropic\Testing\Responses\Concerns\Messages\Fakeable;
 /**
  * @implements ResponseContract<array{input_tokens: int}>
  */
-final class CountTokensResponse implements ResponseContract, ResponseHasMetaInformationContract
+class CountTokensResponse implements ResponseContract, ResponseHasMetaInformationContract
 {
     /**
      * @use ArrayAccessible<array{input_tokens: int}>

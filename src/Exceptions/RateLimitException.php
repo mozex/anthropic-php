@@ -6,7 +6,7 @@ namespace Anthropic\Exceptions;
 
 use Psr\Http\Message\ResponseInterface;
 
-final class RateLimitException extends ErrorException
+class RateLimitException extends ErrorException
 {
     /**
      * Creates a new Exception instance.

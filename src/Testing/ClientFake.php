@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Anthropic\Testing;
 
 use Anthropic\Contracts\ClientContract;
@@ -14,6 +16,7 @@ use Anthropic\Testing\Resources\FilesTestResource;
 use Anthropic\Testing\Resources\MessagesTestResource;
 use Anthropic\Testing\Resources\ModelsTestResource;
 use PHPUnit\Framework\Assert as PHPUnit;
+use Stringable;
 use Throwable;
 
 class ClientFake implements ClientContract
@@ -24,12 +27,12 @@ class ClientFake implements ClientContract
     private array $requests = [];
 
     /**
-     * @param  array<array-key, ResponseContract|ResponseStreamContract|CompletionsStreamResponse|MessagesStreamResponse|Throwable|string>  $responses
+     * @param  array<array-key, ResponseContract|ResponseStreamContract|CompletionsStreamResponse|MessagesStreamResponse|Throwable|Stringable|string>  $responses
      */
     public function __construct(protected array $responses = []) {}
 
     /**
-     * @param  array<array-key, ResponseContract|ResponseStreamContract|CompletionsStreamResponse|MessagesStreamResponse|Throwable|string>  $responses
+     * @param  array<array-key, ResponseContract|ResponseStreamContract|CompletionsStreamResponse|MessagesStreamResponse|Throwable|Stringable|string>  $responses
      */
     public function addResponses(array $responses): void
     {
@@ -117,6 +120,11 @@ class ClientFake implements ClientContract
 
         if ($response instanceof Throwable) {
             throw $response;
+        }
+
+        // A stream queued for a content method such as files()->download().
+        if ($response instanceof Stringable) {
+            return (string) $response;
         }
 
         return $response;

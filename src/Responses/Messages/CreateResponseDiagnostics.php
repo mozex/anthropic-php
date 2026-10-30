@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Anthropic\Responses\Messages;
 
-final class CreateResponseDiagnostics
+class CreateResponseDiagnostics
 {
     private function __construct(
         public readonly ?CreateResponseDiagnosticsCacheMissReason $cache_miss_reason,

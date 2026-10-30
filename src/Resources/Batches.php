@@ -12,7 +12,7 @@ use Anthropic\Responses\Batches\DeletedBatchResponse;
 use Anthropic\ValueObjects\Transporter\Payload;
 use Anthropic\ValueObjects\Transporter\Response;
 
-final class Batches implements BatchesContract
+class Batches implements BatchesContract
 {
     use Concerns\Transportable;
 

@@ -14,10 +14,10 @@ trait Fakeable
     public static function fake(
         array $override = [],
         OverrideStrategy $strategy = OverrideStrategy::Merge,
-    ): static {
-        $class = str_replace('Anthropic\\Responses\\', 'Anthropic\\Testing\\Responses\\Fixtures\\', static::class).'Fixture';
+    ): self {
+        $class = str_replace('Anthropic\\Responses\\', 'Anthropic\\Testing\\Responses\\Fixtures\\', self::class).'Fixture';
 
-        return static::from(
+        return self::from(
             self::buildAttributes($class::ATTRIBUTES, $override, $strategy),
         );
     }

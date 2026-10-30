@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Anthropic\Testing\Responses\Fixtures\Models;
 
-final class RetrieveResponseFixture
+class RetrieveResponseFixture
 {
     public const ATTRIBUTES = [
         'id' => 'claude-sonnet-4-6',

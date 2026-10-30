@@ -7,7 +7,7 @@ namespace Anthropic\Responses\Batches;
 /**
  * Represents a single line in a batch results JSONL response.
  */
-final class BatchIndividualResponse
+class BatchIndividualResponse
 {
     private function __construct(
         public readonly string $customId,

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Anthropic\Responses\Files;
 
-final class FileResponseScope
+class FileResponseScope
 {
     private function __construct(
         public readonly string $id,

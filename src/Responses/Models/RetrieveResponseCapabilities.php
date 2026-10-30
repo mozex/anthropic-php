@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Anthropic\Responses\Models;
 
-final class RetrieveResponseCapabilities
+class RetrieveResponseCapabilities
 {
     private function __construct(
         public readonly RetrieveResponseCapabilitySupport $batch,

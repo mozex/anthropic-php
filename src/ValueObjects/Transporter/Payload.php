@@ -16,7 +16,7 @@ use Psr\Http\Message\StreamInterface;
 /**
  * @internal
  */
-final class Payload
+class Payload
 {
     /**
      * Creates a new Request value object.

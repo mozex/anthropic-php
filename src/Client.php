@@ -12,7 +12,7 @@ use Anthropic\Resources\Files;
 use Anthropic\Resources\Messages;
 use Anthropic\Resources\Models;
 
-final class Client implements ClientContract
+class Client implements ClientContract
 {
     /**
      * Creates a Client instance with the given API token.

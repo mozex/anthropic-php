@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Anthropic\Testing\Resources;
 
 use Anthropic\Contracts\Resources\CompletionsContract;
@@ -8,7 +10,7 @@ use Anthropic\Responses\Completions\CreateResponse;
 use Anthropic\Responses\Completions\StreamResponse;
 use Anthropic\Testing\Resources\Concerns\Testable;
 
-final class CompletionsTestResource implements CompletionsContract
+class CompletionsTestResource implements CompletionsContract
 {
     use Testable;
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Anthropic\Responses\Messages;
 
-final class CreateResponseContentCaller
+class CreateResponseContentCaller
 {
     private function __construct(
         public readonly string $type,

@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Anthropic\Client;
 use Anthropic\Factory;
 
-final class Anthropic
+class Anthropic
 {
     /**
      * Creates a new Anthropic Client with the given API token.

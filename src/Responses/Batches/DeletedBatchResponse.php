@@ -14,7 +14,7 @@ use Anthropic\Testing\Responses\Concerns\Batches\Fakeable;
 /**
  * @implements ResponseContract<array{id: string, type: string}>
  */
-final class DeletedBatchResponse implements ResponseContract, ResponseHasMetaInformationContract
+class DeletedBatchResponse implements ResponseContract, ResponseHasMetaInformationContract
 {
     /**
      * @use ArrayAccessible<array{id: string, type: string}>

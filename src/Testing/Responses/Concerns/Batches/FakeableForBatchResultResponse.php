@@ -15,7 +15,7 @@ trait FakeableForBatchResultResponse
     public static function fake($resource = null): BatchResultResponse
     {
         if ($resource === null) {
-            $filename = str_replace(['Anthropic\Responses', '\\'], [__DIR__.'/../../Fixtures/', '/'], static::class).'Fixture.jsonl';
+            $filename = str_replace(['Anthropic\Responses', '\\'], [__DIR__.'/../../Fixtures/', '/'], self::class).'Fixture.jsonl';
             $resource = fopen($filename, 'r');
         }
 

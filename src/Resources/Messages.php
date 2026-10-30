@@ -12,7 +12,7 @@ use Anthropic\Responses\Messages\StreamResponse;
 use Anthropic\ValueObjects\Transporter\Payload;
 use Anthropic\ValueObjects\Transporter\Response;
 
-final class Messages implements MessagesContract
+class Messages implements MessagesContract
 {
     use Concerns\Streamable;
     use Concerns\Transportable;

@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Anthropic\Testing\Responses\Fixtures\Files;
 
-final class FileListResponseFixture
+class FileListResponseFixture
 {
     public const ATTRIBUTES = [
         'data' => [

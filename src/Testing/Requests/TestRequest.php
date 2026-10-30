@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Anthropic\Testing\Requests;
 
-final class TestRequest
+class TestRequest
 {
     /**
      * @param  array<string, mixed>  $args

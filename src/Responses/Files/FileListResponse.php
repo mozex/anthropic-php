@@ -14,7 +14,7 @@ use Anthropic\Testing\Responses\Concerns\Files\Fakeable;
 /**
  * @implements ResponseContract<array{data: array<int, array{id: string, type: string, filename: string, mime_type: string, size_bytes: int, created_at: string, downloadable?: bool, scope?: array{id: string, type: string}}>, first_id: ?string, last_id: ?string, has_more: bool}>
  */
-final class FileListResponse implements ResponseContract, ResponseHasMetaInformationContract
+class FileListResponse implements ResponseContract, ResponseHasMetaInformationContract
 {
     /**
      * @use ArrayAccessible<array{data: array<int, array{id: string, type: string, filename: string, mime_type: string, size_bytes: int, created_at: string, downloadable?: bool, scope?: array{id: string, type: string}}>, first_id: ?string, last_id: ?string, has_more: bool}>

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Anthropic\Responses\Messages;
 
 use Anthropic\Contracts\ResponseHasMetaInformationContract;
@@ -15,7 +17,7 @@ use Psr\Http\Message\StreamInterface;
  *
  * @implements ResponseStreamContract<TResponse>
  */
-final class StreamResponse implements ResponseHasMetaInformationContract, ResponseStreamContract
+class StreamResponse implements ResponseHasMetaInformationContract, ResponseStreamContract
 {
     /**
      * Creates a new Stream Response instance.

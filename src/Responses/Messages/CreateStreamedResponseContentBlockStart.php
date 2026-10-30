@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Anthropic\Responses\Messages;
 
-final class CreateStreamedResponseContentBlockStart
+class CreateStreamedResponseContentBlockStart
 {
     /**
      * @param  array<int|string, mixed>|null  $input

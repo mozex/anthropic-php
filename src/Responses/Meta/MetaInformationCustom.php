@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Anthropic\Responses\Meta;
 
-final class MetaInformationCustom
+class MetaInformationCustom
 {
     /**
      * @param  array<string, string>  $headers

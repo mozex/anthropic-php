@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * @return array{id: string, type: string, filename: string, mime_type: string, size_bytes: int, created_at: string, downloadable: bool}
  */

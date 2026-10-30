@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Anthropic\Testing\Responses\Fixtures\Completions;
 
-final class CreateResponseFixture
+class CreateResponseFixture
 {
     public const ATTRIBUTES = [
         'type' => 'completion',

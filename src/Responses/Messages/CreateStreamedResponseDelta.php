@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Anthropic\Responses\Messages;
 
-final class CreateStreamedResponseDelta
+class CreateStreamedResponseDelta
 {
     /**
      * @param  array<string, mixed>|null  $citation

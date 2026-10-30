@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Anthropic\Responses\Models;
 
-final class RetrieveResponseCapabilitiesContextManagement
+class RetrieveResponseCapabilitiesContextManagement
 {
     /**
      * @param  array<string, RetrieveResponseCapabilitySupport>  $strategies

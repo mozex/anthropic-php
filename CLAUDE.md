@@ -1,6 +1,4 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+# anthropic-php
 
 ## Project
 
@@ -20,7 +18,7 @@ composer test:lint            # Check code style without fixing
 
 Run a single test file:
 ```bash
-./vendor/bin/pest tests/Resources/Messages.php
+./vendor/bin/pest tests/Resources/MessagesTest.php
 ```
 
 Run a single test by name:
@@ -57,6 +55,7 @@ After every documentation change in this package, open the matching Laravel wrap
 | `docs/usage/thinking.md` | `docs/usage/thinking.md` |
 | `docs/usage/citations.md` | `docs/usage/citations.md` |
 | `docs/usage/batches.md` | `docs/usage/batches.md` |
+| `docs/usage/files.md` | `docs/usage/files.md` |
 | `docs/usage/token-counting.md` | `docs/usage/token-counting.md` |
 | `docs/usage/completions.md` | `docs/usage/completions.md` |
 | `docs/reference/meta-information.md` | `docs/reference/meta-information.md` |
@@ -93,10 +92,10 @@ If the PHP doc change added 150+ lines, the Laravel mirror is usually 20-40 line
 
 ## Architecture
 
-Layered design with strict dependency boundaries enforced by architecture tests (`tests/Arch.php`):
+Layered design with strict dependency boundaries enforced by architecture tests (`tests/ArchTest.php`):
 
 - **`Contracts/`** -- Interfaces for all major components (Client, Transporter, Resources, Responses)
-- **`Resources/`** -- API endpoint implementations (Messages, Completions, Models, Batches). Use `Transportable` and `Streamable` traits. May only depend on Contracts, ValueObjects, Exceptions, and Responses
+- **`Resources/`** -- API endpoint implementations (Messages, Completions, Models, Batches, Files). Use `Transportable` and `Streamable` traits. May only depend on Contracts, ValueObjects, Exceptions, and Responses
 - **`Responses/`** -- Immutable readonly DTOs with static `from()` factory methods and `toArray()`. Implement `ResponseContract`. May not depend on Resources or Transporters
 - **`ValueObjects/`** -- Immutable configuration objects (ApiKey, BaseUri, Headers, Payload, etc.)
 - **`Transporters/`** -- HTTP layer (`HttpTransporter`) using PSR-18 client discovery
@@ -111,7 +110,8 @@ Layered design with strict dependency boundaries enforced by architecture tests 
 ## Code Conventions
 
 - All files use `declare(strict_types=1)`
-- Response classes are `final` with `readonly` properties, private constructors, and static `from()` factories
+- No class is `final`: users extend package classes. Response classes have `readonly` properties, private constructors, and static `from()` factories
+- The fake traits in `src/Testing/Responses/Concerns` look fixtures up by `self::class`, and the plain `Fakeable` ones return `self`, so a subclass of a response still fakes from its parent's fixture (`tests/Testing/SubclassFakeTest.php`). `src/Testing` is outside PHPStan, so only that test guards it
 - 100% type coverage is enforced; all parameters, returns, and properties must be typed
 - PHPStan runs at max level
 - **Never remove PHPDoc type annotations.** Only expand or improve them. The `@param` and `@return` shapes on `from()` and `toArray()` methods are critical for type coverage. When adding new fields, add them to the existing shapes as optional fields. These annotations can be very long; that is expected and correct.
@@ -130,6 +130,8 @@ These vary by DTO. Check the actual source before writing tests or examples:
 
 ## Testing Patterns
 
+Every test file ends in `Test.php`: `phpunit.xml.dist` lists `tests` without a suffix, so PHPUnit's default `Test.php` applies and any other file there is silently skipped. Only `tests/Pest.php` and `tests/Helpers/` (which Pest loads itself) are exempt; a test in `tests/ArchTest.php` fails on any other PHP file without the suffix.
+
 Tests use **Pest** syntax: `test('description', function () { ... })` with `expect()` assertions.
 
 Three mock helpers defined in `tests/Pest.php`:
@@ -143,6 +145,7 @@ Test fixture functions live in `tests/Helpers/` as PHP files returning arrays:
 - `tests/Helpers/Message.php` -- Messages resource fixtures (`messagesCompletion()`, `messagesCompletionWithThinking()`, etc.)
 - `tests/Helpers/Completion.php` -- Completions resource fixtures
 - `tests/Helpers/Batches.php` -- Batches resource fixtures
+- `tests/Helpers/Files.php` -- Files resource fixtures
 - `tests/Helpers/Models.php` -- Models resource fixtures
 - `tests/Helpers/Meta.php` -- Meta/header fixtures
 

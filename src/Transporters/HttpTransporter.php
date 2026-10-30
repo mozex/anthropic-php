@@ -26,7 +26,7 @@ use Psr\Http\Message\ResponseInterface;
 /**
  * @internal
  */
-final class HttpTransporter implements TransporterContract
+class HttpTransporter implements TransporterContract
 {
     /**
      * Creates a new Http Transporter instance.

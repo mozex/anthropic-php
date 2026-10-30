@@ -11,7 +11,7 @@ use Anthropic\Responses\Files\FileResponse;
 use Anthropic\ValueObjects\Transporter\Payload;
 use Anthropic\ValueObjects\Transporter\Response;
 
-final class Files implements FilesContract
+class Files implements FilesContract
 {
     use Concerns\Transportable;
 

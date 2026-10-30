@@ -15,7 +15,7 @@ use Psr\Http\Message\StreamInterface;
 /**
  * @implements ResponseStreamContract<BatchIndividualResponse>
  */
-final class BatchResultResponse implements ResponseHasMetaInformationContract, ResponseStreamContract
+class BatchResultResponse implements ResponseHasMetaInformationContract, ResponseStreamContract
 {
     use FakeableForBatchResultResponse;
 

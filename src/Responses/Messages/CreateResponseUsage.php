@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Anthropic\Responses\Messages;
 
-final class CreateResponseUsage
+class CreateResponseUsage
 {
     /**
      * @param  array<int, CreateResponseUsageIteration>|null  $iterations

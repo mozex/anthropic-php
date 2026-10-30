@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Anthropic\Testing\Resources;
 
 use Anthropic\Contracts\Resources\BatchesContract;
@@ -10,7 +12,7 @@ use Anthropic\Responses\Batches\BatchResultResponse;
 use Anthropic\Responses\Batches\DeletedBatchResponse;
 use Anthropic\Testing\Resources\Concerns\Testable;
 
-final class BatchesTestResource implements BatchesContract
+class BatchesTestResource implements BatchesContract
 {
     use Testable;
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Anthropic\Responses\Models;
 
-final class RetrieveResponseCapabilitiesEffort
+class RetrieveResponseCapabilitiesEffort
 {
     private function __construct(
         public readonly bool $supported,

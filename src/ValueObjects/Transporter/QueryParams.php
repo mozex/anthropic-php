@@ -7,7 +7,7 @@ namespace Anthropic\ValueObjects\Transporter;
 /**
  * @internal
  */
-final class QueryParams
+class QueryParams
 {
     /**
      * Creates a new Query Params value object.

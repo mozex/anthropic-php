@@ -11,7 +11,7 @@ use Anthropic\Testing\Responses\Concerns\Completions\Fakeable;
 /**
  * @implements ResponseContract<array{type: string, id: string, completion: string, stop_reason: string, model: string, stop: string, log_id: string}>
  */
-final class CreateResponse implements ResponseContract
+class CreateResponse implements ResponseContract
 {
     /**
      * @use ArrayAccessible<array{type: string, id: string, completion: string, stop_reason: string, model: string, stop: string, log_id: string}>

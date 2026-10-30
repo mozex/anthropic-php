@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Anthropic\Testing\Responses\Fixtures\Messages;
 
-final class CreateResponseFixture
+class CreateResponseFixture
 {
     public const ATTRIBUTES = [
         'id' => 'msg_019hiOHAEXQwq1PTeETNEBWe',

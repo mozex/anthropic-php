@@ -9,7 +9,7 @@ use Anthropic\Contracts\StringableContract;
 /**
  * @internal
  */
-final class ApiKey implements StringableContract
+class ApiKey implements StringableContract
 {
     /**
      * Creates a new API token value object.
