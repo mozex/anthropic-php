@@ -7,10 +7,10 @@ namespace Anthropic\Responses\Messages;
 use Anthropic\Contracts\ResponseHasMetaInformationContract;
 use Anthropic\Contracts\ResponseStreamContract;
 use Anthropic\Exceptions\ErrorException;
+use Anthropic\Responses\Concerns\ReadsStreams;
 use Anthropic\Responses\Meta\MetaInformation;
 use Generator;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\StreamInterface;
 
 /**
  * @template TResponse
@@ -19,6 +19,8 @@ use Psr\Http\Message\StreamInterface;
  */
 class StreamResponse implements ResponseHasMetaInformationContract, ResponseStreamContract
 {
+    use ReadsStreams;
+
     /**
      * Creates a new Stream Response instance.
      *
@@ -36,17 +38,9 @@ class StreamResponse implements ResponseHasMetaInformationContract, ResponseStre
      */
     public function getIterator(): Generator
     {
-        while (! $this->response->getBody()->eof()) {
-            $line = $this->readLine($this->response->getBody());
-
-            if (! str_starts_with($line, 'data:')) {
-                continue;
-            }
-
-            $data = trim(substr($line, strlen('data:')));
-
+        foreach ($this->readEvents($this->response->getBody()) as $data) {
             /** @var array{type: string, error?: array{type: ?string, message: string|array<int, string>}} $response */
-            $response = json_decode($data, true, flags: JSON_THROW_ON_ERROR);
+            $response = json_decode(trim($data), true, flags: JSON_THROW_ON_ERROR);
 
             if (isset($response['error'])) {
                 throw new ErrorException($response['error'], $this->response);
@@ -56,38 +50,12 @@ class StreamResponse implements ResponseHasMetaInformationContract, ResponseStre
                 break;
             }
 
-            if (! in_array($response['type'], [
-                'message_start',
-                'message_delta',
-                'content_block_start',
-                'content_block_delta',
-                'content_block_stop',
-            ])) {
+            if ($response['type'] === 'ping') {
                 continue;
             }
 
             yield $this->responseClass::from($response);
         }
-    }
-
-    /**
-     * Read a line from the stream.
-     */
-    private function readLine(StreamInterface $stream): string
-    {
-        $buffer = '';
-
-        while (! $stream->eof()) {
-            if ('' === ($byte = $stream->read(1))) {
-                return $buffer;
-            }
-            $buffer .= $byte;
-            if ($byte === "\n") {
-                break;
-            }
-        }
-
-        return $buffer;
     }
 
     public function meta(): MetaInformation

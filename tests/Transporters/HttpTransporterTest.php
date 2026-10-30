@@ -13,8 +13,11 @@ use Anthropic\ValueObjects\Transporter\BaseUri;
 use Anthropic\ValueObjects\Transporter\Headers;
 use Anthropic\ValueObjects\Transporter\Payload;
 use Anthropic\ValueObjects\Transporter\QueryParams;
+use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Request as Psr7Request;
 use GuzzleHttp\Psr7\Response;
 use Psr\Http\Client\ClientInterface;
@@ -571,3 +574,194 @@ test('rate limit with no json body', function () {
                 ->and($e->getStatusCode())->toBe(429);
         });
 });
+
+test('a streamed overload is caught by its error type, before or after the stream starts', function () {
+    $client = Anthropic::factory()
+        ->withApiKey('foo')
+        ->withHttpClient(new GuzzleClient(['handler' => HandlerStack::create(new MockHandler([
+            new Response(529, ['Content-Type' => 'application/json'], json_encode([
+                'type' => 'error',
+                'error' => ['type' => 'overloaded_error', 'message' => 'Overloaded'],
+            ])),
+            new Response(200, ['Content-Type' => 'text/event-stream'], messagesCompletionStreamError()),
+        ]))]))
+        ->make();
+
+    $parameters = ['model' => 'claude-haiku-4-5', 'max_tokens' => 1024, 'messages' => [['role' => 'user', 'content' => 'Hello']]];
+
+    expect(fn () => $client->messages()->createStreamed($parameters))
+        ->toThrow(function (ErrorException $e) {
+            expect($e->getErrorType())->toBe('overloaded_error')
+                ->and($e->getStatusCode())->toBe(529);
+        })
+        ->and(fn () => iterator_to_array($client->messages()->createStreamed($parameters)))
+        ->toThrow(function (ErrorException $e) {
+            expect($e->getErrorType())->toBe('overloaded_error')
+                ->and($e->getStatusCode())->toBe(200);
+        });
+});
+
+test('a plain text server error throws an error exception', function () {
+    $payload = Payload::list('models');
+
+    // composed: no docs example
+    $response = new Response(503, ['Content-Type' => 'text/plain'], 'upstream connect error or disconnect/reset before headers. reset reason: overflow
+');
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    expect(fn () => $this->http->requestObject($payload))
+        ->toThrow(function (ErrorException $e) {
+            expect($e->getMessage())->toBe('upstream connect error or disconnect/reset before headers. reset reason: overflow')
+                ->and($e->getErrorType())->toBeNull()
+                ->and($e->getStatusCode())->toBe(503);
+        });
+});
+
+test('an html server error throws an error exception with the page text', function () {
+    $payload = Payload::list('models');
+
+    // composed: no docs example
+    $response = new Response(502, ['Content-Type' => 'text/html'], '<html>
+<head><title>502 Bad Gateway</title></head>
+<body>
+<center><h1>502 Bad Gateway</h1></center>
+</body>
+</html>
+');
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    expect(fn () => $this->http->requestObject($payload))
+        ->toThrow(function (ErrorException $e) {
+            expect($e->getMessage())->toBe('502 Bad Gateway')
+                ->and($e->getErrorType())->toBeNull()
+                ->and($e->getStatusCode())->toBe(502)
+                ->and($e->response->getStatusCode())->toBe(502);
+        });
+});
+
+test('a content request throws on an html error page instead of returning it', function () {
+    $payload = Payload::list('models');
+
+    // composed: no docs example
+    $response = new Response(502, ['Content-Type' => 'text/html'], '<html><head><title>502 Bad Gateway</title></head></html>');
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    expect(fn () => $this->http->requestContent($payload))
+        ->toThrow(ErrorException::class, '502 Bad Gateway');
+});
+
+test('a json server error without an error object throws an error exception', function () {
+    $payload = Payload::list('models');
+
+    // composed: no docs example
+    $response = new Response(500, ['Content-Type' => 'application/json'], '{"message":"Internal server error"}');
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    expect(fn () => $this->http->requestObject($payload))
+        ->toThrow(function (ErrorException $e) {
+            expect($e->getMessage())->toBe('{"message":"Internal server error"}')
+                ->and($e->getStatusCode())->toBe(500);
+        });
+});
+
+test('an error body that is not valid json throws an error exception', function () {
+    $payload = Payload::list('models');
+
+    $response = new Response(500, ['Content-Type' => 'application/json'], 'not-json');
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    expect(fn () => $this->http->requestObject($payload))
+        ->toThrow(function (ErrorException $e) {
+            expect($e->getMessage())->toBe('not-json')
+                ->and($e->getStatusCode())->toBe(500);
+        });
+});
+
+test('an empty error body falls back to the reason phrase', function () {
+    $payload = Payload::list('models');
+
+    $response = new Response(503, [], '');
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    expect(fn () => $this->http->requestObject($payload))
+        ->toThrow(function (ErrorException $e) {
+            expect($e->getMessage())->toBe('Service Unavailable')
+                ->and($e->getStatusCode())->toBe(503);
+        });
+});
+
+test('a long error line is cut to 200 characters', function () {
+    $payload = Payload::list('models');
+
+    $response = new Response(502, ['Content-Type' => 'text/plain'], str_repeat('é', 300));
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    expect(fn () => $this->http->requestObject($payload))
+        ->toThrow(function (ErrorException $e) {
+            expect($e->getMessage())->toBe(str_repeat('é', 200));
+        });
+});
+
+test('an error line with multibyte characters stays valid utf-8', function () {
+    $payload = Payload::list('models');
+
+    // composed: no docs example
+    $response = new Response(502, ['Content-Type' => 'text/plain'], "Ошибка сервера: х\n入口エラー");
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    expect(fn () => $this->http->requestObject($payload))
+        ->toThrow(function (ErrorException $e) {
+            expect($e->getMessage())->toBe('Ошибка сервера: х');
+        });
+});
+
+test('an error value that is not an object still throws an error exception', function (int $status, string $body, string $exception, string $message) {
+    $payload = Payload::list('models');
+
+    // composed: no docs example
+    $response = new Response($status, ['Content-Type' => 'application/json'], $body);
+
+    $this->client
+        ->shouldReceive('sendRequest')
+        ->once()
+        ->andReturn($response);
+
+    expect(fn () => $this->http->requestObject($payload))
+        ->toThrow($exception, $message);
+})->with([
+    'a boolean' => [500, '{"error":true,"message":"Gateway failure"}', ErrorException::class, '{"error":true,"message":"Gateway failure"}'],
+    'a string' => [500, '{"error":"Gateway failure"}', ErrorException::class, 'Gateway failure'],
+    'a string on a 429' => [429, '{"error":"Too many requests"}', RateLimitException::class, 'Too many requests'],
+]);

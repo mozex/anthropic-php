@@ -37,7 +37,7 @@ As you iterate, you'll receive events in this order:
 | `content_block_stop` | End of each content block | Block index |
 | `message_delta` | Once, near the end | Stop reason and final usage |
 
-The API also sends `message_stop` and `ping` events, but the client handles those internally. Your `foreach` loop only receives the five event types above. If an error occurs mid-stream, the client throws an `ErrorException` (see [Error Handling](../reference/error-handling.md)).
+The client skips `ping` events and ends the loop at `message_stop`, which your loop doesn't receive. Any other event type reaches your loop, including types the API adds later, so check `$response->type` rather than assuming this table is complete. If an error occurs mid-stream, the client throws an `ErrorException` (see [Error Handling](../reference/error-handling.md)).
 
 Here's a practical example that prints text as it arrives:
 

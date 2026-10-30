@@ -66,7 +66,7 @@ arch('client')->expect('Anthropic\Client')->toOnlyUse([
 
 arch('anthropic')->expect('Anthropic')->toOnlyUse([
     'GuzzleHttp\Client',
-    'GuzzleHttp\Exception\ClientException',
+    'GuzzleHttp\Exception\BadResponseException',
     'Http\Discovery\Psr17Factory',
     'Http\Discovery\Psr18ClientDiscovery',
     'Http\Message\MultipartStream\MultipartStreamBuilder',

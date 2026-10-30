@@ -197,6 +197,33 @@ it('asserts a request was not sent on the resource', function () {
     $fake->completions()->assertNotSent();
 });
 
+it('asserts a request was not sent n times', function () {
+    $fake = new ClientFake([
+        CreateResponse::fake(),
+    ]);
+
+    $fake->completions()->create([
+        'model' => 'claude-2.1',
+        'prompt' => 'PHP is ',
+    ]);
+
+    $fake->completions()->assertNotSent(2);
+    $fake->assertNotSent(Completions::class, 0);
+});
+
+it('throws an exception if a request was sent the n times it should not have been', function () {
+    $fake = new ClientFake([
+        CreateResponse::fake(),
+    ]);
+
+    $fake->completions()->create([
+        'model' => 'claude-2.1',
+        'prompt' => 'PHP is ',
+    ]);
+
+    $fake->completions()->assertNotSent(1);
+})->throws(ExpectationFailedException::class, 'The unexpected [Anthropic\Resources\Completions] request was sent 1 times.');
+
 it('asserts no request was sent', function () {
     $fake = new ClientFake;
 

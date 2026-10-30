@@ -32,7 +32,7 @@ $response = $client->messages()->create([
 $response->content[0]->text; // 'Hello! How can I help?'
 ```
 
-The `fake()` method on response classes creates a response object with sensible defaults. Pass an array to override only the fields your test cares about. Overrides are merged recursively by default, so you can override a single nested field without replacing the entire parent array.
+The `fake()` method on response classes creates a response object with sensible defaults. Pass an array to override only the fields your test cares about. Overrides are merged recursively by default, so you can override a single nested field without replacing the entire parent array. A nested item whose `type` differs from the default's, such as a `tool_use` block in place of the default `text` block, replaces it instead of merging into it.
 
 ## Available fake responses
 
@@ -231,6 +231,9 @@ $client->assertNotSent(Completions::class);
 $client->assertNotSent(Messages::class, function (string $method, array $parameters): bool {
     return $parameters['model'] === 'claude-2.1';
 });
+
+// With a number: assert the resource wasn't called exactly that many times
+$client->assertNotSent(Messages::class, 2);
 ```
 
 ### assertNothingSent

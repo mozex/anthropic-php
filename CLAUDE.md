@@ -107,11 +107,16 @@ Layered design with strict dependency boundaries enforced by architecture tests 
 
 **Request flow:** Parameters pass through as-is to the API. `Payload::create()` wraps them, `HttpTransporter` JSON-encodes and sends them. No parameter validation or transformation happens in this client. This means new API parameters (like `thinking.type`, `output_config.effort`) work automatically without code changes on the request side. New features usually only need response DTO updates, tests, and documentation.
 
+**Errors:** `HttpTransporter::throwIfError()` throws for every status of 400 and above, whatever the body: the API's `error` object when there is one, otherwise an `ErrorException` carrying the status and the first line of the body's text (`RateLimitException` for any 429). Guzzle's streamed requests throw on 4xx and 5xx, so `sendRequest()` unwraps any `BadResponseException` into the same check; any other client exception is a `TransporterException`.
+
+**Streams:** every stream reader uses the `Responses\Concerns\ReadsStreams` trait: `readLines()` (64 KiB reads, line endings removed, the unread rest kept on the instance so a second iteration continues where the first stopped) for JSONL, `readEvents()` (SSE: `data:` lines joined, dispatched at a blank line or the end of the stream) for event streams. The Messages reader yields every event type except `ping`, and stops at `message_stop` without yielding it; the Completions reader yields only `completion` events, since its DTO needs a completion's keys.
+
 ## Code Conventions
 
 - All files use `declare(strict_types=1)`
 - No class is `final`: users extend package classes. Response classes have `readonly` properties, private constructors, and static `from()` factories
 - The fake traits in `src/Testing/Responses/Concerns` look fixtures up by `self::class`, and the plain `Fakeable` ones return `self`, so a subclass of a response still fakes from its parent's fixture (`tests/Testing/SubclassFakeTest.php`). `src/Testing` is outside PHPStan, so only that test guards it
+- `fake()` overrides go through `OverrideStrategy::apply()`: `Merge` matches `array_replace_recursive()` except that a nested item whose `type` differs from the fixture's replaces it whole (`tests/Testing/FakeOverrideTest.php`)
 - 100% type coverage is enforced; all parameters, returns, and properties must be typed
 - PHPStan runs at max level
 - **Never remove PHPDoc type annotations.** Only expand or improve them. The `@param` and `@return` shapes on `from()` and `toArray()` methods are critical for type coverage. When adding new fields, add them to the existing shapes as optional fields. These annotations can be very long; that is expected and correct.

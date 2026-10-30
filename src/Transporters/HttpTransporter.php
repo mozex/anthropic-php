@@ -16,7 +16,7 @@ use Anthropic\ValueObjects\Transporter\Payload;
 use Anthropic\ValueObjects\Transporter\QueryParams;
 use Anthropic\ValueObjects\Transporter\Response;
 use Closure;
-use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\BadResponseException;
 use JsonException;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
@@ -54,11 +54,11 @@ class HttpTransporter implements TransporterContract
 
         $contents = (string) $response->getBody();
 
+        $this->throwIfError($response, $contents);
+
         if (str_contains($response->getHeaderLine('Content-Type'), ContentType::TEXT_PLAIN->value)) {
             return Response::from($contents, $response->getHeaders());
         }
-
-        $this->throwIfJsonError($response, $contents);
 
         try {
             /** @var array{error?: array{message: string, type: string}} $data */
@@ -81,7 +81,7 @@ class HttpTransporter implements TransporterContract
 
         $contents = (string) $response->getBody();
 
-        $this->throwIfJsonError($response, $contents);
+        $this->throwIfError($response, $contents);
 
         return $contents;
     }
@@ -95,7 +95,7 @@ class HttpTransporter implements TransporterContract
 
         $response = $this->sendRequest(fn () => ($this->streamHandler)($request));
 
-        $this->throwIfJsonError($response, $response);
+        $this->throwIfError($response);
 
         return $response;
     }
@@ -118,49 +118,64 @@ class HttpTransporter implements TransporterContract
         try {
             return $callable();
         } catch (ClientExceptionInterface $clientException) {
-            if ($clientException instanceof ClientException) {
-                $this->throwIfJsonError($clientException->getResponse(), (string) $clientException->getResponse()->getBody());
+            // Guzzle throws on 4xx and 5xx when it streams; the response still carries the API error.
+            if ($clientException instanceof BadResponseException) {
+                $this->throwIfError($clientException->getResponse());
             }
 
             throw new TransporterException($clientException);
         }
     }
 
-    private function throwIfJsonError(ResponseInterface $response, string|ResponseInterface $contents): void
+    /**
+     * Throws for every status of 400 and above: with the API's error when the body carries one,
+     * otherwise with the first line of the body's text.
+     */
+    private function throwIfError(ResponseInterface $response, ?string $contents = null): void
     {
         if ($response->getStatusCode() < 400) {
             return;
         }
 
-        if ($contents instanceof ResponseInterface) {
-            $contents = (string) $contents->getBody();
-        }
+        $contents ??= (string) $response->getBody();
 
         try {
-            /** @var array{error?: array{message: string|array<int, string>, type: string}} $data */
+            /** @var mixed $data */
             $data = json_decode($contents, true, flags: JSON_THROW_ON_ERROR);
-
-            if (isset($data['error'])) {
-                if ($response->getStatusCode() === 429) {
-                    throw new RateLimitException($data['error'], $response);
-                }
-
-                throw new ErrorException($data['error'], $response);
-            }
-
-            if ($response->getStatusCode() === 429) {
-                throw new RateLimitException([], $response);
-            }
-        } catch (JsonException $jsonException) {
-            if ($response->getStatusCode() === 429) {
-                throw new RateLimitException([], $response);
-            }
-
-            if (! str_contains($response->getHeaderLine('Content-Type'), ContentType::JSON->value)) {
-                return;
-            }
-
-            throw new UnserializableResponse($jsonException, $response);
+        } catch (JsonException) {
+            $data = null;
         }
+
+        $error = is_array($data) ? $data['error'] ?? null : null;
+
+        /** @var array{message?: string|array<int, string>, type?: ?string}|null $error */
+        $error = match (true) {
+            is_string($error) => ['message' => $error],
+            is_array($error) => $error,
+            default => null,
+        };
+
+        if ($response->getStatusCode() === 429) {
+            throw new RateLimitException($error ?? [], $response);
+        }
+
+        throw new ErrorException($error ?? $this->firstLine($contents) ?? $response->getReasonPhrase(), $response);
+    }
+
+    /**
+     * The first line of text in a body that isn't an API error, such as a proxy's HTML error page.
+     */
+    private function firstLine(string $contents): ?string
+    {
+        // ASCII line endings only: \R would also match the 0x85 byte inside a UTF-8 character.
+        foreach (preg_split('/\r\n|\r|\n/', strip_tags($contents)) ?: [] as $line) {
+            $line = trim($line);
+
+            if ($line !== '') {
+                return preg_match('/^.{1,200}/us', $line, $matches) === 1 ? $matches[0] : substr($line, 0, 200);
+            }
+        }
+
+        return null;
     }
 }

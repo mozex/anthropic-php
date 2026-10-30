@@ -82,11 +82,30 @@ class ClientFake implements ClientContract
         return $this->resourcesOf($resource) !== [];
     }
 
-    public function assertNotSent(string $resource, ?callable $callback = null): void
+    /**
+     * With an int, asserts the resource wasn't sent exactly that many times.
+     */
+    public function assertNotSent(string $resource, callable|int|null $callback = null): void
     {
+        if (is_int($callback)) {
+            $this->assertNotSentTimes($resource, $callback);
+
+            return;
+        }
+
         PHPUnit::assertCount(
             0, $this->sent($resource, $callback),
             "The unexpected [{$resource}] request was sent."
+        );
+    }
+
+    private function assertNotSentTimes(string $resource, int $times): void
+    {
+        $count = count($this->sent($resource));
+
+        PHPUnit::assertNotSame(
+            $times, $count,
+            "The unexpected [{$resource}] request was sent {$count} times."
         );
     }
 

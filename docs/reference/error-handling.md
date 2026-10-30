@@ -31,7 +31,7 @@ try {
 
 | Method | Returns | Description |
 |--------|---------|-------------|
-| `getMessage()` | `string` | The error message from the API |
+| `getMessage()` | `string` | The error message from the API, or the first line of a non-API error body |
 | `getErrorType()` | `?string` | The error type (e.g., `invalid_request_error`, `authentication_error`, `overloaded_error`) |
 | `getStatusCode()` | `int` | The HTTP status code |
 
@@ -41,7 +41,7 @@ The raw PSR-7 response is also available on the `response` property if you need 
 $e->response; // Psr\Http\Message\ResponseInterface or null
 ```
 
-> **Note:** For streamed requests, the status code might be `200` even when an error occurs, because the HTTP response started successfully before the error happened mid-stream.
+> **Note:** For streamed requests, the status code might be `200` even when an error occurs, because the HTTP response started successfully before the error happened mid-stream. The error type is the same either way, so match errors with `getErrorType()` (for example `'overloaded_error'`) rather than the status code.
 
 ### Common API errors
 
@@ -101,7 +101,7 @@ This wraps the PSR-18 `ClientExceptionInterface` from your HTTP client. The orig
 
 ## Response parsing errors
 
-If the API returns a response that can't be decoded as JSON, the client throws `Anthropic\Exceptions\UnserializableResponse`:
+If a successful (2xx) response can't be decoded as JSON, the client throws `Anthropic\Exceptions\UnserializableResponse`:
 
 ```php
 use Anthropic\Exceptions\UnserializableResponse;
@@ -114,7 +114,7 @@ try {
 }
 ```
 
-This is rare in normal operation. It typically indicates a proxy or middleware returned an unexpected response (HTML error page, empty body, etc.).
+This is rare in normal operation. It typically means a proxy or middleware answered with something other than the API's JSON. An error status (400 and above) never ends up here: a proxy's HTML error page or an empty error body throws `ErrorException` with that status, `getErrorType()` returning `null`, and the first line of the page's text (or the HTTP reason phrase, such as `Bad Gateway`) as the message.
 
 ## Exception hierarchy
 
@@ -122,7 +122,7 @@ This is rare in normal operation. It typically indicates a proxy or middleware r
 ErrorException (API errors)
 ├── RateLimitException (HTTP 429)
 TransporterException (HTTP client/network errors)
-UnserializableResponse (JSON decode failures)
+UnserializableResponse (a 2xx response that isn't valid JSON)
 ```
 
 A practical catch block that covers everything:

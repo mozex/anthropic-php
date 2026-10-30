@@ -6,11 +6,11 @@ namespace Anthropic\Responses\Batches;
 
 use Anthropic\Contracts\ResponseHasMetaInformationContract;
 use Anthropic\Contracts\ResponseStreamContract;
+use Anthropic\Responses\Concerns\ReadsStreams;
 use Anthropic\Responses\Meta\MetaInformation;
 use Anthropic\Testing\Responses\Concerns\Batches\FakeableForBatchResultResponse;
 use Generator;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\StreamInterface;
 
 /**
  * @implements ResponseStreamContract<BatchIndividualResponse>
@@ -18,6 +18,7 @@ use Psr\Http\Message\StreamInterface;
 class BatchResultResponse implements ResponseHasMetaInformationContract, ResponseStreamContract
 {
     use FakeableForBatchResultResponse;
+    use ReadsStreams;
 
     /**
      * Creates a new Batch Result Response instance.
@@ -31,9 +32,7 @@ class BatchResultResponse implements ResponseHasMetaInformationContract, Respons
      */
     public function getIterator(): Generator
     {
-        while (! $this->response->getBody()->eof()) {
-            $line = $this->readLine($this->response->getBody());
-
+        foreach ($this->readLines($this->response->getBody()) as $line) {
             $line = trim($line);
 
             if ($line === '') {
@@ -45,26 +44,6 @@ class BatchResultResponse implements ResponseHasMetaInformationContract, Respons
 
             yield BatchIndividualResponse::from($data);
         }
-    }
-
-    /**
-     * Read a line from the stream.
-     */
-    private function readLine(StreamInterface $stream): string
-    {
-        $buffer = '';
-
-        while (! $stream->eof()) {
-            if ('' === ($byte = $stream->read(1))) {
-                return $buffer;
-            }
-            $buffer .= $byte;
-            if ($byte === "\n") {
-                break;
-            }
-        }
-
-        return $buffer;
     }
 
     public function meta(): MetaInformation

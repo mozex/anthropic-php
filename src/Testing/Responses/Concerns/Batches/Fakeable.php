@@ -20,22 +20,9 @@ trait Fakeable
         $class = str_replace('Anthropic\\Responses\\', 'Anthropic\\Testing\\Responses\\Fixtures\\', self::class).'Fixture';
 
         return self::from(
-            self::buildAttributes($class::ATTRIBUTES, $override, $strategy),
+            $strategy->apply($class::ATTRIBUTES, $override),
             $meta ?? self::fakeResponseMetaInformation(),
         );
-    }
-
-    /**
-     * @param  array<string, mixed>  $original
-     * @param  array<string, mixed>  $override
-     * @return array<string, mixed>
-     */
-    private static function buildAttributes(array $original, array $override, OverrideStrategy $strategy = OverrideStrategy::Merge): array
-    {
-        return match ($strategy) {
-            OverrideStrategy::Replace => array_replace($original, $override),
-            OverrideStrategy::Merge => array_replace_recursive($original, $override),
-        };
     }
 
     public static function fakeResponseMetaInformation(): MetaInformation
