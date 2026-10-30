@@ -63,6 +63,8 @@ After every documentation change in this package, open the matching Laravel wrap
 | `docs/reference/error-handling.md` | `docs/reference/error-handling.md` |
 | `docs/reference/testing.md` | `docs/reference/testing.md` |
 | `docs/reference/configuration.md` | `docs/reference/configuration.md` |
+| (none: the wrapper's own) | `docs/reference/laravel-ai.md` |
+| `docs/reference/configuration.md` ("Reading the settings back") | `docs/reference/diagnostics.md` |
 
 ### What belongs in the Laravel docs vs what to defer
 
