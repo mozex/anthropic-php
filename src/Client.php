@@ -76,7 +76,7 @@ class Client implements ClientContract
 
     /**
      * Returns a client whose requests also carry these options: `headers`, `query`, `betas`, `api_version`,
-     * `workspace_id` and `user_profile_id`. The client it's called on is left unchanged.
+     * `workspace_id`, `user_profile_id` and `max_retries`. The client it's called on is left unchanged.
      *
      * @param  array<string, mixed>  $options
      */

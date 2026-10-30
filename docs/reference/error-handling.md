@@ -82,6 +82,10 @@ try {
 }
 ```
 
+### Retrying
+
+With `withMaxRetries()` on the factory (see [Configuration](./configuration.md#retries)), the client retries connection failures, timeouts, 408, 409, 429 and 5xx responses itself, waiting what the API asks, so these exceptions reach you only once the retries run out.
+
 ## Rate limit errors
 
 HTTP 429 responses throw `Anthropic\Exceptions\RateLimitException`, a subclass of `ErrorException`. Since it extends `ErrorException`, existing `catch (ErrorException $e)` blocks will catch it too. If you want to handle rate limits specifically, catch it first:

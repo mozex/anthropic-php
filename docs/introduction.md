@@ -86,6 +86,8 @@ $client = Anthropic::factory()
 | `withBaseUri()` | Override the API endpoint, `/v1` included. Defaults to `api.anthropic.com/v1`. Useful for proxies or self-hosted setups. |
 | `withBaseUrl()` | Override it with a URL meant for the official SDKs' `ANTHROPIC_BASE_URL`, which leaves out `/v1`. |
 | `withTimeout()`, `withConnectTimeout()` | Timeouts of the Guzzle client the factory builds. |
+| `withMaxRetries()` | Retry connection failures, timeouts and 408, 409, 429 and 5xx responses. Defaults to 0. |
+| `withMiddleware()`, `withLogger()` | Run code around every attempt; log requests and responses without their bodies. |
 | `withHttpClient()` | Provide your own PSR-18 HTTP client instead of auto-discovery. |
 | `withHttpHeader()` | Add custom HTTP headers to every request. |
 | `withQueryParam()` | Add query parameters to every request URL. |

@@ -78,6 +78,7 @@ arch('anthropic')->expect('Anthropic')->toOnlyUse([
     'Psr\Http\Message\RequestInterface',
     'Psr\Http\Message\ResponseInterface',
     'Psr\Http\Message\StreamInterface',
+    'Psr\Log\LoggerInterface',
 ])->ignoring('Anthropic\Testing');
 
 test('every test file ends in Test.php', function () {

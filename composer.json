@@ -32,7 +32,11 @@
         "phpstan/phpstan": "^2.1.45",
         "phpstan/phpstan-deprecation-rules": "^2.0",
         "phpstan/phpstan-phpunit": "^2.0",
+        "psr/log": "^3.0.2",
         "symfony/var-dumper": "^7.3.5"
+    },
+    "suggest": {
+        "psr/log": "To log each request and response with Factory::withLogger()"
     },
     "autoload": {
         "psr-4": {

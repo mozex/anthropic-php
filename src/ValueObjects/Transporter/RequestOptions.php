@@ -13,7 +13,7 @@ use Anthropic\Exceptions\InvalidArgumentException;
  */
 class RequestOptions
 {
-    private const KEYS = ['headers', 'query', 'betas', 'api_version', 'workspace_id', 'user_profile_id'];
+    private const KEYS = ['headers', 'query', 'betas', 'api_version', 'workspace_id', 'user_profile_id', 'max_retries'];
 
     /**
      * @param  array<string, string>  $headers
@@ -24,6 +24,7 @@ class RequestOptions
         public readonly array $headers,
         public readonly array $query,
         public readonly array $betas,
+        public readonly ?int $maxRetries,
     ) {}
 
     /**
@@ -73,7 +74,13 @@ class RequestOptions
             }
         }
 
-        return new self($headers, $query, array_values(array_unique($betas)));
+        $maxRetries = $options['max_retries'] ?? null;
+
+        if ($maxRetries !== null && (! is_int($maxRetries) || $maxRetries < 0)) {
+            throw new InvalidArgumentException('The [max_retries] request option must be an integer of 0 or more.');
+        }
+
+        return new self($headers, $query, array_values(array_unique($betas)), $maxRetries);
     }
 
     /**

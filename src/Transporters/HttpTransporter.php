@@ -8,6 +8,7 @@ use Anthropic\Contracts\TransporterContract;
 use Anthropic\Enums\Transporter\ContentType;
 use Anthropic\Exceptions\ConnectionException;
 use Anthropic\Exceptions\ErrorException;
+use Anthropic\Exceptions\RetryableException;
 use Anthropic\Exceptions\TimeoutException;
 use Anthropic\Exceptions\TransporterException;
 use Anthropic\Exceptions\UnserializableResponse;
@@ -27,6 +28,8 @@ use Psr\Http\Client\NetworkExceptionInterface;
 use Psr\Http\Client\RequestExceptionInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface;
+use Throwable;
 
 /**
  * @internal
@@ -37,6 +40,8 @@ class HttpTransporter implements TransporterContract
      * Creates a new Http Transporter instance.
      *
      * @param  Closure(RequestInterface): ResponseInterface  $streamHandler
+     * @param  list<Closure(RequestInterface, Closure(RequestInterface): ResponseInterface): ResponseInterface>  $middleware  run once per attempt, the first one outermost
+     * @param  (Closure(int): void)|null  $sleep  waits the given milliseconds between attempts
      */
     public function __construct(
         private readonly ClientInterface $client,
@@ -44,6 +49,10 @@ class HttpTransporter implements TransporterContract
         private Headers $headers,
         private readonly QueryParams $queryParams,
         private readonly Closure $streamHandler,
+        private readonly int $maxRetries = 0,
+        private readonly array $middleware = [],
+        private readonly ?LoggerInterface $logger = null,
+        private readonly ?Closure $sleep = null,
     ) {
         // ..
     }
@@ -55,7 +64,7 @@ class HttpTransporter implements TransporterContract
     {
         $request = $payload->toRequest($this->baseUri, $this->headers, $this->queryParams);
 
-        $response = $this->sendRequest(fn (): ResponseInterface => $this->client->sendRequest($request));
+        $response = $this->send($request, $this->client->sendRequest(...));
 
         $contents = (string) $response->getBody();
 
@@ -82,7 +91,7 @@ class HttpTransporter implements TransporterContract
     {
         $request = $payload->toRequest($this->baseUri, $this->headers, $this->queryParams);
 
-        $response = $this->sendRequest(fn (): ResponseInterface => $this->client->sendRequest($request));
+        $response = $this->send($request, $this->client->sendRequest(...));
 
         $contents = (string) $response->getBody();
 
@@ -98,7 +107,7 @@ class HttpTransporter implements TransporterContract
     {
         $request = $payload->toRequest($this->baseUri, $this->headers, $this->queryParams);
 
-        $response = $this->sendRequest(fn () => ($this->streamHandler)($request));
+        $response = $this->send($request, $this->streamHandler);
 
         $this->throwIfError($response);
 
@@ -128,20 +137,74 @@ class HttpTransporter implements TransporterContract
             $options->applyToHeaders($this->headers),
             $options->applyToQueryParams($this->queryParams),
             $this->streamHandler,
+            $options->maxRetries ?? $this->maxRetries,
+            $this->middleware,
+            $this->logger,
+            $this->sleep,
         );
     }
 
     /**
-     * @param  Closure(): ResponseInterface  $callable
+     * Sends the request through the middleware, retrying a connection failure, a RetryableException and the
+     * statuses the API asks to retry, up to the retry limit.
+     *
+     * @param  Closure(RequestInterface): ResponseInterface  $handler
      */
-    private function sendRequest(Closure $callable): ResponseInterface
+    private function send(RequestInterface $request, Closure $handler): ResponseInterface
+    {
+        $pipeline = array_reduce(
+            array_reverse($this->middleware),
+            fn (Closure $next, Closure $middleware): Closure => fn (RequestInterface $request): ResponseInterface => $middleware($request, $next),
+            fn (RequestInterface $request): ResponseInterface => $this->sendOnce($request, $handler),
+        );
+
+        for ($attempt = 0; ; $attempt++) {
+            $started = hrtime(true);
+
+            $this->logger?->info('Anthropic request', ['method' => $request->getMethod(), 'uri' => $this->loggedUri($request), 'attempt' => $attempt + 1]);
+
+            try {
+                $response = $pipeline($request);
+            } catch (ConnectionException|RetryableException $exception) {
+                if (! $this->canRetry($attempt, $request)) {
+                    throw $exception;
+                }
+
+                $this->wait($attempt, $exception);
+
+                continue;
+            }
+
+            $this->logger?->info('Anthropic response', [
+                'status' => $response->getStatusCode(),
+                'request_id' => $response->getHeaderLine('request-id'),
+                'duration_ms' => (int) ((hrtime(true) - $started) / 1_000_000),
+            ]);
+
+            if (! $this->shouldRetry($response) || ! $this->canRetry($attempt, $request)) {
+                return $response;
+            }
+
+            // A streamed response holds its connection open until its body is closed.
+            $response->getBody()->close();
+
+            $this->wait($attempt, $response);
+        }
+    }
+
+    /**
+     * One attempt: a response for every HTTP status, an exception only when no response came back.
+     *
+     * @param  Closure(RequestInterface): ResponseInterface  $handler
+     */
+    private function sendOnce(RequestInterface $request, Closure $handler): ResponseInterface
     {
         try {
-            return $callable();
+            return $handler($request);
         } catch (ClientExceptionInterface $clientException) {
             // Guzzle throws on 4xx and 5xx when it streams; the response still carries the API error.
             if ($clientException instanceof BadResponseException) {
-                $this->throwIfError($clientException->getResponse());
+                return $clientException->getResponse();
             }
 
             throw match (true) {
@@ -152,6 +215,92 @@ class HttpTransporter implements TransporterContract
                 default => new TransporterException($clientException),
             };
         }
+    }
+
+    /**
+     * An error the API marks with `x-should-retry` when it knows; otherwise 408, 409, 429 and 5xx are worth
+     * another attempt. A success is never sent again, whatever its headers say.
+     */
+    private function shouldRetry(ResponseInterface $response): bool
+    {
+        $status = $response->getStatusCode();
+
+        if ($status < 400) {
+            return false;
+        }
+
+        return match (strtolower(trim($response->getHeaderLine('x-should-retry')))) {
+            'true' => true,
+            'false' => false,
+            default => in_array($status, [408, 409, 429], true) || $status >= 500,
+        };
+    }
+
+    /**
+     * Whether a retry is left and the request can be sent again, rewinding its body for the next attempt:
+     * a body that can't be rewound was already read.
+     */
+    private function canRetry(int $attempt, RequestInterface $request): bool
+    {
+        if ($attempt >= $this->maxRetries || ! $request->getBody()->isSeekable()) {
+            return false;
+        }
+
+        $request->getBody()->rewind();
+
+        return true;
+    }
+
+    /**
+     * Waits as long as the response asks (`retry-after-ms`, then `retry-after`), otherwise
+     * 0.5 seconds doubled per attempt up to 8, less up to a quarter at random.
+     */
+    private function wait(int $attempt, ResponseInterface|Throwable $cause): void
+    {
+        $milliseconds = $cause instanceof ResponseInterface ? $this->requestedDelay($cause) : null;
+
+        if ($milliseconds === null) {
+            $seconds = min(0.5 * 2 ** $attempt, 8.0);
+            $milliseconds = (int) round($seconds * 1000 * (1 - mt_rand(0, 250) / 1000));
+        }
+
+        $this->logger?->warning('Retrying Anthropic request', [
+            'attempt' => $attempt + 2,
+            'delay_ms' => $milliseconds,
+            'reason' => $cause instanceof ResponseInterface ? 'status '.$cause->getStatusCode() : $cause::class,
+        ]);
+
+        if ($this->sleep === null) {
+            usleep($milliseconds * 1000);
+        } else {
+            ($this->sleep)($milliseconds);
+        }
+    }
+
+    /**
+     * The delay a response asks for, in milliseconds. Zero, a date in the past or a delay too long to sleep
+     * leaves the backoff to decide, as in the official SDKs.
+     */
+    private function requestedDelay(ResponseInterface $response): ?int
+    {
+        $retryAfterMs = trim($response->getHeaderLine('retry-after-ms'));
+
+        if (is_numeric($retryAfterMs)) {
+            $milliseconds = (float) $retryAfterMs;
+        } else {
+            $seconds = ErrorException::retryAfterSeconds($response);
+            $milliseconds = $seconds === null ? null : $seconds * 1000;
+        }
+
+        return $milliseconds !== null && $milliseconds > 0 && $milliseconds <= 2_147_483_647 ? (int) $milliseconds : null;
+    }
+
+    /**
+     * The request's URL for a log line, without user info or a query string, where a gateway key may ride.
+     */
+    private function loggedUri(RequestInterface $request): string
+    {
+        return (string) $request->getUri()->withUserInfo('')->withQuery('');
     }
 
     /**

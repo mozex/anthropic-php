@@ -163,7 +163,17 @@ class ErrorException extends Exception
      */
     public function getRetryAfter(): ?int
     {
-        $value = trim($this->response?->getHeaderLine('retry-after') ?? '');
+        return $this->response === null ? null : self::retryAfterSeconds($this->response);
+    }
+
+    /**
+     * Reads a response's `retry-after` header as seconds, from whole seconds or an HTTP date.
+     *
+     * @internal
+     */
+    public static function retryAfterSeconds(ResponseInterface $response): ?int
+    {
+        $value = trim($response->getHeaderLine('retry-after'));
 
         if ($value === '') {
             return null;
@@ -173,7 +183,7 @@ class ErrorException extends Exception
             return (int) $value;
         }
 
-        $date = $this->httpDate($value);
+        $date = self::httpDate($value);
 
         return $date === null ? null : max(0, $date->getTimestamp() - time());
     }
@@ -182,7 +192,7 @@ class ErrorException extends Exception
      * Reads an HTTP date in the IMF-fixdate, RFC 850 or asctime form, rejecting one PHP would only normalize
      * (a wrong weekday, the 31st of February).
      */
-    private function httpDate(string $value): ?DateTimeImmutable
+    private static function httpDate(string $value): ?DateTimeImmutable
     {
         $value = (string) preg_replace('/ +/', ' ', $value);
 

@@ -259,6 +259,59 @@ $client = Anthropic::factory()
     ->make();
 ```
 
+## Retries
+
+The client doesn't retry by default. Turn it on with the number of extra attempts; two is what the official SDKs default to:
+
+```php
+$client = Anthropic::factory()
+    ->withApiKey('your-api-key')
+    ->withMaxRetries(2)
+    ->make();
+```
+
+A request is sent again after a connection failure or a timeout, or a response the API marks as worth retrying: 408, 409, 429 and every 5xx, including the 529 overload, unless the response's `x-should-retry` header says otherwise. Between attempts the client waits what the response asks for (`retry-after-ms`, then `retry-after`), or, when it asks for nothing or for no wait at all, backs off: half a second, doubled each attempt up to 8 seconds, less up to a quarter at random. When the retries run out, the last error is thrown as usual (see [Error Handling](./error-handling.md)).
+
+A stream is retried only before it starts: once events arrive, an error in the middle of the stream reaches your loop.
+
+Two things to plan for. A `retry-after` of several minutes holds the call that long, so where a request can't wait, turn retries off for it with `withOptions(['max_retries' => 0])`. And a timeout or a dropped connection can hide a request the API already received: the retry sends it again, so a message or a batch can be created twice. In tests, `withRetrySleep(fn (int $milliseconds) => ...)` replaces the wait, so a test of your retry handling doesn't sleep.
+
+## Middleware
+
+A middleware runs around every HTTP attempt, retries included, and gets the PSR-7 request and the next handler:
+
+```php
+use Closure;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
+
+$client = Anthropic::factory()
+    ->withApiKey('your-api-key')
+    ->withMiddleware(function (RequestInterface $request, Closure $next): ResponseInterface {
+        $response = $next($request->withHeader('X-Request-Source', 'billing-report'));
+
+        // inspect $response, record metrics ...
+
+        return $response;
+    })
+    ->make();
+```
+
+An invokable object with the same signature works too. The first middleware added runs outermost. Every status comes back as a response here, errors included; the client throws after the middleware has seen it. To have the request sent again, throw `Anthropic\Exceptions\RetryableException`: it counts against `withMaxRetries()`, and once the retries run out it reaches the caller.
+
+## Logging
+
+`withLogger()` takes any PSR-3 logger (`psr/log`):
+
+```php
+$client = Anthropic::factory()
+    ->withApiKey('your-api-key')
+    ->withLogger($logger)
+    ->make();
+```
+
+Each attempt logs an `info` line with the method, the URL and the attempt number, its response another with the status, the request ID and the duration, and each retry a `warning` with the delay and the reason. Bodies and headers are never logged, so keys and prompts stay out of your logs.
+
 ## Per-request options
 
 `withOptions()` returns a client whose requests carry extra settings, and leaves the client you call it on unchanged. Use it for a request that runs in another workspace, needs a beta the rest of your app doesn't, or carries a tracing header:
@@ -274,14 +327,15 @@ $tenant->models()->retrieve('claude-sonnet-5-5'); // carries all three
 $client->models()->retrieve('claude-sonnet-5-5'); // carries none of them
 ```
 
-| Option | Sends |
-|--------|-------|
+| Option | What it sets |
+|--------|--------------|
 | `headers` | Extra headers, as name => value pairs |
 | `query` | Extra query parameters |
 | `betas` | Betas added to the `anthropic-beta` header, with the factory's and any `betas` passed on a call |
 | `api_version` | The `anthropic-version` header, in place of the factory's |
 | `workspace_id` | The `anthropic-workspace-id` header |
 | `user_profile_id` | The `anthropic-user-profile-id` header, for requests made on an end user's behalf |
+| `max_retries` | The number of retries, in place of the factory's `withMaxRetries()` |
 
 This is also how methods that take only an ID, such as `models()->retrieve()` or `batches()->results()`, get a beta header. Calling `withOptions()` on a client that already has options merges them: headers and query parameters by name, betas added up, the rest replaced. An unknown option throws an `InvalidArgumentException`. A timeout per request isn't possible through PSR-18; build a separate client with its own HTTP client for that.
 

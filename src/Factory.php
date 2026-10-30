@@ -17,6 +17,7 @@ use Http\Discovery\Psr18ClientDiscovery;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpClient\Psr18Client;
 
 class Factory
@@ -42,6 +43,20 @@ class Factory
     private int|float|null $timeout = null;
 
     private int|float|null $connectTimeout = null;
+
+    private int $maxRetries = 0;
+
+    /**
+     * @var list<Closure(RequestInterface, Closure(RequestInterface): ResponseInterface): ResponseInterface>
+     */
+    private array $middleware = [];
+
+    private ?LoggerInterface $logger = null;
+
+    /**
+     * @var (Closure(int): void)|null
+     */
+    private ?Closure $retrySleep = null;
 
     /**
      * The HTTP client for the requests.
@@ -187,6 +202,58 @@ class Factory
     }
 
     /**
+     * Sets how many times a failed request is sent again: connection failures and timeouts, a RetryableException
+     * from a middleware, and the statuses worth retrying (408, 409, 429, 5xx, or what `x-should-retry` says).
+     * Defaults to 0; 2 is what the official SDKs use.
+     */
+    public function withMaxRetries(int $retries): self
+    {
+        if ($retries < 0) {
+            throw new InvalidArgumentException('withMaxRetries() takes 0 or more.');
+        }
+
+        $this->maxRetries = $retries;
+
+        return $this;
+    }
+
+    /**
+     * Adds a middleware run around every HTTP attempt: `fn (RequestInterface $request, Closure $next): ResponseInterface`,
+     * or an invokable object of that shape. The first one added runs outermost; throw a RetryableException to have
+     * the request sent again.
+     *
+     * @param  callable(RequestInterface, Closure(RequestInterface): ResponseInterface): ResponseInterface  $middleware
+     */
+    public function withMiddleware(callable $middleware): self
+    {
+        $this->middleware[] = $middleware(...);
+
+        return $this;
+    }
+
+    /**
+     * Logs each attempt and its response (method, URL, status, request ID, duration, retries), never a body or a header.
+     */
+    public function withLogger(LoggerInterface $logger): self
+    {
+        $this->logger = $logger;
+
+        return $this;
+    }
+
+    /**
+     * Replaces the wait between retries, which gets the delay in milliseconds, so a test doesn't sleep.
+     *
+     * @param  Closure(int): void  $sleep
+     */
+    public function withRetrySleep(Closure $sleep): self
+    {
+        $this->retrySleep = $sleep;
+
+        return $this;
+    }
+
+    /**
      * Adds a custom HTTP header to the requests.
      */
     public function withHttpHeader(string $name, string $value): self
@@ -243,7 +310,7 @@ class Factory
 
         $sendAsync = $this->makeStreamHandler($client);
 
-        $transporter = new HttpTransporter($client, $baseUri, $headers, $queryParams, $sendAsync);
+        $transporter = new HttpTransporter($client, $baseUri, $headers, $queryParams, $sendAsync, $this->maxRetries, $this->middleware, $this->logger, $this->retrySleep);
 
         return new Client($transporter);
     }
