@@ -53,7 +53,7 @@ class Messages implements MessagesContract
 
         $response = $this->transporter->requestStream($payload);
 
-        return new StreamResponse(CreateStreamedResponse::class, $response);
+        return new StreamResponse(CreateStreamedResponse::class, $response, $this->transporter->streamCompletionHandler());
     }
 
     /**

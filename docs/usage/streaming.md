@@ -297,6 +297,28 @@ $response->input_transformations; // set only after a fallback in the middle of 
 
 Keep the `container` ID to reuse the sandbox on the next request, as [Server Tools](./server-tools.md#container-persistence) shows.
 
+## Knowing when a stream ends
+
+`withStreamCompletionHandler()` on the factory gets every Messages stream once it's done with, so you can record what each one used:
+
+```php
+use Anthropic\Responses\Messages\StreamResponse;
+
+$client = Anthropic::factory()
+    ->withApiKey(getenv('ANTHROPIC_API_KEY'))
+    ->withStreamCompletionHandler(function (StreamResponse $stream) {
+        $usage = $stream->usage();   // ['input_tokens' => 25, 'output_tokens' => 15]
+
+        $stream->model();            // 'claude-sonnet-5-5'
+        $stream->completed();        // true when it was read to its message_stop
+        $stream->durationMs();       // from the response's headers until now
+        $stream->meta()->requestId;  // 'req_018EeWyXxfu5pfWkrYcMdjWG'
+    })
+    ->make();
+```
+
+It runs at most once per stream: at `message_stop`, just before a mid-stream error is thrown, or when a stream you stopped reading is dropped (a `break`, an exception in your loop). The usage is `message_start`'s with the last `message_delta`'s counts over it. The real output count only comes with that final `message_delta`, so a stream dropped before it has its input tokens and `message_start`'s placeholder output count, usually 1. A stream you never read reports when it's dropped, with no usage, and a fatal error skips the handler. After a server-side fallback, `model()` is the model that answered. A handler that throws at `message_stop` throws out of your loop; on a mid-stream error the API's exception wins, and on a dropped stream the handler's exception is dropped, since a destructor can't fail your code. The same methods work on any stream without a handler.
+
 ## Meta information on streams
 
 You can access rate limit headers and request metadata on the stream object itself:

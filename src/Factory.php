@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Anthropic;
 
 use Anthropic\Exceptions\InvalidArgumentException;
+use Anthropic\Responses\Messages\CreateStreamedResponse;
+use Anthropic\Responses\Messages\StreamResponse;
 use Anthropic\Transporters\HttpTransporter;
 use Anthropic\ValueObjects\ApiKey;
 use Anthropic\ValueObjects\Transporter\BaseUri;
@@ -89,6 +91,8 @@ class Factory
     private array $queryParams = [];
 
     private ?Closure $streamHandler = null;
+
+    private ?Closure $streamCompletionHandler = null;
 
     /**
      * Sets the API key for the requests.
@@ -243,6 +247,20 @@ class Factory
     public function withLogger(LoggerInterface $logger): self
     {
         $this->logger = $logger;
+
+        return $this;
+    }
+
+    /**
+     * Calls the handler at most once for each Messages stream, when it ends, fails or is dropped, with the stream: its
+     * `usage()`, `model()`, `completed()`, `durationMs()` and `meta()`. A stream never read reports when it's dropped,
+     * with no usage; a fatal error skips it.
+     *
+     * @param  Closure(StreamResponse<CreateStreamedResponse>): void  $handler
+     */
+    public function withStreamCompletionHandler(Closure $handler): self
+    {
+        $this->streamCompletionHandler = $handler;
 
         return $this;
     }
@@ -571,7 +589,7 @@ class Factory
         $sendAsync = $this->makeStreamHandler($client);
 
         // Timeouts exist only for the Guzzle client built here (make() refuses them beside yours), so only theirs are known.
-        $transporter = new HttpTransporter($client, $baseUri, $headers, $queryParams, $sendAsync, $this->maxRetries, $this->middleware, $this->logger, $this->retrySleep, $this->timeout, $this->connectTimeout);
+        $transporter = new HttpTransporter($client, $baseUri, $headers, $queryParams, $sendAsync, $this->maxRetries, $this->middleware, $this->logger, $this->retrySleep, $this->timeout, $this->connectTimeout, $this->streamCompletionHandler);
 
         return new Client($transporter);
     }

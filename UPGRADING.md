@@ -1,5 +1,19 @@
 # Upgrading
 
+## To 1.14.0
+
+### The Transporter Contract Gains streamCompletionHandler()
+
+**Likelihood Of Impact: Low**
+
+For implementers of the `@internal` `TransporterContract`: it has a new `streamCompletionHandler()` method, which returns the factory's `withStreamCompletionHandler()` (or null), and the Messages resource passes it to each stream. A transporter of your own needs it:
+
+```php
+public function streamCompletionHandler(): ?Closure;
+```
+
+The Messages `StreamResponse` gains `usage()`, `model()`, `completed()` and `durationMs()`, so a subclass that declares one of them with another signature no longer loads. It also gains `__clone()` and `__destruct()`: a subclass with its own must call the parent's, or a dropped stream never reaches the handler. A test that streams through a `Mockery::mock(TransporterContract::class)` needs `->shouldReceive('streamCompletionHandler')->andReturn(null)`.
+
 ## To 1.13.0
 
 ### An Empty ClientFake Answers Every Call

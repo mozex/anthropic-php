@@ -16,6 +16,9 @@ function mockClient(string $method, string $resource, array $params, Response|Re
 {
     $transporter = Mockery::mock(TransporterContract::class);
 
+    // A stream asks the transporter for its completion handler.
+    $transporter->shouldReceive('streamCompletionHandler')->andReturn(null);
+
     $transporter
         ->shouldReceive($methodName)
         ->once()

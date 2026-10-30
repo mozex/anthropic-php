@@ -46,6 +46,7 @@ class HttpTransporter implements TransporterContract
      * @param  (Closure(int): void)|null  $sleep  waits the given milliseconds between attempts
      * @param  float|null  $timeout  the timeout of the HTTP client the factory built, for settings() only
      * @param  float|null  $connectTimeout  its connection timeout, for settings() only
+     * @param  Closure|null  $streamCompletionHandler  the factory's withStreamCompletionHandler(), which each Messages stream calls once
      */
     public function __construct(
         private readonly ClientInterface $client,
@@ -59,6 +60,7 @@ class HttpTransporter implements TransporterContract
         private readonly ?Closure $sleep = null,
         private readonly ?float $timeout = null,
         private readonly ?float $connectTimeout = null,
+        private readonly ?Closure $streamCompletionHandler = null,
     ) {
         // ..
     }
@@ -170,7 +172,16 @@ class HttpTransporter implements TransporterContract
             $this->sleep,
             $this->timeout,
             $this->connectTimeout,
+            $this->streamCompletionHandler,
         );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function streamCompletionHandler(): ?Closure
+    {
+        return $this->streamCompletionHandler;
     }
 
     /**
