@@ -72,6 +72,19 @@ $response->usage->cacheReadInputTokens;      // 0
 
 If you're using [prompt caching](https://platform.claude.com/docs/en/build-with-claude/prompt-caching), the cache fields tell you how many tokens were written to or read from cache.
 
+Four helpers add the counts up the way billing and rate limits do:
+
+```php
+$response->usage->billedInputTokens();  // input + cache writes + cache reads
+$response->usage->billedOutputTokens(); // output
+$response->usage->billedTokens();       // both
+$response->usage->rateLimitTokens();    // input + cache writes + output, without cache reads
+```
+
+They count across `usage->iterations` when the API lists them, since the top-level counts can leave work out: under compaction they skip the compaction step, and with the advisor tool its own calls. A call that compacted 180,000 tokens before a 23,000-token answer shows `inputTokens` 23,000 but `billedInputTokens()` 203,000. A server-side fallback lists each attempt there too. `rateLimitTokens()` leaves cache reads out, since they don't count toward the input-tokens-per-minute limit on most models.
+
+The helpers count tokens, not cost. Cache reads are billed at a fraction of the input price, and the advisor's iterations and a fallback's attempts at their own model's rates. For a stream, `CreateResponseUsage::from($stream->usage())` gives you the same helpers once it ends.
+
 For cache breakdowns by window type:
 
 ```php

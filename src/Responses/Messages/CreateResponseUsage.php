@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Anthropic\Responses\Messages;
 
+use Closure;
+
 class CreateResponseUsage
 {
     /**
@@ -73,5 +75,54 @@ class CreateResponseUsage
                 $this->iterations,
             ),
         ], fn (mixed $value): bool => ! is_null($value)));
+    }
+
+    /**
+     * The input tokens the call was billed for: plain input, cache writes and cache reads. Counted across `iterations`
+     * when the API lists them (compaction, the advisor, a server-side fallback), which the top-level counts leave out.
+     */
+    public function billedInputTokens(): int
+    {
+        return $this->sum(fn (int $input, int $output, int $write, int $read): int => $input + $write + $read);
+    }
+
+    /**
+     * The output tokens the call was billed for, across `iterations` when the API lists them.
+     */
+    public function billedOutputTokens(): int
+    {
+        return $this->sum(fn (int $input, int $output, int $write, int $read): int => $output);
+    }
+
+    /**
+     * Every token the call was billed for: input, cache writes, cache reads and output, across `iterations`.
+     */
+    public function billedTokens(): int
+    {
+        return $this->billedInputTokens() + $this->billedOutputTokens();
+    }
+
+    /**
+     * The tokens rate limits count: input, cache writes and output, across `iterations`. Cache reads are left out,
+     * since they don't count toward the input-tokens-per-minute limit on most models.
+     */
+    public function rateLimitTokens(): int
+    {
+        return $this->sum(fn (int $input, int $output, int $write, int $read): int => $input + $write + $output);
+    }
+
+    /**
+     * @param  Closure(int, int, int, int): int  $count  the input, output, cache-write and cache-read tokens of the top-level usage or of one iteration
+     */
+    private function sum(Closure $count): int
+    {
+        if ($this->iterations === null || $this->iterations === []) {
+            return $count($this->inputTokens, $this->outputTokens, $this->cacheCreationInputTokens, $this->cacheReadInputTokens);
+        }
+
+        return array_sum(array_map(
+            fn (CreateResponseUsageIteration $iteration): int => $count($iteration->inputTokens, $iteration->outputTokens, $iteration->cacheCreationInputTokens, $iteration->cacheReadInputTokens),
+            $this->iterations,
+        ));
     }
 }

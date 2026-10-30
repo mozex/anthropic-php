@@ -12,7 +12,7 @@ For implementers of the `@internal` `TransporterContract`: it has a new `streamC
 public function streamCompletionHandler(): ?Closure;
 ```
 
-The Messages `StreamResponse` gains `usage()`, `model()`, `completed()` and `durationMs()`, so a subclass that declares one of them with another signature no longer loads. It also gains `__clone()` and `__destruct()`: a subclass with its own must call the parent's, or a dropped stream never reaches the handler. A test that streams through a `Mockery::mock(TransporterContract::class)` needs `->shouldReceive('streamCompletionHandler')->andReturn(null)`.
+`CreateResponseUsage` gains `billedInputTokens()`, `billedOutputTokens()`, `billedTokens()` and `rateLimitTokens()`, and the Messages `StreamResponse` gains `usage()`, `model()`, `completed()` and `durationMs()`, so a subclass that declares one of them with another signature no longer loads. It also gains `__clone()` and `__destruct()`: a subclass with its own must call the parent's, or a dropped stream never reaches the handler. A test that streams through a `Mockery::mock(TransporterContract::class)` needs `->shouldReceive('streamCompletionHandler')->andReturn(null)`.
 
 ## To 1.13.0
 
