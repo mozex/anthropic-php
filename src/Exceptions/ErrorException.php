@@ -127,7 +127,10 @@ class ErrorException extends Exception
      */
     public function getErrorType(): ?string
     {
-        return $this->contents['type'] ?? null;
+        // A gateway's error body may carry a number here; context() runs inside Laravel's reporting, so it can't throw.
+        $type = $this->contents['type'] ?? null;
+
+        return is_string($type) ? $type : null;
     }
 
     /**
@@ -164,6 +167,26 @@ class ErrorException extends Exception
     public function getRetryAfter(): ?int
     {
         return $this->response === null ? null : self::retryAfterSeconds($this->response);
+    }
+
+    /**
+     * Returns what a log entry needs about the error: the request ID, the status, the error type, the `retry-after`
+     * seconds and the `error_code`, each only when known. Laravel's exception handler and the Laravel packages of Sentry
+     * and Flare read a `context()` method on their own, so every logged API error carries them.
+     *
+     * @return array{anthropic_request_id?: string, status: int, type?: string, retry_after?: int, error_code?: string}
+     */
+    public function context(): array
+    {
+        $errorCode = $this->getErrorDetails()['error_code'] ?? null;
+
+        return array_filter([
+            'anthropic_request_id' => $this->getRequestId(),
+            'status' => $this->statusCode,
+            'type' => $this->getErrorType(),
+            'retry_after' => $this->getRetryAfter(),
+            'error_code' => is_string($errorCode) ? $errorCode : null,
+        ], fn (mixed $value): bool => $value !== null);
     }
 
     /**

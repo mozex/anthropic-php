@@ -1,5 +1,19 @@
 # Upgrading
 
+## To 1.12.0
+
+### ErrorException Gains context()
+
+**Likelihood Of Impact: Low**
+
+`ErrorException` has a new public `context()` method, which returns the request ID, the status, the error type, the `retry-after` seconds and the error code for a log entry. Laravel's exception handler, Sentry and Flare call it on their own. A subclass of your own that already defines `context()` without the `array` return type, or with required parameters, no longer loads: rename it, or declare it as `public function context(): array`.
+
+### ClientFake Gains Connection Views
+
+**Likelihood Of Impact: Low**
+
+`ClientFake` has new `onConnection()`, `assertSentOn()` and `assertNotSentOn()` methods and a protected `$connection` property, so a framework can hand out one view of a fake per connection, and `TestRequest` has `connection()` and a fifth constructor argument for it. `Factory` has a new `withConfig()`. A subclass of your own that already declares one of them with another signature no longer loads.
+
 ## To 1.11.0
 
 ### Error Statuses Throw Subclasses Of ErrorException

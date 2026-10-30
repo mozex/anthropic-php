@@ -82,6 +82,18 @@ try {
 }
 ```
 
+### Log context
+
+`context()` returns what a log entry needs about the error: the request ID, the status, the error type, the `retry-after` seconds and the error code, leaving out what the error doesn't carry:
+
+```php
+$e->context();
+// a rate limit: ['anthropic_request_id' => 'req_018EeWyXxfu5pfWkrYcMdjWG', 'status' => 429, 'type' => 'rate_limit_error', 'retry_after' => 30]
+// the spend cap: ['anthropic_request_id' => 'req_018EeWyXxfu5pfWkrYcMdjWG', 'status' => 429, 'type' => 'rate_limit_error', 'error_code' => 'enforced_spend_limit_reached']
+```
+
+Laravel's exception handler adds it to the log entry of every reported exception, as do the Laravel packages of Sentry and Flare, so a logged API error carries its request ID with no code of yours. Elsewhere, pass it to your logger yourself: `$logger->error($e->getMessage(), $e->context())`. It holds only those five values, never the message, the other headers or a body. For an error in the middle of a stream, `status` is 200, as `getStatusCode()` is, so match on `type`.
+
 ### Retrying
 
 With `withMaxRetries()` on the factory (see [Configuration](./configuration.md#retries)), the client retries connection failures, timeouts, 408, 409, 429 and 5xx responses itself, waiting what the API asks, so these exceptions reach you only once the retries run out.
