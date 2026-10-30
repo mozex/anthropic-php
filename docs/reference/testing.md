@@ -34,6 +34,36 @@ $response->content[0]->text; // 'Hello! How can I help?'
 
 The `fake()` method on response classes creates a response object with sensible defaults. Pass an array to override only the fields your test cares about. Overrides are merged recursively by default, so you can override a single nested field without replacing the entire parent array. A nested item whose `type` differs from the default's, such as a `tool_use` block in place of the default `text` block, replaces it instead of merging into it.
 
+A fake given no responses at all answers every call with its method's default fake, such as `CreateResponse::fake()` for `messages()->create()`, so a test that doesn't care about the answer needs none. Once you queue a response, or call `preventStrayRequests()`, a call with nothing to answer it throws instead, naming the call:
+
+```php
+$client = new ClientFake;
+$client->messages()->create([...]); // a CreateResponse::fake()
+
+$client = (new ClientFake)->preventStrayRequests();
+$client->messages()->create([...]); // throws: No fake responses left. Messages::create() has none, ...
+```
+
+## Answering by resource, method or closure
+
+`respondTo()` answers every matching call, ahead of the queue and as often as it comes. Match a resource's class, a resource and method pair, or a closure that takes the `TestRequest`:
+
+```php
+use Anthropic\Resources\Messages;
+use Anthropic\Resources\Models;
+use Anthropic\Responses\Models\RetrieveResponse;
+use Anthropic\Testing\Requests\TestRequest;
+
+$client = (new ClientFake)
+    ->respondTo([Models::class, 'retrieve'], RetrieveResponse::fake())
+    ->respondTo(
+        fn (TestRequest $request): bool => ($request->args()[0]['model'] ?? null) === 'claude-haiku-4-5',
+        fn (TestRequest $request) => CreateResponse::fake(['model' => 'claude-haiku-4-5']),
+    );
+```
+
+The response can be a closure that takes the `TestRequest` and returns one. A stream needs that, since it can be read only once. The first matching responder answers; a call none matches takes the next queued response. A response that doesn't fit the method, such as a `ListResponse` queued for `messages()->create()`, throws, naming both.
+
 ## Available fake responses
 
 Every response class has a `fake()` method:
@@ -175,44 +205,24 @@ The stream emits `message_start`, three `content_block_delta` events with the te
 
 ## Testing errors
 
-To test error handling, pass an exception as a fake response. It will be thrown when the matching request is made:
+To test error handling, queue an exception. It's thrown when the matching request is made. Every API exception has a `fake()` that builds it as the client would: its status, the error type and message from the API's errors page, a JSON body and a `request-id` header on a real PSR-7 response:
 
 ```php
-use Anthropic\Testing\ClientFake;
-use Anthropic\Exceptions\ErrorException;
-use GuzzleHttp\Psr7\Response;
-
-$client = new ClientFake([
-    new ErrorException([
-        'message' => 'Overloaded',
-        'type' => 'overloaded_error',
-    ], new Response(529)),
-]);
-
-// This will throw the ErrorException
-$client->messages()->create([
-    'model' => 'claude-sonnet-5-5',
-    'max_tokens' => 1024,
-    'messages' => [
-        ['role' => 'user', 'content' => 'Hello'],
-    ],
-]);
-```
-
-Like the client, pass any PSR-7 response as the second argument, such as Guzzle's. The status comes from it, and headers you add, such as a `Retry-After` on a `RateLimitException`, reach the code under test through `$e->response`:
-
-```php
+use Anthropic\Exceptions\OverloadedException;
 use Anthropic\Exceptions\RateLimitException;
 
-new RateLimitException(
-    ['message' => 'Rate limited', 'type' => 'rate_limit_error'],
-    new Response(429, ['retry-after' => '30']),
-);
+$client = new ClientFake([OverloadedException::fake()]);
+
+$client->messages()->create([...]); // throws OverloadedException, status 529
+
+RateLimitException::fake(headers: ['retry-after' => '30']);                     // getRetryAfter() is 30
+RateLimitException::fake(['details' => ['error_code' => 'enforced_spend_limit_reached']]); // the spend cap
+OverloadedException::fake(status: 200);                                          // an error in the middle of a stream
 ```
 
-An `int` status code still works in place of the response, but it's deprecated, and `$e->response` is `null` then.
+The first argument goes into the error object (`message`, `details`), `headers` onto the response, and `status` replaces the class's own. `ErrorException::fake(status: 405)` makes one for a status without a class of its own, typed `invalid_request_error` as the API types other 4xx statuses. A subclass of your own fakes as its parent, and `['request_id' => 'req_...']` sets the request ID. A failure without an answer has fakes too: `ConnectionException::fake()` and `TimeoutException::fake()` wrap a PSR-18 network exception, and `TransporterException::fake('...')` a plain PSR-18 client exception.
 
-The client throws a subclass for each status, such as `OverloadedException` for a 529, and you can queue those the same way: `new OverloadedException([...], new Response(529))`. Code that catches `ErrorException` catches them all.
+You can still build one by hand, with any PSR-7 response as the second argument: `new RateLimitException(['message' => 'Rate limited'], new Response(429, ['retry-after' => '30']))`. An `int` status code in place of the response is deprecated, and `$e->response` is `null` then. Code that catches `ErrorException` catches every subclass.
 
 ## Assertions
 
@@ -265,6 +275,24 @@ Check that no requests were sent at all:
 $client->assertNothingSent();
 ```
 
+### assertSentTimes and assertSentInOrder
+
+`assertSentTimes()` counts a resource's calls, or only those a callback accepts. `assertSentInOrder()` checks every call that was sent, in order, each as a resource's class, a resource and method pair, or a closure taking the `TestRequest`:
+
+```php
+use Anthropic\Resources\Models;
+
+$client->assertSentTimes(Messages::class, 2);
+$client->assertSentTimes(Messages::class, 1, fn (string $method, array $parameters): bool => $parameters['model'] === 'claude-haiku-4-5');
+
+$client->assertSentInOrder([
+    [Models::class, 'retrieve'],
+    [Messages::class, 'create'],
+]);
+```
+
+A failure lists the calls that were sent. `sent()` returns them as `TestRequest` objects, all of them, those to a resource, or those a callback accepts: `$client->sent(Messages::class)[0]->args()`.
+
 ### Resource-level assertions
 
 You can also assert directly on a resource:
@@ -275,8 +303,24 @@ $client->messages()->assertSent(function (string $method, array $parameters): bo
         && $parameters['max_tokens'] === 1024;
 });
 
+$client->messages()->assertSentTimes(2);
+
 $client->batches()->assertNotSent();
 ```
+
+### Pest expectations
+
+Under Pest, a fake also works with `expect()`:
+
+```php
+expect($client)
+    ->toHaveSent(Messages::class)
+    ->toHaveSentTimes(Messages::class, 2)
+    ->toHaveSentInOrder([Models::class, Messages::class])
+    ->not->toHaveSent(Batches::class);
+```
+
+`toHaveSentOn()` and `toHaveSentNothing()` follow `assertSentOn()` and `assertNothingSent()`. They're registered the first time a fake is made, and only when Pest is installed.
 
 ### assertSentWithOptions
 
@@ -323,7 +367,7 @@ $first = $client->messages()->create([...]); // Returns "First"
 $second = $client->messages()->create([...]); // Returns "Second"
 ```
 
-If you make more requests than you have fake responses, the client will throw an error.
+If you make more requests than you have fake responses, the next call throws, naming it: `No fake responses left. Messages::create() was the next call: ...`
 
 ## Fakes per connection
 

@@ -1,5 +1,15 @@
 # Upgrading
 
+## To 1.13.0
+
+### An Empty ClientFake Answers Every Call
+
+**Likelihood Of Impact: Low**
+
+A `ClientFake` given no responses used to throw on its first call. It now answers each call with its method's default fake, such as `CreateResponse::fake()`, until you queue a response. A test that relied on the throw calls `preventStrayRequests()` on the fake. Running out of queued responses still throws, now a `RuntimeException` (an `Exception`, which still catches it) whose message starts with the old `No fake responses left.` and goes on to name the call, so an exact comparison of the message fails. A queued response that doesn't fit the method throws one too, where it used to be a `TypeError`.
+
+`ClientFake::record()` gains an optional second argument, the type the method returns, and `sent()` and `assertSentTimes()` are public. A subclass of your own that already declares `record()`, `sent()`, `assertSentTimes()`, `assertSentInOrder()`, `respondTo()` or `preventStrayRequests()` with another signature, or overrides `record()` without the new argument, no longer loads; so does a test resource subclass declaring `assertSentTimes()`. The exceptions gain a static `fake()`, with the same effect on a subclass that declares one.
+
 ## To 1.12.0
 
 ### ErrorException Gains context()

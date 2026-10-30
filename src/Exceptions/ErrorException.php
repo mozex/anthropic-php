@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Anthropic\Exceptions;
 
+use Anthropic\Testing\Exceptions\Concerns\FakeableError;
 use DateTimeImmutable;
 use DateTimeZone;
 use Exception;
@@ -11,6 +12,8 @@ use Psr\Http\Message\ResponseInterface;
 
 class ErrorException extends Exception
 {
+    use FakeableError;
+
     /**
      * @var array{type?: ?string, message?: string|array<int, string>, details?: mixed, request_id?: ?string}
      */

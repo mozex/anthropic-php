@@ -30,6 +30,8 @@ arch('exceptions')
     ->toOnlyUse([
         'Psr\Http\Client',
         'Psr\Http\Message\ResponseInterface',
+        // the fake() of each exception
+        'Anthropic\Testing\Exceptions\Concerns',
     ])->toImplement(Throwable::class);
 
 arch('resources')->expect('Anthropic\Resources')->toOnlyUse([

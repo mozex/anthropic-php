@@ -7,7 +7,9 @@ namespace Anthropic\Testing;
 use Anthropic\Contracts\ClientContract;
 use Anthropic\Contracts\ResponseContract;
 use Anthropic\Contracts\ResponseStreamContract;
+use Anthropic\Responses\Completions\CreateStreamedResponse as CompletionsCreateStreamedResponse;
 use Anthropic\Responses\Completions\StreamResponse as CompletionsStreamResponse;
+use Anthropic\Responses\Messages\CreateStreamedResponse;
 use Anthropic\Responses\Messages\StreamResponse as MessagesStreamResponse;
 use Anthropic\Responses\Raw\RawResponse;
 use Anthropic\Testing\Requests\TestRequest;
@@ -18,7 +20,10 @@ use Anthropic\Testing\Resources\MessagesTestResource;
 use Anthropic\Testing\Resources\ModelsTestResource;
 use Anthropic\Testing\Resources\RawTestResource;
 use Anthropic\ValueObjects\Transporter\RequestOptions;
+use Closure;
+use Pest\Expectation;
 use PHPUnit\Framework\Assert as PHPUnit;
+use RuntimeException;
 use Stringable;
 use Throwable;
 
@@ -49,9 +54,30 @@ class ClientFake implements ClientContract
     protected ?string $connection = null;
 
     /**
+     * Answers checked before the queue, in the order added: a matcher, and the response or the closure that makes it.
+     *
+     * @var list<array{Closure(TestRequest): bool, mixed}>
+     */
+    private array $responders = [];
+
+    /**
+     * Whether a response was ever queued. Until one is, a call no responder answers gets its method's default fake.
+     */
+    private bool $queued = false;
+
+    private bool $preventStrayRequests = false;
+
+    private static bool $expectationsRegistered = false;
+
+    /**
      * @param  array<array-key, ResponseContract|ResponseStreamContract|CompletionsStreamResponse|MessagesStreamResponse|RawResponse|Throwable|Stringable|string>  $responses
      */
-    public function __construct(protected array $responses = []) {}
+    public function __construct(protected array $responses = [])
+    {
+        $this->queued = $responses !== [];
+
+        self::registerPestExpectations();
+    }
 
     /**
      * @param  array<array-key, ResponseContract|ResponseStreamContract|CompletionsStreamResponse|MessagesStreamResponse|RawResponse|Throwable|Stringable|string>  $responses
@@ -60,6 +86,31 @@ class ClientFake implements ClientContract
     {
         $root = $this->root();
         $root->responses = [...$root->responses, ...$responses];
+        $root->queued = $root->queued || $responses !== [];
+    }
+
+    /**
+     * Answers every matching call ahead of the queue, as often as it comes: a resource's class, a [resource, method]
+     * pair or a closure taking the TestRequest. The response can be a closure taking the TestRequest, which a stream
+     * needs, since one is read only once.
+     *
+     * @param  class-string|array{0: class-string, 1: string}|Closure(TestRequest): bool  $match
+     */
+    public function respondTo(string|array|Closure $match, mixed $response): static
+    {
+        $this->root()->responders[] = [self::matcher($match), $response];
+
+        return $this;
+    }
+
+    /**
+     * Makes a call that no queued response or responder answers throw, rather than get its method's default fake.
+     */
+    public function preventStrayRequests(bool $prevent = true): static
+    {
+        $this->root()->preventStrayRequests = $prevent;
+
+        return $this;
     }
 
     /**
@@ -165,9 +216,12 @@ class ClientFake implements ClientContract
         );
     }
 
-    private function assertSentTimes(string $resource, int $times = 1): void
+    /**
+     * Asserts the resource was sent exactly that many times, counting only the calls the callback accepts with one.
+     */
+    public function assertSentTimes(string $resource, int $times, ?callable $callback = null): void
     {
-        $count = count($this->sent($resource));
+        $count = count($this->sent($resource, $callback));
 
         PHPUnit::assertSame(
             $times, $count,
@@ -176,22 +230,35 @@ class ClientFake implements ClientContract
     }
 
     /**
-     * @return mixed[]
+     * Asserts the calls were sent in this order, and no others: each a resource's class, a [resource, method] pair or
+     * a closure taking the TestRequest.
+     *
+     * @param  list<class-string|array{0: class-string, 1: string}|Closure(TestRequest): bool>  $expected
      */
-    private function sent(string $resource, ?callable $callback = null): array
+    public function assertSentInOrder(array $expected): void
     {
-        if (! $this->hasSent($resource)) {
-            return [];
+        $requests = array_values($this->root()->requests);
+        $sent = 'The requests sent were: '.(implode(', ', array_map(self::describe(...), $requests)) ?: 'none').'.';
+
+        PHPUnit::assertCount(count($expected), $requests, 'Expected '.count($expected).' requests, '.count($requests).' were sent. '.$sent);
+
+        foreach (array_values($expected) as $index => $match) {
+            PHPUnit::assertTrue(self::matcher($match)($requests[$index]), 'Request '.($index + 1).' was '.self::describe($requests[$index]).", not the one expected. {$sent}");
         }
-
-        $callback = $callback ?: fn (): bool => true;
-
-        return array_filter($this->resourcesOf($resource), fn (TestRequest $resource) => $callback($resource->method(), ...$resource->args()));
     }
 
-    private function hasSent(string $resource): bool
+    /**
+     * The recorded requests, in the order sent: those to the resource, those the callback accepts (with the method
+     * and its arguments), or all of them.
+     *
+     * @return list<TestRequest>
+     */
+    public function sent(?string $resource = null, ?callable $callback = null): array
     {
-        return $this->resourcesOf($resource) !== [];
+        $callback ??= fn (): bool => true;
+        $requests = $resource === null ? $this->root()->requests : $this->resourcesOf($resource);
+
+        return array_values(array_filter($requests, fn (TestRequest $request): bool => (bool) $callback($request->method(), ...$request->args())));
     }
 
     /**
@@ -241,7 +308,12 @@ class ClientFake implements ClientContract
         return array_filter($this->root()->requests, fn (TestRequest $request): bool => $request->resource() === $type);
     }
 
-    public function record(TestRequest $request): ResponseContract|ResponseStreamContract|RawResponse|string
+    /**
+     * Records the call and answers it: a responder's response, else the next queued one, else, while none was ever
+     * queued and stray requests are allowed, the method's default fake. `$returns` is the type the method returns,
+     * which a response must fit.
+     */
+    public function record(TestRequest $request, ?string $returns = null): ResponseContract|ResponseStreamContract|RawResponse|string
     {
         if ($this->options !== [] || $this->connection !== null) {
             $request = new TestRequest($request->resource(), $request->method(), $request->args(), $this->options, $this->connection);
@@ -250,11 +322,7 @@ class ClientFake implements ClientContract
         $root = $this->root();
         $root->requests[] = $request;
 
-        $response = array_shift($root->responses);
-
-        if (is_null($response)) {
-            throw new \Exception('No fake responses left.');
-        }
+        $response = $root->answer($request, $returns);
 
         if ($response instanceof Throwable) {
             throw $response;
@@ -262,10 +330,51 @@ class ClientFake implements ClientContract
 
         // A stream queued for a content method such as files()->download().
         if ($response instanceof Stringable) {
-            return (string) $response;
+            $response = (string) $response;
+        }
+
+        if ($returns !== null && ! ($returns === 'string' ? is_string($response) : $response instanceof $returns)) {
+            throw new RuntimeException('The fake response for '.self::describe($request).' is '.get_debug_type($response).", but the method returns {$returns}.");
+        }
+
+        if (! $response instanceof ResponseContract && ! $response instanceof ResponseStreamContract && ! $response instanceof RawResponse && ! is_string($response)) {
+            throw new RuntimeException('The fake response for '.self::describe($request).' is '.get_debug_type($response).', which no method returns.');
         }
 
         return $response;
+    }
+
+    /**
+     * The answer to a recorded call, on the root fake.
+     */
+    private function answer(TestRequest $request, ?string $returns): mixed
+    {
+        foreach ($this->responders as [$matcher, $response]) {
+            if ($matcher($request)) {
+                return $response instanceof Closure ? $response($request) : $response;
+            }
+        }
+
+        if ($this->responses !== []) {
+            return array_shift($this->responses);
+        }
+
+        if (! $this->queued && ! $this->preventStrayRequests && $returns !== null) {
+            return match ($returns) {
+                'string' => '',
+                // A stream's fake comes from the event it's made of.
+                MessagesStreamResponse::class => CreateStreamedResponse::fake(),
+                CompletionsStreamResponse::class => CompletionsCreateStreamedResponse::fake(),
+                default => $returns::fake(),
+            };
+        }
+
+        // The old message first, so an assertion on it still matches.
+        throw new RuntimeException('No fake responses left. '.self::describe($request).match (true) {
+            $this->queued => ' was the next call: queue another response, or answer it with respondTo().',
+            $this->preventStrayRequests => ' has none, and stray requests are prevented: queue one, or answer it with respondTo().',
+            default => ' has none, and its return type gives no default: queue one, or answer it with respondTo().',
+        });
     }
 
     /**
@@ -297,7 +406,7 @@ class ClientFake implements ClientContract
     }
 
     /**
-     * Records the request under `Raw::class` and returns the next queued response, a `RawResponse::fake()`.
+     * Records the request under `Raw::class` and answers it as any call: a responder, the queue, or the default fake.
      *
      * @param  array<string, mixed>  $parameters
      */
@@ -309,6 +418,81 @@ class ClientFake implements ClientContract
     private function root(): ClientFake
     {
         return $this->root ?? $this;
+    }
+
+    /**
+     * A matcher for a resource's class, a [resource, method] pair or a closure taking the TestRequest.
+     *
+     * @param  class-string|array{0: class-string, 1: string}|Closure(TestRequest): bool  $match
+     * @return Closure(TestRequest): bool
+     */
+    private static function matcher(string|array|Closure $match): Closure
+    {
+        return match (true) {
+            $match instanceof Closure => $match,
+            is_array($match) => fn (TestRequest $request): bool => $request->resource() === $match[0] && $request->method() === $match[1],
+            default => fn (TestRequest $request): bool => $request->resource() === $match,
+        };
+    }
+
+    /**
+     * A recorded call as a failure message names it: `Messages::create()`.
+     */
+    private static function describe(TestRequest $request): string
+    {
+        $resource = strrchr($request->resource(), '\\');
+
+        return ($resource === false ? $request->resource() : substr($resource, 1)).'::'.$request->method().'()';
+    }
+
+    /**
+     * Pest's `expect($fake)->toHaveSent(...)` and its siblings, registered the first time a fake is made under Pest:
+     * on Pest's own Expectation, since another library may define `expect()`, and never over a suite's own expectation
+     * of the same name.
+     */
+    private static function registerPestExpectations(): void
+    {
+        if (self::$expectationsRegistered || ! class_exists(Expectation::class)) {
+            return;
+        }
+
+        self::$expectationsRegistered = true;
+
+        $expectations = [
+            'toHaveSent' => function (string $resource, callable|int|null $callback = null) {
+                $this->value->assertSent($resource, $callback);
+
+                return $this;
+            },
+            'toHaveSentTimes' => function (string $resource, int $times, ?callable $callback = null) {
+                $this->value->assertSentTimes($resource, $times, $callback);
+
+                return $this;
+            },
+            'toHaveSentOn' => function (string $connection, string $resource, callable|int|null $callback = null) {
+                $this->value->assertSentOn($connection, $resource, $callback);
+
+                return $this;
+            },
+            'toHaveSentInOrder' => function (array $expected) {
+                $this->value->assertSentInOrder($expected);
+
+                return $this;
+            },
+            'toHaveSentNothing' => function () {
+                $this->value->assertNothingSent();
+
+                return $this;
+            },
+        ];
+
+        $expect = new Expectation(null);
+
+        foreach ($expectations as $name => $expectation) {
+            if (! Expectation::hasExtend($name)) {
+                $expect->extend($name, $expectation);
+            }
+        }
     }
 
     /**
