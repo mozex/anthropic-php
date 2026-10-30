@@ -399,6 +399,40 @@ $retry->usage->fallbackCredit; // the credit's status on the retry, or null
 
 Send the token as the retry's top-level `fallback_credit_token` parameter, with the same beta header, within five minutes. The retry must keep the refused request's `system`, `messages`, `tools` and the other prompt fields exactly as they were; only the model and a few settings may change. The [fallback credit guide](https://platform.claude.com/docs/en/build-with-claude/fallback-credit) has the retry shapes and which fallback models each model accepts. Server-side fallback applies the credit for you. A Claude Haiku 5.5 refusal carries no credit.
 
+### Falling back on the client
+
+Where server-side fallback isn't available (Claude Haiku 5.5, or a platform without it), `RefusalFallbackMiddleware` does the same job from the client for requests that don't stream. It sends a refused request to the next model you list, redeems the refusal's fallback credit for you, and returns the answer with the same `fallback` block and `usage->iterations` a server-side fallback gives:
+
+```php
+use Anthropic\Middleware\FallbackState;
+use Anthropic\Middleware\RefusalFallbackMiddleware;
+
+$state = new FallbackState; // one per conversation
+
+$client = Anthropic::factory()
+    ->withApiKey('your-api-key')
+    ->withMiddleware(new RefusalFallbackMiddleware(['claude-opus-4-8'], state: $state))
+    ->make();
+
+$response = $client->messages()->create([
+    'model' => 'claude-fable-5',
+    'max_tokens' => 1024,
+    'messages' => [
+        ['role' => 'user', 'content' => $userPrompt],
+    ],
+]);
+
+$response->model; // 'claude-opus-4-8' when Claude Fable 5 refused
+```
+
+The models are tried in order, and each has to be one the refused model allows as a fallback (the [fallback credit guide](https://platform.claude.com/docs/en/build-with-claude/fallback-credit) lists them). An entry can also be an array that changes a few settings for its model, such as `['model' => 'claude-opus-4-8', 'max_tokens' => 2048]`: `max_tokens`, `thinking`, `output_config` (merged one field at a time, with `null` removing a field) and `speed`. Changing `thinking` or `output_config` breaks the match the credit needs, so that retry is billed in full; so does a request with `thinking: between_tools`, which goes to the fallback as `disabled` unless the entry sets `thinking`, since only Claude Sonnet 5.5 takes it. A request sent with `speed: fast` loses it on a fallback that's rate limited or overloaded, unless the entry sets `speed` itself. A model that refused is never asked again within the same request.
+
+The shared `FallbackState` keeps the conversation on the model that answered, so the next turn doesn't ask a model that already refused; without one, every request starts from the model you asked for. Its `index` is `null` for the model you asked for and the chain position otherwise, so you can store it with the conversation and set it again on the next request. A pinned turn goes straight to its model, so it carries no `fallback` block: read `$response->model`. The second argument, `fn (array $refused, array $entry, int $index) => ...`, is called before each fallback, for logging; the arguments come in the official SDK's order.
+
+With retries on (see [Configuration](../reference/configuration.md#retries)), a fallback that's overloaded or rate limited sends the whole request again, from the pinned model, so without a shared state the model that refused is asked once more, and each attempt can take a request timeout.
+
+The middleware adds the `fallback-credit-2026-07-01` beta to the requests it handles, and takes the `fallback` blocks it put at the front of a turn out of the history you send back. It handles `messages()->create()` and raw `POST` requests to `messages`: a streamed request passes through unchanged (server-side `fallbacks` covers streams), and a request that sets `fallbacks` throws, since the API would run a chain of its own.
+
 ## The `pause_turn` stop reason
 
 Long-running turns that hit internal limits come back with `stop_reason: 'pause_turn'` instead of `'end_turn'`. The response is valid and complete for the work done so far. To let Claude continue, send the same response back as the next assistant message:

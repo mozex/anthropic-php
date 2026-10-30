@@ -60,6 +60,13 @@ arch('value objects')->expect('Anthropic\ValueObjects')->toOnlyUse([
     'Anthropic\Responses\Meta\MetaInformation',
 ]);
 
+arch('middleware')->expect('Anthropic\Middleware')->toOnlyUse([
+    'Anthropic\Exceptions\InvalidArgumentException',
+    'Http\Discovery\Psr17Factory',
+    'Psr\Http\Message\RequestInterface',
+    'Psr\Http\Message\ResponseInterface',
+]);
+
 arch('client')->expect('Anthropic\Client')->toOnlyUse([
     'Anthropic\Resources',
     'Anthropic\Contracts',
