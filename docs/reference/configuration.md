@@ -335,6 +335,26 @@ The span is the current one while the request goes out, so instrumentation below
 
 Add it after `RefusalFallbackMiddleware` and each fallback attempt gets a span of its own; before it, one span covers the whole chain.
 
+## Building from a config array
+
+`withConfig()` takes the settings a framework's config file holds, in one array, and applies the same rules the Laravel package does:
+
+```php
+$client = Anthropic::factory()
+    ->withConfig([
+        'api_key' => getenv('ANTHROPIC_API_KEY'),
+        'workspace_id' => 'wrkspc_011CZkZaBF1tNoB5wlCeusgy',
+        'betas' => ['compact-2026-09-04'],
+        'max_retries' => 2,
+        'headers' => ['X-Request-Source' => 'billing-report'],
+    ])
+    ->make();
+```
+
+The keys are `api_key`, `auth_token` (used only when there's no key), `workspace_id`, `api_version`, `base_url` (as `ANTHROPIC_BASE_URL`, without `/v1`) or `base_uri` (the full API root), `betas` (a list, or a comma-separated string as an environment variable gives it), `timeout`, `connect_timeout`, `max_retries`, `middleware` (one callable or a list), `http_client` and `headers` (applied last).
+
+A null, false or blank value keeps the default, so `getenv()` of an unset variable does too, and so does a timeout of 0. The credential in the array replaces one set before it, so the client never sends both. An unknown key, a value of the wrong type (a beta that isn't a string, a `max_retries` of `2.5`), `base_url` beside `base_uri` and a timeout beside `http_client` throw before anything is applied, so a misspelt setting can't go unnoticed.
+
 ## Per-request options
 
 `withOptions()` returns a client whose requests carry extra settings, and leaves the client you call it on unchanged. Use it for a request that runs in another workspace, needs a beta the rest of your app doesn't, or carries a tracing header:

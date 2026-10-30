@@ -37,9 +37,16 @@ class ClientFake implements ClientContract
     private array $options = [];
 
     /**
-     * The fake a withOptions() fake came from: it holds the queue and the recorded requests for all of them.
+     * The fake a withOptions() fake or an onConnection() view came from: it holds the queue and the recorded requests
+     * for all of them.
      */
     private ?ClientFake $root = null;
+
+    /**
+     * The connection an onConnection() view records its requests under. A subclass may name the root's, so calls
+     * through the fake itself count as that connection's.
+     */
+    protected ?string $connection = null;
 
     /**
      * @param  array<array-key, ResponseContract|ResponseStreamContract|CompletionsStreamResponse|MessagesStreamResponse|RawResponse|Throwable|Stringable|string>  $responses
@@ -70,6 +77,57 @@ class ClientFake implements ClientContract
         $fake->options = self::mergeOptions($this->options, self::normalizeOptions($options));
 
         return $fake;
+    }
+
+    /**
+     * Returns a view of the fake that shares its queue and recorded requests, and records its requests under the
+     * connection's name, for a framework that hands out one client per connection.
+     */
+    public function onConnection(string $name): static
+    {
+        $fake = clone $this;
+        $fake->root = $this->root();
+        $fake->connection = $name;
+
+        return $fake;
+    }
+
+    /**
+     * Asserts a request to the resource was sent through the named onConnection() view; with an int, exactly that
+     * many times.
+     */
+    public function assertSentOn(string $connection, string $resource, callable|int|null $callback = null): void
+    {
+        if (is_int($callback)) {
+            $count = count($this->sentOn($connection, $resource));
+
+            PHPUnit::assertSame($callback, $count, "The expected [{$resource}] resource was sent {$count} times on the [{$connection}] connection instead of {$callback} times.");
+
+            return;
+        }
+
+        PHPUnit::assertNotEmpty($this->sentOn($connection, $resource, $callback), "The expected [{$resource}] request on the [{$connection}] connection was not sent.");
+    }
+
+    /**
+     * Asserts no request to the resource (or none the callback accepts) was sent through the named onConnection() view.
+     */
+    public function assertNotSentOn(string $connection, string $resource, ?callable $callback = null): void
+    {
+        PHPUnit::assertCount(0, $this->sentOn($connection, $resource, $callback), "The unexpected [{$resource}] request on the [{$connection}] connection was sent.");
+    }
+
+    /**
+     * @return array<array-key, TestRequest>
+     */
+    private function sentOn(string $connection, string $resource, ?callable $callback = null): array
+    {
+        $callback ??= fn (): bool => true;
+
+        return array_filter(
+            $this->resourcesOf($resource),
+            fn (TestRequest $request): bool => $request->connection() === $connection && $callback($request->method(), ...$request->args()),
+        );
     }
 
     /**
@@ -185,8 +243,8 @@ class ClientFake implements ClientContract
 
     public function record(TestRequest $request): ResponseContract|ResponseStreamContract|RawResponse|string
     {
-        if ($this->options !== []) {
-            $request = new TestRequest($request->resource(), $request->method(), $request->args(), $this->options);
+        if ($this->options !== [] || $this->connection !== null) {
+            $request = new TestRequest($request->resource(), $request->method(), $request->args(), $this->options, $this->connection);
         }
 
         $root = $this->root();

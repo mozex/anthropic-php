@@ -23,6 +23,11 @@ use Symfony\Component\HttpClient\Psr18Client;
 class Factory
 {
     /**
+     * The keys withConfig() takes.
+     */
+    private const CONFIG_KEYS = ['api_key', 'auth_token', 'workspace_id', 'api_version', 'base_url', 'base_uri', 'betas', 'timeout', 'connect_timeout', 'max_retries', 'middleware', 'http_client', 'headers'];
+
+    /**
      * The API key for the requests.
      */
     private ?string $apiKey = null;
@@ -271,6 +276,260 @@ class Factory
         $this->queryParams[$name] = $value;
 
         return $this;
+    }
+
+    /**
+     * Applies a configuration array, as a framework's config file holds one: `api_key`, `auth_token` (used only
+     * without a key: one credential, as in the official SDKs), `workspace_id`, `api_version`, `base_url` (the official
+     * SDKs' `ANTHROPIC_BASE_URL`, without `/v1`) or `base_uri` (the full API root), `betas` (a list or a comma-separated
+     * string, sent as `anthropic-beta`), `timeout` and `connect_timeout` (seconds), `max_retries`, `middleware` (one
+     * callable or a list), `http_client` and `headers` (applied last). A null, false or blank value keeps the default
+     * (so `getenv()` of an unset variable does), and so does a timeout of 0. A credential replaces the one set before;
+     * an unknown key, a value of the wrong type, both base keys together and a timeout beside an `http_client` throw,
+     * before anything is applied.
+     *
+     * @param  array<string, mixed>  $config
+     */
+    public function withConfig(array $config): self
+    {
+        $unknown = array_diff(array_keys($config), self::CONFIG_KEYS);
+
+        if ($unknown !== []) {
+            throw new InvalidArgumentException('Unknown config key ['.implode('], [', $unknown).']; the keys are '.implode(', ', self::CONFIG_KEYS).'.');
+        }
+
+        // getenv() gives false for an unset variable, and env() an empty string for an empty line.
+        $config = array_map(fn (mixed $value): mixed => $value === false || (is_string($value) && trim($value) === '') ? null : $value, $config);
+
+        $apiKey = self::configString($config['api_key'] ?? null, 'api_key');
+        $authToken = self::configString($config['auth_token'] ?? null, 'auth_token');
+        $workspaceId = self::configString($config['workspace_id'] ?? null, 'workspace_id');
+        $apiVersion = self::configString($config['api_version'] ?? null, 'api_version');
+        $baseUri = self::configString($config['base_uri'] ?? null, 'base_uri');
+        $baseUrl = self::configString($config['base_url'] ?? null, 'base_url');
+
+        if ($baseUri !== null && $baseUrl !== null) {
+            throw new InvalidArgumentException('Set base_uri (the full API root) or base_url (without /v1), not both.');
+        }
+
+        $betas = self::configBetas($config['betas'] ?? null);
+        $timeout = self::configSeconds($config['timeout'] ?? null, 'timeout');
+        $connectTimeout = self::configSeconds($config['connect_timeout'] ?? null, 'connect_timeout');
+        $maxRetries = self::configRetries($config['max_retries'] ?? null);
+        $middleware = self::configMiddleware($config['middleware'] ?? null);
+        $headers = self::configHeaders($config['headers'] ?? null);
+        $httpClient = $config['http_client'] ?? null;
+
+        if ($httpClient !== null && ! $httpClient instanceof ClientInterface) {
+            throw new InvalidArgumentException('The [http_client] config value must be a PSR-18 client.');
+        }
+
+        if ($httpClient !== null && ($timeout !== null || $connectTimeout !== null)) {
+            throw new InvalidArgumentException('The [timeout] and [connect_timeout] config values apply to the HTTP client the factory builds: set them on your [http_client] instead.');
+        }
+
+        // One credential: the key when one is set, the token otherwise, either replacing what an earlier call set.
+        if ($apiKey !== null) {
+            $this->withApiKey($apiKey);
+            $this->authToken = null;
+        } elseif ($authToken !== null) {
+            $this->withAuthToken($authToken);
+            $this->apiKey = null;
+        }
+
+        if ($workspaceId !== null) {
+            $this->withWorkspaceId($workspaceId);
+        }
+
+        if ($apiVersion !== null) {
+            $this->withApiVersion($apiVersion);
+        }
+
+        if ($baseUri !== null) {
+            $this->withBaseUri($baseUri);
+        }
+
+        if ($baseUrl !== null) {
+            $this->withBaseUrl($baseUrl);
+        }
+
+        if ($betas !== []) {
+            $this->withHttpHeader('anthropic-beta', implode(',', $betas));
+        }
+
+        if ($timeout !== null) {
+            $this->withTimeout($timeout);
+        }
+
+        if ($connectTimeout !== null) {
+            $this->withConnectTimeout($connectTimeout);
+        }
+
+        if ($maxRetries !== null) {
+            $this->withMaxRetries($maxRetries);
+        }
+
+        foreach ($middleware as $entry) {
+            $this->withMiddleware($entry);
+        }
+
+        if ($httpClient instanceof ClientInterface) {
+            $this->withHttpClient($httpClient);
+        }
+
+        foreach ($headers as $name => $value) {
+            $this->withHttpHeader($name, $value);
+        }
+
+        return $this;
+    }
+
+    /**
+     * A string setting, trimmed, or null for none.
+     */
+    private static function configString(mixed $value, string $key): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        if (! is_string($value)) {
+            throw new InvalidArgumentException("The [{$key}] config value must be a string.");
+        }
+
+        return trim($value);
+    }
+
+    /**
+     * The config's betas, from a list or a comma-separated string: trimmed, without blanks or repeats.
+     *
+     * @return list<string>
+     */
+    private static function configBetas(mixed $betas): array
+    {
+        $betas = is_string($betas) ? explode(',', $betas) : ($betas ?? []);
+
+        if (! is_array($betas)) {
+            throw new InvalidArgumentException('The [betas] config value must be a list of beta names or a comma-separated string.');
+        }
+
+        $names = [];
+
+        foreach ($betas as $beta) {
+            if (! is_string($beta)) {
+                throw new InvalidArgumentException('Each beta in the [betas] config value must be a string.');
+            }
+
+            if (trim($beta) !== '') {
+                $names[] = trim($beta);
+            }
+        }
+
+        return array_values(array_unique($names));
+    }
+
+    /**
+     * A timeout in seconds; null for none or 0, which keep the HTTP client's default.
+     */
+    private static function configSeconds(mixed $seconds, string $key): ?float
+    {
+        if ($seconds === null) {
+            return null;
+        }
+
+        if (! is_numeric($seconds) || (float) $seconds < 0) {
+            throw new InvalidArgumentException("The [{$key}] config value must be a number of seconds.");
+        }
+
+        return (float) $seconds > 0 ? (float) $seconds : null;
+    }
+
+    /**
+     * The retry count: a whole number of 0 or more, or null for none.
+     */
+    private static function configRetries(mixed $retries): ?int
+    {
+        if ($retries === null) {
+            return null;
+        }
+
+        if (is_int($retries) && $retries >= 0) {
+            return $retries;
+        }
+
+        if (is_string($retries) && ctype_digit(trim($retries))) {
+            return (int) trim($retries);
+        }
+
+        throw new InvalidArgumentException('The [max_retries] config value must be a whole number of 0 or more.');
+    }
+
+    /**
+     * The config's middleware: one callable or a list of them.
+     *
+     * @return list<callable>
+     */
+    private static function configMiddleware(mixed $middleware): array
+    {
+        if ($middleware === null) {
+            return [];
+        }
+
+        // An array is a list, never an [object, method] callable.
+        if (! is_array($middleware) && is_callable($middleware)) {
+            return [$middleware];
+        }
+
+        if (! is_array($middleware)) {
+            throw new InvalidArgumentException('The [middleware] config value must be a callable or a list of them.');
+        }
+
+        $entries = [];
+
+        foreach ($middleware as $entry) {
+            if (! is_callable($entry)) {
+                throw new InvalidArgumentException('Each middleware must be callable: fn (RequestInterface $request, Closure $next): ResponseInterface. An array is read as a list, so pass a method as $object->handle(...).');
+            }
+
+            $entries[] = $entry;
+        }
+
+        return $entries;
+    }
+
+    /**
+     * The config's headers by name, without the null or blank ones; a boolean (env() gives one for `true`) is sent as
+     * `true` or `false`.
+     *
+     * @return array<string, string>
+     */
+    private static function configHeaders(mixed $headers): array
+    {
+        if ($headers === null) {
+            return [];
+        }
+
+        if (! is_array($headers)) {
+            throw new InvalidArgumentException('The [headers] config value must be an array of header values by name.');
+        }
+
+        $values = [];
+
+        foreach ($headers as $name => $value) {
+            if (is_bool($value)) {
+                $value = $value ? 'true' : 'false';
+            }
+
+            if (! is_string($name) || ($value !== null && ! is_string($value) && ! is_int($value) && ! is_float($value))) {
+                throw new InvalidArgumentException('Each header in the [headers] config value must be a string, int, float or bool under its name.');
+            }
+
+            if ($value !== null && trim((string) $value) !== '') {
+                $values[$name] = (string) $value;
+            }
+        }
+
+        return $values;
     }
 
     /**

@@ -90,6 +90,7 @@ $client = Anthropic::factory()
 | `withMiddleware()`, `withLogger()` | Run code around every attempt; log requests and responses without their bodies. |
 | `OpenTelemetryMiddleware`, `RefusalFallbackMiddleware` | Trace each attempt with OpenTelemetry; retry a refused request on fallback models. |
 | `withHttpClient()` | Provide your own PSR-18 HTTP client instead of auto-discovery. |
+| `withConfig()` | Apply a framework config's settings, all from one array. |
 | `withHttpHeader()` | Add custom HTTP headers to every request. |
 | `withQueryParam()` | Add query parameters to every request URL. |
 | `withStreamHandler()` | Custom handler for streaming requests. Only needed for HTTP clients other than Guzzle or Symfony. |

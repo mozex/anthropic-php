@@ -325,6 +325,22 @@ $second = $client->messages()->create([...]); // Returns "Second"
 
 If you make more requests than you have fake responses, the client will throw an error.
 
+## Fakes per connection
+
+A framework that hands out one client per connection (the Laravel package's `Anthropic::connection()`) gives each a view of one fake: `onConnection('support')` shares the queue and the recorded requests, and records its own under that name. `assertSentOn()` checks which connection a call used:
+
+```php
+$fake = new ClientFake([CreateResponse::fake()]);
+
+$fake->onConnection('support')->messages()->create([...]);
+
+$fake->assertSentOn('support', Messages::class);
+$fake->assertSentOn('support', Messages::class, 1); // exactly once
+$fake->assertNotSentOn('billing', Messages::class);
+```
+
+Calls through the fake itself carry no connection name. A subclass can give them one by setting the protected `$connection` property, as the Laravel package's fake does for its default connection.
+
 ## Faking pages for iterate()
 
 `iterate()` on the fake calls the fake's own `list()` for each page, so every page is a queued response and a recorded `list` request. Queue a page whose cursor says there's more, then the last one:
