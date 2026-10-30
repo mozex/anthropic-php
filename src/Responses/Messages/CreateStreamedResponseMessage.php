@@ -8,6 +8,7 @@ class CreateStreamedResponseMessage
 {
     /**
      * @param  array<int, string>  $content
+     * @param  array{id?: string, type?: string, role?: string, content?: array<int, string>, model?: string, stop_reason?: string|null, stop_sequence?:string|null, diagnostics?: array{cache_miss_reason?: array{type: string, cache_missed_input_tokens?: int|null}|null}|null}  $attributes
      */
     private function __construct(
         public readonly ?string $id,
@@ -18,6 +19,7 @@ class CreateStreamedResponseMessage
         public readonly ?string $stop_reason,
         public readonly ?string $stop_sequence,
         public readonly ?CreateResponseDiagnostics $diagnostics,
+        protected readonly array $attributes,
     ) {}
 
     /**
@@ -34,11 +36,12 @@ class CreateStreamedResponseMessage
             $attributes['stop_reason'] ?? null,
             $attributes['stop_sequence'] ?? null,
             isset($attributes['diagnostics']) ? CreateResponseDiagnostics::from($attributes['diagnostics']) : null,
+            $attributes,
         );
     }
 
     /**
-     * @return array{id: string|null, type: string|null, role: string|null, content: array<int, string>|null, model: string|null, stop_reason: string|null, stop_sequence:string|null, diagnostics?: array{cache_miss_reason: array{type: string, cache_missed_input_tokens?: int}|null}}
+     * @return array{id: string|null, type: string|null, role: string|null, content: array<int, string>|null, model: string|null, stop_reason: string|null, stop_sequence: string|null, diagnostics?: array{cache_miss_reason?: array{type: string, cache_missed_input_tokens?: int|null}|null}|null}
      */
     public function toArray(): array
     {
@@ -56,6 +59,6 @@ class CreateStreamedResponseMessage
             $result['diagnostics'] = $this->diagnostics->toArray();
         }
 
-        return $result;
+        return array_replace($this->attributes, $result);
     }
 }

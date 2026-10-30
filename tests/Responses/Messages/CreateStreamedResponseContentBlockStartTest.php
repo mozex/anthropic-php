@@ -55,9 +55,9 @@ test('to array from first chunk', function () {
 
     expect($result->toArray())
         ->toBe([
-            'id' => null,
             'type' => 'text',
             'text' => '',
+            'id' => null,
             'name' => null,
             'input' => null,
             'thinking' => null,
@@ -69,11 +69,11 @@ test('to array from first chunk of tool calls', function () {
 
     expect($result->toArray())
         ->toBe([
-            'id' => 'toolu_01T1x8fJ34qAma2tNTrN7Up1',
             'type' => 'tool_use',
-            'text' => null,
+            'id' => 'toolu_01T1x8fJ34qAma2tNTrN7Up1',
             'name' => 'get_weather',
             'input' => [],
+            'text' => null,
             'thinking' => null,
         ]);
 });
@@ -83,12 +83,12 @@ test('to array from first chunk of thinking', function () {
 
     expect($result->toArray())
         ->toBe([
-            'id' => null,
             'type' => 'thinking',
+            'thinking' => '',
+            'id' => null,
             'text' => null,
             'name' => null,
             'input' => null,
-            'thinking' => '',
         ]);
 });
 
@@ -132,13 +132,13 @@ test('to array from first chunk of fallback', function () {
 
     expect($result->toArray())
         ->toBe([
-            'id' => null,
             'type' => 'fallback',
+            'from' => ['model' => 'claude-fable-5'],
+            'to' => ['model' => 'claude-opus-4-8'],
+            'id' => null,
             'text' => null,
             'name' => null,
             'input' => null,
             'thinking' => null,
-            'from' => ['model' => 'claude-fable-5'],
-            'to' => ['model' => 'claude-opus-4-8'],
         ]);
 });

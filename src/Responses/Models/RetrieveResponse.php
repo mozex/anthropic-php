@@ -24,6 +24,9 @@ class RetrieveResponse implements ResponseContract, ResponseHasMetaInformationCo
     use Fakeable;
     use HasMetaInformation;
 
+    /**
+     * @param  array{id: string, type: string, created_at: string, display_name: string, max_input_tokens: int, max_tokens: int, capabilities: array{batch: array{supported: bool}, citations: array{supported: bool}, code_execution: array{supported: bool}, context_management: array<string, bool|array{supported: bool}>, effort: array{supported: bool, low: array{supported: bool}, medium: array{supported: bool}, high: array{supported: bool}, max: array{supported: bool}}, image_input: array{supported: bool}, pdf_input: array{supported: bool}, structured_outputs: array{supported: bool}, thinking: array{supported: bool, types: array{adaptive: array{supported: bool}, enabled: array{supported: bool}}}}}  $attributes
+     */
     private function __construct(
         public readonly string $id,
         public readonly string $type,
@@ -33,6 +36,7 @@ class RetrieveResponse implements ResponseContract, ResponseHasMetaInformationCo
         public readonly int $maxTokens,
         public readonly RetrieveResponseCapabilities $capabilities,
         private readonly MetaInformation $meta,
+        protected readonly array $attributes,
     ) {}
 
     /**
@@ -51,6 +55,7 @@ class RetrieveResponse implements ResponseContract, ResponseHasMetaInformationCo
             $attributes['max_tokens'],
             RetrieveResponseCapabilities::from($attributes['capabilities']),
             $meta,
+            $attributes,
         );
     }
 
@@ -59,7 +64,7 @@ class RetrieveResponse implements ResponseContract, ResponseHasMetaInformationCo
      */
     public function toArray(): array
     {
-        return [
+        return array_replace($this->attributes, [
             'id' => $this->id,
             'type' => $this->type,
             'created_at' => $this->createdAt,
@@ -67,6 +72,6 @@ class RetrieveResponse implements ResponseContract, ResponseHasMetaInformationCo
             'max_input_tokens' => $this->maxInputTokens,
             'max_tokens' => $this->maxTokens,
             'capabilities' => $this->capabilities->toArray(),
-        ];
+        ]);
     }
 }

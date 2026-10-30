@@ -6,6 +6,9 @@ namespace Anthropic\Responses\Messages;
 
 class CreateResponseUsageIteration
 {
+    /**
+     * @param  array{type: string, model?: string|null, input_tokens: int, output_tokens: int, cache_read_input_tokens?: int, cache_creation_input_tokens?: int, cache_creation?: array{ephemeral_5m_input_tokens: int, ephemeral_1h_input_tokens: int}|null}  $attributes
+     */
     private function __construct(
         public readonly string $type,
         public readonly ?string $model,
@@ -14,6 +17,7 @@ class CreateResponseUsageIteration
         public readonly int $cacheReadInputTokens,
         public readonly int $cacheCreationInputTokens,
         public readonly ?CreateResponseUsageCacheCreation $cacheCreation,
+        protected readonly array $attributes,
     ) {}
 
     /**
@@ -29,11 +33,12 @@ class CreateResponseUsageIteration
             $attributes['cache_read_input_tokens'] ?? 0,
             $attributes['cache_creation_input_tokens'] ?? 0,
             isset($attributes['cache_creation']) ? CreateResponseUsageCacheCreation::from($attributes['cache_creation']) : null,
+            $attributes,
         );
     }
 
     /**
-     * @return array{type: string, model?: string, input_tokens: int, output_tokens: int, cache_read_input_tokens: int, cache_creation_input_tokens: int, cache_creation?: array{ephemeral_5m_input_tokens: int, ephemeral_1h_input_tokens: int}}
+     * @return array{type: string, model?: string|null, input_tokens: int, output_tokens: int, cache_read_input_tokens: int, cache_creation_input_tokens: int, cache_creation?: array{ephemeral_5m_input_tokens: int, ephemeral_1h_input_tokens: int}|null}
      */
     public function toArray(): array
     {
@@ -54,6 +59,6 @@ class CreateResponseUsageIteration
             $result['cache_creation'] = $this->cacheCreation->toArray();
         }
 
-        return $result;
+        return array_replace($this->attributes, $result);
     }
 }

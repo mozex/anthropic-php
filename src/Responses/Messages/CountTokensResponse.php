@@ -24,9 +24,13 @@ class CountTokensResponse implements ResponseContract, ResponseHasMetaInformatio
     use Fakeable;
     use HasMetaInformation;
 
+    /**
+     * @param  array{input_tokens: int}  $attributes
+     */
     private function __construct(
         public readonly int $inputTokens,
         private readonly MetaInformation $meta,
+        protected readonly array $attributes,
     ) {}
 
     /**
@@ -39,6 +43,7 @@ class CountTokensResponse implements ResponseContract, ResponseHasMetaInformatio
         return new self(
             $attributes['input_tokens'],
             $meta,
+            $attributes,
         );
     }
 
@@ -47,8 +52,8 @@ class CountTokensResponse implements ResponseContract, ResponseHasMetaInformatio
      */
     public function toArray(): array
     {
-        return [
+        return array_replace($this->attributes, [
             'input_tokens' => $this->inputTokens,
-        ];
+        ]);
     }
 }

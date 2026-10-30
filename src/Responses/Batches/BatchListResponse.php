@@ -26,6 +26,7 @@ class BatchListResponse implements ResponseContract, ResponseHasMetaInformationC
 
     /**
      * @param  array<int, BatchResponse>  $data
+     * @param  array{data: array<int, array{id: string, type: string, processing_status: string, request_counts: array{processing: int, succeeded: int, errored: int, canceled: int, expired: int}, created_at: string, expires_at: string, ended_at: ?string, cancel_initiated_at: ?string, archived_at: ?string, results_url: ?string}>, first_id: string, last_id: string, has_more: bool}  $attributes
      */
     private function __construct(
         public readonly array $data,
@@ -33,6 +34,7 @@ class BatchListResponse implements ResponseContract, ResponseHasMetaInformationC
         public readonly string $lastId,
         public readonly bool $hasMore,
         private readonly MetaInformation $meta,
+        protected readonly array $attributes,
     ) {}
 
     /**
@@ -53,6 +55,7 @@ class BatchListResponse implements ResponseContract, ResponseHasMetaInformationC
             $attributes['last_id'],
             $attributes['has_more'],
             $meta,
+            $attributes,
         );
     }
 
@@ -61,7 +64,7 @@ class BatchListResponse implements ResponseContract, ResponseHasMetaInformationC
      */
     public function toArray(): array
     {
-        return [
+        return array_replace($this->attributes, [
             'data' => array_map(
                 static fn (BatchResponse $response): array => $response->toArray(),
                 $this->data,
@@ -69,6 +72,6 @@ class BatchListResponse implements ResponseContract, ResponseHasMetaInformationC
             'first_id' => $this->firstId,
             'last_id' => $this->lastId,
             'has_more' => $this->hasMore,
-        ];
+        ]);
     }
 }

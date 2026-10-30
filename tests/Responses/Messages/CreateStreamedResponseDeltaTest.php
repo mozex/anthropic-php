@@ -94,9 +94,6 @@ test('to array for a citations delta chunk', function () {
     expect($result->toArray())
         ->toBe([
             'type' => 'citations_delta',
-            'text' => null,
-            'stop_reason' => null,
-            'stop_sequence' => null,
             'citation' => [
                 'type' => 'char_location',
                 'cited_text' => 'The grass is green.',
@@ -105,6 +102,9 @@ test('to array for a citations delta chunk', function () {
                 'start_char_index' => 0,
                 'end_char_index' => 20,
             ],
+            'text' => null,
+            'stop_reason' => null,
+            'stop_sequence' => null,
         ]);
 });
 
@@ -138,10 +138,10 @@ test('to array for a tool calls chunk', function () {
     expect($result->toArray())
         ->toBe([
             'type' => 'input_json_delta',
+            'partial_json' => '{',
             'text' => null,
             'stop_reason' => null,
             'stop_sequence' => null,
-            'partial_json' => '{',
         ]);
 });
 
@@ -151,10 +151,10 @@ test('to array for a thinking delta chunk', function () {
     expect($result->toArray())
         ->toBe([
             'type' => 'thinking_delta',
+            'thinking' => 'I need to find the GCD using the Euclidean algorithm.',
             'text' => null,
             'stop_reason' => null,
             'stop_sequence' => null,
-            'thinking' => 'I need to find the GCD using the Euclidean algorithm.',
         ]);
 });
 
@@ -164,10 +164,10 @@ test('to array for a signature delta chunk', function () {
     expect($result->toArray())
         ->toBe([
             'type' => 'signature_delta',
+            'signature' => 'EqQBCgIYAhIM1gbcDa9GJwZA2b3h',
             'text' => null,
             'stop_reason' => null,
             'stop_sequence' => null,
-            'signature' => 'EqQBCgIYAhIM1gbcDa9GJwZA2b3h',
         ]);
 });
 
@@ -176,10 +176,10 @@ test('to array from last chunk', function () {
 
     expect($result->toArray())
         ->toBe([
-            'type' => null,
-            'text' => null,
             'stop_reason' => 'end_turn',
             'stop_sequence' => null,
+            'type' => null,
+            'text' => null,
         ]);
 });
 
@@ -200,9 +200,9 @@ test('to array for a compaction delta chunk', function () {
     expect($result->toArray())
         ->toBe([
             'type' => 'compaction_delta',
+            'content' => 'Summary of the conversation: The user requested help building a web scraper',
             'text' => null,
             'stop_reason' => null,
             'stop_sequence' => null,
-            'content' => 'Summary of the conversation: The user requested help building a web scraper',
         ]);
 });

@@ -26,6 +26,7 @@ class FileListResponse implements ResponseContract, ResponseHasMetaInformationCo
 
     /**
      * @param  array<int, FileResponse>  $data
+     * @param  array{data: array<int, array{id: string, type: string, filename: string, mime_type: string, size_bytes: int, created_at: string, downloadable?: bool, scope?: array{id: string, type: string}}>, first_id?: ?string, last_id?: ?string, has_more?: bool}  $attributes
      */
     private function __construct(
         public readonly array $data,
@@ -33,6 +34,7 @@ class FileListResponse implements ResponseContract, ResponseHasMetaInformationCo
         public readonly ?string $lastId,
         public readonly bool $hasMore,
         private readonly MetaInformation $meta,
+        protected readonly array $attributes,
     ) {}
 
     /**
@@ -53,6 +55,7 @@ class FileListResponse implements ResponseContract, ResponseHasMetaInformationCo
             $attributes['last_id'] ?? null,
             $attributes['has_more'] ?? false,
             $meta,
+            $attributes,
         );
     }
 
@@ -61,7 +64,7 @@ class FileListResponse implements ResponseContract, ResponseHasMetaInformationCo
      */
     public function toArray(): array
     {
-        return [
+        return array_replace($this->attributes, [
             'data' => array_map(
                 static fn (FileResponse $response): array => $response->toArray(),
                 $this->data,
@@ -69,6 +72,6 @@ class FileListResponse implements ResponseContract, ResponseHasMetaInformationCo
             'first_id' => $this->firstId,
             'last_id' => $this->lastId,
             'has_more' => $this->hasMore,
-        ];
+        ]);
     }
 }

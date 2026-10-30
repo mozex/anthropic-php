@@ -24,6 +24,9 @@ class FileResponse implements ResponseContract, ResponseHasMetaInformationContra
     use Fakeable;
     use HasMetaInformation;
 
+    /**
+     * @param  array{id: string, type: string, filename: string, mime_type: string, size_bytes: int, created_at: string, downloadable?: bool, scope?: array{id: string, type: string}}  $attributes
+     */
     private function __construct(
         public readonly string $id,
         public readonly string $type,
@@ -34,6 +37,7 @@ class FileResponse implements ResponseContract, ResponseHasMetaInformationContra
         public readonly ?bool $downloadable,
         public readonly ?FileResponseScope $scope,
         private readonly MetaInformation $meta,
+        protected readonly array $attributes,
     ) {}
 
     /**
@@ -53,6 +57,7 @@ class FileResponse implements ResponseContract, ResponseHasMetaInformationContra
             $attributes['downloadable'] ?? null,
             isset($attributes['scope']) ? FileResponseScope::from($attributes['scope']) : null,
             $meta,
+            $attributes,
         );
     }
 
@@ -78,6 +83,6 @@ class FileResponse implements ResponseContract, ResponseHasMetaInformationContra
             $result['scope'] = $this->scope->toArray();
         }
 
-        return $result;
+        return array_replace($this->attributes, $result);
     }
 }

@@ -24,10 +24,14 @@ class DeletedBatchResponse implements ResponseContract, ResponseHasMetaInformati
     use Fakeable;
     use HasMetaInformation;
 
+    /**
+     * @param  array{id: string, type: string}  $attributes
+     */
     private function __construct(
         public readonly string $id,
         public readonly string $type,
         private readonly MetaInformation $meta,
+        protected readonly array $attributes,
     ) {}
 
     /**
@@ -41,6 +45,7 @@ class DeletedBatchResponse implements ResponseContract, ResponseHasMetaInformati
             $attributes['id'],
             $attributes['type'],
             $meta,
+            $attributes,
         );
     }
 
@@ -49,9 +54,9 @@ class DeletedBatchResponse implements ResponseContract, ResponseHasMetaInformati
      */
     public function toArray(): array
     {
-        return [
+        return array_replace($this->attributes, [
             'id' => $this->id,
             'type' => $this->type,
-        ];
+        ]);
     }
 }

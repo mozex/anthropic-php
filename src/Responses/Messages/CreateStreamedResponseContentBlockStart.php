@@ -9,6 +9,7 @@ class CreateStreamedResponseContentBlockStart
     /**
      * @param  array<int|string, mixed>|null  $input
      * @param  array<int|string, mixed>|null  $content
+     * @param  array{id?: string, type?: string, text?: string, name?: string, input?: array<int|string, mixed>, thinking?: string, tool_use_id?: string, content?: array<int|string, mixed>, from?: array{model: string}, to?: array{model: string}}  $attributes
      */
     private function __construct(
         public readonly ?string $id,
@@ -21,6 +22,7 @@ class CreateStreamedResponseContentBlockStart
         public readonly ?array $content,
         public readonly ?CreateResponseContentFallbackModel $from,
         public readonly ?CreateResponseContentFallbackModel $to,
+        protected readonly array $attributes,
     ) {}
 
     /**
@@ -39,6 +41,7 @@ class CreateStreamedResponseContentBlockStart
             $attributes['content'] ?? null,
             isset($attributes['from']) ? CreateResponseContentFallbackModel::from($attributes['from']) : null,
             isset($attributes['to']) ? CreateResponseContentFallbackModel::from($attributes['to']) : null,
+            $attributes,
         );
     }
 
@@ -72,6 +75,6 @@ class CreateStreamedResponseContentBlockStart
             $result['to'] = $this->to->toArray();
         }
 
-        return $result;
+        return array_replace($this->attributes, $result);
     }
 }

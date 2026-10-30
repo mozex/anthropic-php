@@ -18,10 +18,14 @@ use Anthropic\Responses\Meta\MetaInformation;
  */
 class BatchResult
 {
+    /**
+     * @param  array{type: string, message?: array<string, mixed>}  $attributes
+     */
     private function __construct(
         public readonly string $type,
         public readonly ?CreateResponse $message,
         public readonly ?BatchResultError $error,
+        protected readonly array $attributes,
     ) {}
 
     /**
@@ -45,10 +49,15 @@ class BatchResult
             $error = BatchResultError::from($errorData['error']);
         }
 
+        // an errored result's inner error is kept once, as this result's error
+        $payload = $attributes;
+        unset($payload['error']);
+
         return new self(
             $attributes['type'],
             $message,
             $error,
+            $payload,
         );
     }
 
@@ -69,6 +78,6 @@ class BatchResult
             $result['error'] = $this->error->toArray();
         }
 
-        return $result;
+        return array_replace($this->attributes, $result);
     }
 }

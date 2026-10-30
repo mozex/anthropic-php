@@ -12,10 +12,12 @@ class BatchResultError
     /**
      * @param  string  $type  The inner error type (e.g., "invalid_request_error")
      * @param  string  $message  The error message
+     * @param  array{type: string, message: string}  $attributes
      */
     private function __construct(
         public readonly string $type,
         public readonly string $message,
+        protected readonly array $attributes,
     ) {}
 
     /**
@@ -28,6 +30,7 @@ class BatchResultError
         return new self(
             $attributes['type'],
             $attributes['message'],
+            $attributes,
         );
     }
 
@@ -36,9 +39,9 @@ class BatchResultError
      */
     public function toArray(): array
     {
-        return [
+        return array_replace($this->attributes, [
             'type' => $this->type,
             'message' => $this->message,
-        ];
+        ]);
     }
 }

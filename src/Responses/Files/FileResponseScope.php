@@ -6,9 +6,13 @@ namespace Anthropic\Responses\Files;
 
 class FileResponseScope
 {
+    /**
+     * @param  array{id: string, type: string}  $attributes
+     */
     private function __construct(
         public readonly string $id,
         public readonly string $type,
+        protected readonly array $attributes,
     ) {}
 
     /**
@@ -19,6 +23,7 @@ class FileResponseScope
         return new self(
             $attributes['id'],
             $attributes['type'],
+            $attributes,
         );
     }
 
@@ -27,9 +32,9 @@ class FileResponseScope
      */
     public function toArray(): array
     {
-        return [
+        return array_replace($this->attributes, [
             'id' => $this->id,
             'type' => $this->type,
-        ];
+        ]);
     }
 }

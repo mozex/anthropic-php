@@ -6,11 +6,15 @@ namespace Anthropic\Responses\Messages;
 
 class CreateResponseUsageServerToolUse
 {
+    /**
+     * @param  array{web_search_requests?: int, web_fetch_requests?: int, code_execution_requests?: int, tool_search_requests?: int}  $attributes
+     */
     private function __construct(
         public readonly int $webSearchRequests,
         public readonly int $webFetchRequests,
         public readonly int $codeExecutionRequests,
         public readonly int $toolSearchRequests,
+        protected readonly array $attributes,
     ) {}
 
     /**
@@ -23,6 +27,7 @@ class CreateResponseUsageServerToolUse
             $attributes['web_fetch_requests'] ?? 0,
             $attributes['code_execution_requests'] ?? 0,
             $attributes['tool_search_requests'] ?? 0,
+            $attributes,
         );
     }
 
@@ -31,11 +36,11 @@ class CreateResponseUsageServerToolUse
      */
     public function toArray(): array
     {
-        return array_filter([
+        return array_replace($this->attributes, array_filter([
             'web_search_requests' => $this->webSearchRequests,
             'web_fetch_requests' => $this->webFetchRequests,
             'code_execution_requests' => $this->codeExecutionRequests,
             'tool_search_requests' => $this->toolSearchRequests,
-        ]);
+        ]));
     }
 }

@@ -8,6 +8,7 @@ class CreateStreamedResponseDelta
 {
     /**
      * @param  array<string, mixed>|null  $citation
+     * @param  array{type?: string, text?: string|null, partial_json?: string|null, stop_reason?: string, stop_sequence?: string|null, thinking?: string|null, signature?: string|null, citation?: array<string, mixed>|null, content?: string|null}  $attributes
      */
     private function __construct(
         public readonly ?string $type,
@@ -19,6 +20,7 @@ class CreateStreamedResponseDelta
         public readonly ?string $signature,
         public readonly ?array $citation,
         public readonly ?string $content,
+        protected readonly array $attributes,
     ) {}
 
     /**
@@ -36,11 +38,12 @@ class CreateStreamedResponseDelta
             $attributes['signature'] ?? null,
             $attributes['citation'] ?? null,
             $attributes['content'] ?? null,
+            $attributes,
         );
     }
 
     /**
-     * @return array{type: string|null, text: string|null, partial_json?: string|null, stop_reason: string|null, stop_sequence: string|null, thinking?: string|null, signature?: string|null, citation?: array<string, mixed>, content?: string}
+     * @return array{type: string|null, text: string|null, partial_json?: string|null, stop_reason: string|null, stop_sequence: string|null, thinking?: string|null, signature?: string|null, citation?: array<string, mixed>|null, content?: string|null}
      */
     public function toArray(): array
     {
@@ -71,6 +74,6 @@ class CreateStreamedResponseDelta
             $data['content'] = $this->content;
         }
 
-        return $data;
+        return array_replace($this->attributes, $data);
     }
 }

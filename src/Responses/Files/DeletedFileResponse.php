@@ -24,10 +24,14 @@ class DeletedFileResponse implements ResponseContract, ResponseHasMetaInformatio
     use Fakeable;
     use HasMetaInformation;
 
+    /**
+     * @param  array{id: string, type?: string}  $attributes
+     */
     private function __construct(
         public readonly string $id,
         public readonly string $type,
         private readonly MetaInformation $meta,
+        protected readonly array $attributes,
     ) {}
 
     /**
@@ -41,6 +45,7 @@ class DeletedFileResponse implements ResponseContract, ResponseHasMetaInformatio
             $attributes['id'],
             $attributes['type'] ?? 'file_deleted',
             $meta,
+            $attributes,
         );
     }
 
@@ -49,9 +54,9 @@ class DeletedFileResponse implements ResponseContract, ResponseHasMetaInformatio
      */
     public function toArray(): array
     {
-        return [
+        return array_replace($this->attributes, [
             'id' => $this->id,
             'type' => $this->type,
-        ];
+        ]);
     }
 }

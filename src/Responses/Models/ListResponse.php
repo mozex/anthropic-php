@@ -26,6 +26,7 @@ class ListResponse implements ResponseContract, ResponseHasMetaInformationContra
 
     /**
      * @param  array<int, RetrieveResponse>  $data
+     * @param  array{data: array<int, array{id: string, type: string, created_at: string, display_name: string, max_input_tokens: int, max_tokens: int, capabilities: array{batch: array{supported: bool}, citations: array{supported: bool}, code_execution: array{supported: bool}, context_management: array<string, bool|array{supported: bool}>, effort: array{supported: bool, low: array{supported: bool}, medium: array{supported: bool}, high: array{supported: bool}, max: array{supported: bool}}, image_input: array{supported: bool}, pdf_input: array{supported: bool}, structured_outputs: array{supported: bool}, thinking: array{supported: bool, types: array{adaptive: array{supported: bool}, enabled: array{supported: bool}}}}}>, first_id: string, last_id: string, has_more: bool}  $attributes
      */
     private function __construct(
         public readonly array $data,
@@ -33,6 +34,7 @@ class ListResponse implements ResponseContract, ResponseHasMetaInformationContra
         public readonly string $lastId,
         public readonly bool $hasMore,
         private readonly MetaInformation $meta,
+        protected readonly array $attributes,
     ) {}
 
     /**
@@ -53,6 +55,7 @@ class ListResponse implements ResponseContract, ResponseHasMetaInformationContra
             $attributes['last_id'],
             $attributes['has_more'],
             $meta,
+            $attributes,
         );
     }
 
@@ -61,7 +64,7 @@ class ListResponse implements ResponseContract, ResponseHasMetaInformationContra
      */
     public function toArray(): array
     {
-        return [
+        return array_replace($this->attributes, [
             'data' => array_map(
                 static fn (RetrieveResponse $response): array => $response->toArray(),
                 $this->data,
@@ -69,6 +72,6 @@ class ListResponse implements ResponseContract, ResponseHasMetaInformationContra
             'first_id' => $this->firstId,
             'last_id' => $this->lastId,
             'has_more' => $this->hasMore,
-        ];
+        ]);
     }
 }

@@ -8,10 +8,12 @@ class RetrieveResponseCapabilitiesContextManagement
 {
     /**
      * @param  array<string, RetrieveResponseCapabilitySupport>  $strategies
+     * @param  array<string, bool|array{supported: bool}>  $attributes
      */
     private function __construct(
         public readonly bool $supported,
         public readonly array $strategies,
+        protected readonly array $attributes,
     ) {}
 
     /**
@@ -36,6 +38,7 @@ class RetrieveResponseCapabilitiesContextManagement
         return new self(
             is_bool($supported) ? $supported : false,
             $strategies,
+            $attributes,
         );
     }
 
@@ -50,6 +53,6 @@ class RetrieveResponseCapabilitiesContextManagement
             $result[$key] = $strategy->toArray();
         }
 
-        return $result;
+        return array_replace($this->attributes, $result);
     }
 }

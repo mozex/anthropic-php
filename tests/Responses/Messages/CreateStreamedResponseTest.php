@@ -205,19 +205,19 @@ test('to array', function () {
         ->toBeArray()
         ->toBe([
             'type' => 'message_start',
-            'index' => null,
-            'delta' => [
-                'type' => null,
-                'text' => null,
-                'stop_reason' => null,
-                'stop_sequence' => null,
-            ],
             'message' => [
                 'id' => 'msg_01YS82gyNJHzAN1xVt2ymmTN',
                 'type' => 'message',
                 'role' => 'assistant',
                 'content' => [],
                 'model' => 'claude-haiku-4-5',
+                'stop_reason' => null,
+                'stop_sequence' => null,
+            ],
+            'index' => null,
+            'delta' => [
+                'type' => null,
+                'text' => null,
                 'stop_reason' => null,
                 'stop_sequence' => null,
             ],

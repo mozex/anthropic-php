@@ -6,9 +6,13 @@ namespace Anthropic\Responses\Models;
 
 class RetrieveResponseCapabilitiesThinkingTypes
 {
+    /**
+     * @param  array{adaptive: array{supported: bool}, enabled: array{supported: bool}}  $attributes
+     */
     private function __construct(
         public readonly RetrieveResponseCapabilitySupport $adaptive,
         public readonly RetrieveResponseCapabilitySupport $enabled,
+        protected readonly array $attributes,
     ) {}
 
     /**
@@ -19,6 +23,7 @@ class RetrieveResponseCapabilitiesThinkingTypes
         return new self(
             RetrieveResponseCapabilitySupport::from($attributes['adaptive']),
             RetrieveResponseCapabilitySupport::from($attributes['enabled']),
+            $attributes,
         );
     }
 
@@ -27,9 +32,9 @@ class RetrieveResponseCapabilitiesThinkingTypes
      */
     public function toArray(): array
     {
-        return [
+        return array_replace($this->attributes, [
             'adaptive' => $this->adaptive->toArray(),
             'enabled' => $this->enabled->toArray(),
-        ];
+        ]);
     }
 }

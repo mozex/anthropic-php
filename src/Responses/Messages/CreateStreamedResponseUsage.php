@@ -8,6 +8,8 @@ class CreateStreamedResponseUsage
 {
     /**
      * @param  array<int, CreateResponseUsageIteration>|null  $iterations
+     * @param  array{status: array{type: string, reason?: string, remove_to_redeem?: array<int, string>|null}}|null  $fallbackCredit
+     * @param  array{input_tokens?: int, output_tokens?: int, cache_creation_input_tokens?: int, cache_read_input_tokens?: int, cache_creation?: array{ephemeral_5m_input_tokens: int, ephemeral_1h_input_tokens: int}, service_tier?: string, server_tool_use?: array{web_search_requests?: int, web_fetch_requests?: int, code_execution_requests?: int, tool_search_requests?: int}, inference_geo?: string|null, output_tokens_details?: array{thinking_tokens?: int}|null, speed?: string|null, iterations?: array<int, array{type: string, model?: string|null, input_tokens: int, output_tokens: int, cache_read_input_tokens?: int, cache_creation_input_tokens?: int, cache_creation?: array{ephemeral_5m_input_tokens: int, ephemeral_1h_input_tokens: int}|null}>|null, fallback_credit?: array{status: array{type: string, reason?: string, remove_to_redeem?: array<int, string>|null}}|null}  $attributes
      */
     private function __construct(
         public readonly ?int $inputTokens,
@@ -21,10 +23,12 @@ class CreateStreamedResponseUsage
         public readonly ?CreateResponseUsageOutputTokensDetails $outputTokensDetails,
         public readonly ?string $speed,
         public readonly ?array $iterations,
+        public readonly ?array $fallbackCredit,
+        protected readonly array $attributes,
     ) {}
 
     /**
-     * @param  array{input_tokens?: int, output_tokens?: int, cache_creation_input_tokens?: int, cache_read_input_tokens?: int, cache_creation?: array{ephemeral_5m_input_tokens: int, ephemeral_1h_input_tokens: int}, service_tier?: string, server_tool_use?: array{web_search_requests?: int, web_fetch_requests?: int, code_execution_requests?: int, tool_search_requests?: int}, inference_geo?: string|null, output_tokens_details?: array{thinking_tokens?: int}|null, speed?: string|null, iterations?: array<int, array{type: string, model?: string|null, input_tokens: int, output_tokens: int, cache_read_input_tokens?: int, cache_creation_input_tokens?: int, cache_creation?: array{ephemeral_5m_input_tokens: int, ephemeral_1h_input_tokens: int}|null}>|null}  $attributes
+     * @param  array{input_tokens?: int, output_tokens?: int, cache_creation_input_tokens?: int, cache_read_input_tokens?: int, cache_creation?: array{ephemeral_5m_input_tokens: int, ephemeral_1h_input_tokens: int}, service_tier?: string, server_tool_use?: array{web_search_requests?: int, web_fetch_requests?: int, code_execution_requests?: int, tool_search_requests?: int}, inference_geo?: string|null, output_tokens_details?: array{thinking_tokens?: int}|null, speed?: string|null, iterations?: array<int, array{type: string, model?: string|null, input_tokens: int, output_tokens: int, cache_read_input_tokens?: int, cache_creation_input_tokens?: int, cache_creation?: array{ephemeral_5m_input_tokens: int, ephemeral_1h_input_tokens: int}|null}>|null, fallback_credit?: array{status: array{type: string, reason?: string, remove_to_redeem?: array<int, string>|null}}|null}  $attributes
      */
     public static function from(array $attributes): self
     {
@@ -43,11 +47,13 @@ class CreateStreamedResponseUsage
                 static fn (array $iteration): CreateResponseUsageIteration => CreateResponseUsageIteration::from($iteration),
                 $attributes['iterations'],
             ) : null,
+            $attributes['fallback_credit'] ?? null,
+            $attributes,
         );
     }
 
     /**
-     * @return array{input_tokens: int|null, output_tokens: int|null, cache_creation_input_tokens: int|null, cache_read_input_tokens: int|null, cache_creation?: array{ephemeral_5m_input_tokens: int, ephemeral_1h_input_tokens: int}, service_tier?: string, server_tool_use?: array<string, int>, inference_geo?: string, output_tokens_details?: array{thinking_tokens: int}, speed?: string, iterations?: array<int, array{type: string, model?: string, input_tokens: int, output_tokens: int, cache_read_input_tokens: int, cache_creation_input_tokens: int, cache_creation?: array{ephemeral_5m_input_tokens: int, ephemeral_1h_input_tokens: int}}>}
+     * @return array{input_tokens: int|null, output_tokens: int|null, cache_creation_input_tokens: int|null, cache_read_input_tokens: int|null, cache_creation?: array{ephemeral_5m_input_tokens: int, ephemeral_1h_input_tokens: int}, service_tier?: string, server_tool_use?: array<string, int>, inference_geo?: string|null, output_tokens_details?: array{thinking_tokens?: int}|null, speed?: string|null, iterations?: array<int, array{type: string, model?: string|null, input_tokens: int, output_tokens: int, cache_read_input_tokens?: int, cache_creation_input_tokens?: int, cache_creation?: array{ephemeral_5m_input_tokens: int, ephemeral_1h_input_tokens: int}|null}>|null, fallback_credit?: array{status: array{type: string, reason?: string, remove_to_redeem?: array<int, string>|null}}|null}
      */
     public function toArray(): array
     {
@@ -89,6 +95,6 @@ class CreateStreamedResponseUsage
             );
         }
 
-        return $data;
+        return array_replace($this->attributes, $data);
     }
 }

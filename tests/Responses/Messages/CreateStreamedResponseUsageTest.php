@@ -132,8 +132,8 @@ test('to array from last chunk', function () {
 
     expect($result->toArray())
         ->toBe([
-            'input_tokens' => null,
             'output_tokens' => messagesCompletionStreamLastChunk()['usage']['output_tokens'],
+            'input_tokens' => null,
             'cache_creation_input_tokens' => null,
             'cache_read_input_tokens' => null,
         ]);
@@ -151,10 +151,10 @@ test('to array from last chunk with cache', function () {
 
     expect($result->toArray())
         ->toBe([
-            'input_tokens' => null,
             'output_tokens' => messagesCompletionStreamLastChunkWithCache()['usage']['output_tokens'],
             'cache_creation_input_tokens' => 30,
             'cache_read_input_tokens' => 40,
+            'input_tokens' => null,
         ]);
 });
 
@@ -170,14 +170,14 @@ test('to array from last chunk with extended usage', function () {
 
     expect($result->toArray())
         ->toBe([
-            'input_tokens' => null,
             'output_tokens' => 15,
-            'cache_creation_input_tokens' => null,
-            'cache_read_input_tokens' => null,
             'service_tier' => 'standard',
             'server_tool_use' => [
                 'web_search_requests' => 3,
             ],
+            'input_tokens' => null,
+            'cache_creation_input_tokens' => null,
+            'cache_read_input_tokens' => null,
         ]);
 });
 
@@ -216,13 +216,13 @@ test('to array from last chunk with output tokens details', function () {
 
     expect($result->toArray())
         ->toBe([
-            'input_tokens' => null,
             'output_tokens' => 200,
-            'cache_creation_input_tokens' => null,
-            'cache_read_input_tokens' => null,
             'output_tokens_details' => [
                 'thinking_tokens' => 150,
             ],
+            'input_tokens' => null,
+            'cache_creation_input_tokens' => null,
+            'cache_read_input_tokens' => null,
         ]);
 });
 
@@ -231,11 +231,11 @@ test('to array from last chunk with iterations', function () {
 
     expect($result->toArray())
         ->toBe([
-            'input_tokens' => null,
             'output_tokens' => 264,
-            'cache_creation_input_tokens' => null,
-            'cache_read_input_tokens' => null,
             'speed' => 'standard',
             'iterations' => messagesCompletionStreamLastChunkWithIterations()['usage']['iterations'],
+            'input_tokens' => null,
+            'cache_creation_input_tokens' => null,
+            'cache_read_input_tokens' => null,
         ]);
 });

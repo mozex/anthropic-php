@@ -6,12 +6,16 @@ namespace Anthropic\Responses\Batches;
 
 class BatchResponseRequestCounts
 {
+    /**
+     * @param  array{processing: int, succeeded: int, errored: int, canceled: int, expired: int}  $attributes
+     */
     private function __construct(
         public readonly int $processing,
         public readonly int $succeeded,
         public readonly int $errored,
         public readonly int $canceled,
         public readonly int $expired,
+        protected readonly array $attributes,
     ) {}
 
     /**
@@ -25,6 +29,7 @@ class BatchResponseRequestCounts
             $attributes['errored'],
             $attributes['canceled'],
             $attributes['expired'],
+            $attributes,
         );
     }
 
@@ -33,12 +38,12 @@ class BatchResponseRequestCounts
      */
     public function toArray(): array
     {
-        return [
+        return array_replace($this->attributes, [
             'processing' => $this->processing,
             'succeeded' => $this->succeeded,
             'errored' => $this->errored,
             'canceled' => $this->canceled,
             'expired' => $this->expired,
-        ];
+        ]);
     }
 }

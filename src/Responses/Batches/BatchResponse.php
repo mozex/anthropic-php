@@ -24,6 +24,9 @@ class BatchResponse implements ResponseContract, ResponseHasMetaInformationContr
     use Fakeable;
     use HasMetaInformation;
 
+    /**
+     * @param  array{id: string, type: string, processing_status: string, request_counts: array{processing: int, succeeded: int, errored: int, canceled: int, expired: int}, created_at: string, expires_at: string, ended_at: ?string, cancel_initiated_at: ?string, archived_at: ?string, results_url: ?string}  $attributes
+     */
     private function __construct(
         public readonly string $id,
         public readonly string $type,
@@ -36,6 +39,7 @@ class BatchResponse implements ResponseContract, ResponseHasMetaInformationContr
         public readonly ?string $archivedAt,
         public readonly ?string $resultsUrl,
         private readonly MetaInformation $meta,
+        protected readonly array $attributes,
     ) {}
 
     /**
@@ -57,6 +61,7 @@ class BatchResponse implements ResponseContract, ResponseHasMetaInformationContr
             $attributes['archived_at'] ?? null,
             $attributes['results_url'] ?? null,
             $meta,
+            $attributes,
         );
     }
 
@@ -65,7 +70,7 @@ class BatchResponse implements ResponseContract, ResponseHasMetaInformationContr
      */
     public function toArray(): array
     {
-        return [
+        return array_replace($this->attributes, [
             'id' => $this->id,
             'type' => $this->type,
             'processing_status' => $this->processingStatus,
@@ -76,6 +81,6 @@ class BatchResponse implements ResponseContract, ResponseHasMetaInformationContr
             'cancel_initiated_at' => $this->cancelInitiatedAt,
             'archived_at' => $this->archivedAt,
             'results_url' => $this->resultsUrl,
-        ];
+        ]);
     }
 }

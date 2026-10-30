@@ -6,8 +6,12 @@ namespace Anthropic\Responses\Messages;
 
 class CreateResponseContentFallbackModel
 {
+    /**
+     * @param  array{model: string}  $attributes
+     */
     private function __construct(
         public readonly string $model,
+        protected readonly array $attributes,
     ) {}
 
     /**
@@ -17,6 +21,7 @@ class CreateResponseContentFallbackModel
     {
         return new self(
             $attributes['model'],
+            $attributes,
         );
     }
 
@@ -25,8 +30,8 @@ class CreateResponseContentFallbackModel
      */
     public function toArray(): array
     {
-        return [
+        return array_replace($this->attributes, [
             'model' => $this->model,
-        ];
+        ]);
     }
 }

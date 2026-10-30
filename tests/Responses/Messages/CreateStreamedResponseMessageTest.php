@@ -44,6 +44,10 @@ test('to array from first chunk', function () {
             'model' => 'claude-haiku-4-5',
             'stop_reason' => null,
             'stop_sequence' => null,
+            'usage' => [
+                'input_tokens' => 10,
+                'output_tokens' => 1,
+            ],
         ]);
 });
 
@@ -87,6 +91,10 @@ test('to array from first chunk with diagnostics', function () {
             'model' => 'claude-opus-5',
             'stop_reason' => null,
             'stop_sequence' => null,
+            'usage' => [
+                'input_tokens' => 42,
+                'output_tokens' => 1,
+            ],
             'diagnostics' => [
                 'cache_miss_reason' => [
                     'type' => 'system_changed',

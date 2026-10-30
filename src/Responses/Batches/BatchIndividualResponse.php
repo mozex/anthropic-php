@@ -9,9 +9,13 @@ namespace Anthropic\Responses\Batches;
  */
 class BatchIndividualResponse
 {
+    /**
+     * @param  array{custom_id: string, result: array{type: string, message?: array<string, mixed>, error?: array{type: string, request_id?: string, error: array{type: string, message: string}}}}  $attributes
+     */
     private function __construct(
         public readonly string $customId,
         public readonly BatchResult $result,
+        protected readonly array $attributes,
     ) {}
 
     /**
@@ -24,6 +28,7 @@ class BatchIndividualResponse
         return new self(
             $attributes['custom_id'],
             BatchResult::from($attributes['result']),
+            $attributes,
         );
     }
 
@@ -32,9 +37,9 @@ class BatchIndividualResponse
      */
     public function toArray(): array
     {
-        return [
+        return array_replace($this->attributes, [
             'custom_id' => $this->customId,
             'result' => $this->result->toArray(),
-        ];
+        ]);
     }
 }
