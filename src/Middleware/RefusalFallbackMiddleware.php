@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Anthropic\Middleware;
 
+use Anthropic\Exceptions\ConnectionException;
 use Anthropic\Exceptions\InvalidArgumentException;
+use Anthropic\Exceptions\RetryableException;
 use Closure;
 use Http\Discovery\Psr17Factory;
 use JsonException;
@@ -23,13 +25,16 @@ use stdClass;
  * overrides) is merged over the request, and the refusal's `fallback_credit_token` rides along in `best_effort` mode,
  * so the retry isn't billed for the new model's cache writes. The `fallback-credit-2026-07-01` beta goes on every
  * request the middleware handles. The answer gains a `fallback` block at each model boundary and the attempts in
- * `usage.iterations`, as a server-side fallback answers; the blocks it puts at the front of a turn are taken out of the
- * history again on later requests. A `FallbackState` shared by a conversation's requests pins them to the model that
- * answered.
+ * `usage.iterations`, as a server-side fallback answers; every `fallback` block is taken out of the history again on
+ * later requests, since only the server-side fallback reads them (and its `fallback` parameter stands this middleware
+ * down). A `FallbackState` shared by a conversation's requests pins them to the model that answered.
+ *
+ * A streamed request gets the next model's events spliced onto its stream (`RefusalFallbackStream`): a refusal after
+ * output carries on from the refused partial when the API lets it claim one (`fallback_has_prefill_claim`).
  *
  * A request with `speed: fast` that falls back to an entry without `speed`, and gets a 429 or 529 there, is sent once
- * more without `speed`. Streamed requests, Message Batches and token counting pass through untouched, as does a request
- * with the server-side `fallback`; one with `fallbacks` throws, since the API would run its own chain.
+ * more without `speed`. Message Batches and token counting pass through untouched, as does a request with the
+ * server-side `fallback`; one with `fallbacks` throws, since the API would run its own chain.
  */
 class RefusalFallbackMiddleware
 {
@@ -90,7 +95,7 @@ class RefusalFallbackMiddleware
 
         $body = self::requestBody($request);
 
-        if ($body === null || ($body['stream'] ?? false) === true || isset($body['fallback'])) {
+        if ($body === null || isset($body['fallback'])) {
             return $next($request);
         }
 
@@ -110,6 +115,10 @@ class RefusalFallbackMiddleware
         $response = $entry === null
             ? $next(self::withBody($request, $attempt))
             : $this->sendHop($request, $next, $attempt, $entry)[0];
+
+        if (($body['stream'] ?? false) === true) {
+            return self::isEventStream($response) ? $this->spliced($request, $next, $response, $body, $attempt, $index) : $response;
+        }
 
         [$response, $message] = self::read($response);
 
@@ -141,29 +150,8 @@ class RefusalFallbackMiddleware
                 ($this->onFallback)($message, $entry, $index);
             }
 
-            $retry = self::merge($body, $entry);
-
-            if ($token !== null) {
-                $retry['fallback_credit_token'] = ['token' => $token, 'mode' => 'best_effort'];
-            }
-
             $response->getBody()->close();
-            [$response, $entry] = $this->sendHop($request, $next, $retry, $entry);
-
-            if ($token !== null && $response->getStatusCode() === 400) {
-                // A redemption that's only unavailable for now is worth one more try with the same token.
-                if (str_contains((string) $response->getBody(), 'redemption temporarily unavailable')) {
-                    $response->getBody()->close();
-                    // Merged again, so a `speed` dropped on the way stays dropped.
-                    [$response, $entry] = $this->sendHop($request, $next, [...self::merge($body, $entry), 'fallback_credit_token' => $retry['fallback_credit_token']], $entry);
-                }
-
-                // A token the API won't take: the retry goes out once more without it, the credit forfeited.
-                if ($response->getStatusCode() === 400) {
-                    $response->getBody()->close();
-                    [$response, $entry] = $this->sendHop($request, $next, self::merge($body, $entry), $entry);
-                }
-            }
+            [$response, $entry] = $this->hop($request, $next, $body, $entry, $token);
 
             [$response, $message] = self::read($response);
 
@@ -184,6 +172,120 @@ class RefusalFallbackMiddleware
         }
 
         return $blocks === [] ? $response : self::stitch($response, $blocks, $iterations, $model);
+    }
+
+    /**
+     * The stream a streamed request is answered with: its events as they come, a fallback's spliced on after a refusal.
+     *
+     * @param  Closure(RequestInterface): ResponseInterface  $next
+     * @param  array<string, mixed>  $body
+     * @param  array<string, mixed>  $attempt
+     */
+    private function spliced(RequestInterface $request, Closure $next, ResponseInterface $response, array $body, array $attempt, int $index): ResponseInterface
+    {
+        $stream = new RefusalFallbackStream(
+            $response,
+            $this->chain,
+            $index + 1,
+            is_string($attempt['model'] ?? null) ? $attempt['model'] : '',
+            function (array $entry, ?string $token, array $continuation, int $claimed) use ($request, $next, $body): array {
+                try {
+                    [$response, , $continuation] = $this->hop($request, $next, $body, $entry, $token, $continuation, $claimed);
+                } catch (ConnectionException|RetryableException) {
+                    // A hop that never answered, or that a retry would send again, which can't happen while the stream
+                    // is read: the next entry gets the same token.
+                    return [null, 0, $continuation];
+                }
+
+                if (self::isEventStream($response)) {
+                    return [$response, 200, $continuation];
+                }
+
+                $response->getBody()->close();
+
+                return [null, $response->getStatusCode(), $continuation];
+            },
+            function (array $message, array $entry, int $index): void {
+                if ($this->onFallback !== null) {
+                    ($this->onFallback)($message, $entry, $index);
+                }
+            },
+            function (int $index): void {
+                if ($this->state !== null) {
+                    $this->state->index = $index;
+                }
+            },
+        );
+
+        return $response->withBody($stream)->withoutHeader('Content-Length');
+    }
+
+    /**
+     * Sends one retry to an entry, with the refusal's token and, on a stream, the claimed partial as an assistant turn
+     * the fallback carries on from. On a 400 for the token, a redemption that's only unavailable for now is tried once
+     * more, then the retry goes without the claim it just made, then without the token, the credit forfeited.
+     *
+     * @param  Closure(RequestInterface): ResponseInterface  $next
+     * @param  array<string, mixed>  $body
+     * @param  array<string, mixed>  $entry
+     * @param  list<stdClass>  $continuation
+     * @return array{ResponseInterface, array<string, mixed>, list<stdClass>} the response, the entry a later attempt merges, and the continuation it went with
+     */
+    private function hop(RequestInterface $request, Closure $next, array $body, array $entry, ?string $token, array $continuation = [], int $claimed = 0): array
+    {
+        [$response, $entry] = $this->retry($request, $next, $body, $entry, $token, $continuation);
+
+        if ($token === null || $response->getStatusCode() !== 400) {
+            return [$response, $entry, $continuation];
+        }
+
+        if (str_contains((string) $response->getBody(), 'redemption temporarily unavailable')) {
+            $response->getBody()->close();
+            [$response, $entry] = $this->retry($request, $next, $body, $entry, $token, $continuation);
+        }
+
+        if ($response->getStatusCode() === 400 && $claimed > 0) {
+            $response->getBody()->close();
+            $continuation = array_slice($continuation, 0, count($continuation) - $claimed);
+            [$response, $entry] = $this->retry($request, $next, $body, $entry, $token, $continuation);
+        }
+
+        if ($response->getStatusCode() === 400) {
+            $response->getBody()->close();
+            [$response, $entry] = $this->retry($request, $next, $body, $entry, null, $continuation);
+        }
+
+        return [$response, $entry, $continuation];
+    }
+
+    /**
+     * One retry: the entry merged over the request (each time, so a `speed` dropped on the way stays dropped), the
+     * token, and the continuation as an assistant turn.
+     *
+     * @param  Closure(RequestInterface): ResponseInterface  $next
+     * @param  array<string, mixed>  $body
+     * @param  array<string, mixed>  $entry
+     * @param  list<stdClass>  $continuation
+     * @return array{ResponseInterface, array<string, mixed>}
+     */
+    private function retry(RequestInterface $request, Closure $next, array $body, array $entry, ?string $token, array $continuation): array
+    {
+        $retry = self::merge($body, $entry);
+
+        if ($token !== null) {
+            $retry['fallback_credit_token'] = ['token' => $token, 'mode' => 'best_effort'];
+        }
+
+        if ($continuation !== []) {
+            $retry['messages'] = [...(is_array($retry['messages'] ?? null) ? $retry['messages'] : []), (object) ['role' => 'assistant', 'content' => $continuation]];
+        }
+
+        return $this->sendHop($request, $next, $retry, $entry);
+    }
+
+    private static function isEventStream(ResponseInterface $response): bool
+    {
+        return $response->getStatusCode() === 200 && str_contains(strtolower($response->getHeaderLine('Content-Type')), 'event-stream');
     }
 
     /**
@@ -258,9 +360,10 @@ class RefusalFallbackMiddleware
     }
 
     /**
-     * Takes the `fallback` blocks at the front of each assistant turn out of the history: that's where the middleware
-     * puts them. One further in, from a server-side fallback in the middle of an answer, stays where the API expects
-     * it. A turn left without content goes too.
+     * Takes every `fallback` block out of the assistant turns: the middleware puts them at the front of an answer and,
+     * on a stream, in the middle, and only the server-side fallback reads them. A turn that had one also loses a
+     * `tool_use` no `tool_result` answers: a stream refused in the middle of a tool call leaves it behind, and the API
+     * refuses a call without its result. A turn left without content goes too.
      *
      * @param  array<string, mixed>  $body
      * @return array<string, mixed>
@@ -271,15 +374,33 @@ class RefusalFallbackMiddleware
             return $body;
         }
 
+        $answered = [];
+
+        foreach ($body['messages'] as $message) {
+            foreach ($message instanceof stdClass && is_array($message->content ?? null) ? $message->content : [] as $block) {
+                if ($block instanceof stdClass && ($block->type ?? null) === 'tool_result' && is_string($block->tool_use_id ?? null)) {
+                    $answered[$block->tool_use_id] = true;
+                }
+            }
+        }
+
         $messages = [];
 
         foreach ($body['messages'] as $message) {
             if ($message instanceof stdClass && ($message->role ?? null) === 'assistant' && is_array($message->content ?? null)) {
-                $content = array_values($message->content);
+                $seamed = array_filter($message->content, fn (mixed $block): bool => $block instanceof stdClass && ($block->type ?? null) === 'fallback') !== [];
 
-                while ($content !== [] && $content[0] instanceof stdClass && ($content[0]->type ?? null) === 'fallback') {
-                    array_shift($content);
+                if (! $seamed) {
+                    $messages[] = $message;
+
+                    continue;
                 }
+
+                $content = array_values(array_filter(
+                    $message->content,
+                    fn (mixed $block): bool => ! $block instanceof stdClass
+                        || (($block->type ?? null) !== 'fallback' && (($block->type ?? null) !== 'tool_use' || isset($answered[is_string($block->id ?? null) ? $block->id : '']))),
+                ));
 
                 if ($content === []) {
                     continue;

@@ -2,6 +2,12 @@
 
 ## To 1.15.0
 
+### RefusalFallbackMiddleware Handles Streams, And Takes Every fallback Block Out Of The History
+
+**Likelihood Of Impact: Low**
+
+A streamed request through `RefusalFallbackMiddleware` used to pass through untouched. A refused stream now goes on with the next model's events spliced onto it, behind a `fallback` block, and the fallback is requested while you read the stream. So its errors come out of your loop, and the callback and the `FallbackState` run during it. The middleware also takes every `fallback` block out of the assistant turns you send back, where it used to take only those at the front of a turn, as the official SDKs' middleware does: a spliced stream puts one in the middle. In a turn that had one, it also drops a `tool_use` no `tool_result` answers, which a stream refused in the middle of a tool call leaves behind.
+
 ### A Messages Response's stop_reason Can Be Null
 
 **Likelihood Of Impact: Low**

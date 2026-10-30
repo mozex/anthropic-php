@@ -414,7 +414,7 @@ Send the token as the retry's top-level `fallback_credit_token` parameter, with 
 
 ### Falling back on the client
 
-Where server-side fallback isn't available (Claude Haiku 5.5, or a platform without it), `RefusalFallbackMiddleware` does the same job from the client for requests that don't stream. It sends a refused request to the next model you list, redeems the refusal's fallback credit for you, and returns the answer with the same `fallback` block and `usage->iterations` a server-side fallback gives:
+Where server-side fallback isn't available (Claude Haiku 5.5, or a platform without it), `RefusalFallbackMiddleware` does the same job from the client. It sends a refused request to the next model you list, redeems the refusal's fallback credit for you, and returns the answer with the same `fallback` block and `usage->iterations` a server-side fallback gives:
 
 ```php
 use Anthropic\Middleware\FallbackState;
@@ -442,9 +442,13 @@ The models are tried in order, and each has to be one the refused model allows a
 
 The shared `FallbackState` keeps the conversation on the model that answered, so the next turn doesn't ask a model that already refused; without one, every request starts from the model you asked for. Its `index` is `null` for the model you asked for and the chain position otherwise, so you can store it with the conversation and set it again on the next request. A pinned turn goes straight to its model, so it carries no `fallback` block: read `$response->model`. The second argument, `fn (array $refused, array $entry, int $index) => ...`, is called before each fallback, for logging; the arguments come in the official SDK's order.
 
-With retries on (see [Configuration](../reference/configuration.md#retries)), a fallback that's overloaded or rate limited sends the whole request again, from the pinned model, so without a shared state the model that refused is asked once more, and each attempt can take a request timeout.
+With retries on (see [Configuration](../reference/configuration.md#retries)), a fallback that's overloaded or rate limited sends the whole request again, from the pinned model, so without a shared state the model that refused is asked once more, and each attempt can take a request timeout. A streamed request is different: its fallbacks are requested while you read it, where the retries can't reach, so an overloaded or rate-limited fallback gives way to the next model, and the last one's refusal comes back with `stop_details->recommended_model` after a 429.
 
-The middleware adds the `fallback-credit-2026-07-01` beta to the requests it handles, and takes the `fallback` blocks it put at the front of a turn out of the history you send back. It handles `messages()->create()` and raw `POST` requests to `messages`: a streamed request passes through unchanged (server-side `fallbacks` covers streams), and a request that sets `fallbacks` throws, since the API would run a chain of its own.
+The middleware adds the `fallback-credit-2026-07-01` beta to the requests it handles, and takes every `fallback` block out of the history you send back, as the official SDKs' middleware does: they're its own boundary markers. In a turn that had one, it also drops a `tool_use` no `tool_result` answers. It handles `messages()->create()`, `createStreamed()` and raw `POST` requests to `messages`. A request that sets `fallbacks` throws, since the API would run a chain of its own.
+
+A stream refused partway goes on in the same stream. The events you already read stay, a `fallback` block marks the switch, and the fallback's blocks follow it, their indices counting on. It's still one message: one `message_start` (with the first message's ID), one `message_delta` whose `usage.iterations` has every attempt, and one `message_stop`. `finalMessage()` gives you the whole answer, `fallback` block included.
+
+When the refusal sets `stop_details.fallback_has_prefill_claim`, the middleware sends the refused partial along as an assistant turn (without a client `tool_use` nothing answers), and the fallback carries on from the refused model's last word. Without it, or when the API turns the claim down, the fallback answers from the start, so its text follows the refused partial. The stream doesn't say which happened, as the official SDKs' streams don't either. A refusal after output that carries no credit token isn't retried, while one before any output starts over at no cost. The fallback is requested while you read the stream, so its errors come out of your loop, and a fallback that fails or never answers gives way to the next one, with the same token. The stream's `meta()` is the first answer's: its request ID and rate limits.
 
 ## The `pause_turn` stop reason
 

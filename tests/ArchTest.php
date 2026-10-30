@@ -64,6 +64,7 @@ arch('value objects')->expect('Anthropic\ValueObjects')->toOnlyUse([
 
 arch('middleware')->expect('Anthropic\Middleware')->toOnlyUse([
     'Anthropic\Exceptions\ConnectionException',
+    'Anthropic\Exceptions\RetryableException',
     'Anthropic\Exceptions\InvalidArgumentException',
     'Anthropic\Exceptions\TimeoutException',
     'OpenTelemetry\API',
@@ -72,6 +73,7 @@ arch('middleware')->expect('Anthropic\Middleware')->toOnlyUse([
     'Http\Discovery\Psr17Factory',
     'Psr\Http\Message\RequestInterface',
     'Psr\Http\Message\ResponseInterface',
+    'Psr\Http\Message\StreamInterface',
 ]);
 
 arch('client')->expect('Anthropic\Client')->toOnlyUse([

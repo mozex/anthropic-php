@@ -74,7 +74,7 @@ class HttpTransporter implements TransporterContract
 
         $response = $this->send($request, $this->client->sendRequest(...));
 
-        $contents = (string) $response->getBody();
+        $contents = self::contents($response);
 
         $this->throwIfError($response, $contents);
 
@@ -101,7 +101,7 @@ class HttpTransporter implements TransporterContract
 
         $response = $this->send($request, $this->client->sendRequest(...));
 
-        $contents = (string) $response->getBody();
+        $contents = self::contents($response);
 
         $this->throwIfError($response, $contents);
 
@@ -117,7 +117,7 @@ class HttpTransporter implements TransporterContract
 
         $response = $this->send($request, $this->client->sendRequest(...));
 
-        $contents = (string) $response->getBody();
+        $contents = self::contents($response);
 
         $this->throwIfError($response, $contents);
 
@@ -380,6 +380,17 @@ class HttpTransporter implements TransporterContract
     }
 
     /**
+     * The body's text: a stream the refusal fallback splices is read, not cast, so an error raised while it's read
+     * isn't swallowed into an empty string.
+     */
+    private static function contents(ResponseInterface $response): string
+    {
+        $body = $response->getBody();
+
+        return $body->isSeekable() ? (string) $body : $body->getContents();
+    }
+
+    /**
      * Throws for every status of 400 and above: with the API's error when the body carries one,
      * otherwise with the first line of the body's text.
      */
@@ -389,7 +400,7 @@ class HttpTransporter implements TransporterContract
             return;
         }
 
-        $contents ??= (string) $response->getBody();
+        $contents ??= self::contents($response);
 
         try {
             /** @var mixed $data */

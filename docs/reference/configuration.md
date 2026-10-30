@@ -333,7 +333,7 @@ Each attempt, a retry included, gets a client span: `anthropic.messages.create` 
 
 The span is the current one while the request goes out, so instrumentation below it (an HTTP client's, a log processor's) nests under it, and the registered propagator writes the trace context into the request's headers: `traceparent` with the W3C propagator, which an SDK set up with `OTEL_PROPAGATORS=tracecontext,baggage` (autoload's default) registers. The middleware reads the registered tracer provider and propagator on each request, so a client built before your SDK starts still records; pass your own as `new OpenTelemetryMiddleware($tracer, $propagator)`, or `OpenTelemetry\Context\Propagation\NoopTextMapPropagator::getInstance()` as the propagator to send no trace context.
 
-Add it after `RefusalFallbackMiddleware` and each fallback attempt gets a span of its own; before it, one span covers the whole chain.
+Add it after `RefusalFallbackMiddleware` and each fallback attempt gets a span of its own. Before it, one span covers the whole chain of a request that doesn't stream; a streamed one's span ends at the first answer's headers, so the fallbacks requested while you read it get none.
 
 ## Building from a config array
 
