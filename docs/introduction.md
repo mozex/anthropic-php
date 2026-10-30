@@ -88,6 +88,7 @@ $client = Anthropic::factory()
 | `withTimeout()`, `withConnectTimeout()` | Timeouts of the Guzzle client the factory builds. |
 | `withMaxRetries()` | Retry connection failures, timeouts and 408, 409, 429 and 5xx responses. Defaults to 0. |
 | `withMiddleware()`, `withLogger()` | Run code around every attempt; log requests and responses without their bodies. |
+| `OpenTelemetryMiddleware`, `RefusalFallbackMiddleware` | Trace each attempt with OpenTelemetry; retry a refused request on fallback models. |
 | `withHttpClient()` | Provide your own PSR-18 HTTP client instead of auto-discovery. |
 | `withHttpHeader()` | Add custom HTTP headers to every request. |
 | `withQueryParam()` | Add query parameters to every request URL. |

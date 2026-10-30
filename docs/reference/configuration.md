@@ -312,6 +312,29 @@ $client = Anthropic::factory()
 
 Each attempt logs an `info` line with the method, the URL and the attempt number, its response another with the status, the request ID and the duration, and each retry a `warning` with the delay and the reason. Bodies and headers are never logged, so keys and prompts stay out of your logs.
 
+## OpenTelemetry
+
+`OpenTelemetryMiddleware` traces every attempt with OpenTelemetry. It needs `open-telemetry/api`, which the package only suggests, and an SDK your app sets up:
+
+```bash
+composer require open-telemetry/api
+```
+
+```php
+use Anthropic\Middleware\OpenTelemetryMiddleware;
+
+$client = Anthropic::factory()
+    ->withApiKey('your-api-key')
+    ->withMiddleware(new OpenTelemetryMiddleware)
+    ->make();
+```
+
+Each attempt, a retry included, gets a client span: `anthropic.messages.create` and `anthropic.messages.count_tokens` for those calls, the HTTP method for any other. The spans carry the attributes the official SDKs set, from the GenAI semantic conventions: `gen_ai.request.model`, `gen_ai.request.max_tokens`, `gen_ai.response.id`, `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens` and the cache counts, the stop reason, the request ID, and `error.type` on a failure (the API's error type, else the status; `connection_error` or `client_timeout_error` when no answer came). Prompts, answers and keys are never recorded, and a failure to record never fails the request. A streamed message's span ends when its headers arrive, so it has the request's attributes but no usage, and an error in the middle of the stream doesn't reach it.
+
+The span is the current one while the request goes out, so instrumentation below it (an HTTP client's, a log processor's) nests under it, and the registered propagator writes the trace context into the request's headers: `traceparent` with the W3C propagator, which an SDK set up with `OTEL_PROPAGATORS=tracecontext,baggage` (autoload's default) registers. The middleware reads the registered tracer provider and propagator on each request, so a client built before your SDK starts still records; pass your own as `new OpenTelemetryMiddleware($tracer, $propagator)`, or `OpenTelemetry\Context\Propagation\NoopTextMapPropagator::getInstance()` as the propagator to send no trace context.
+
+Add it after `RefusalFallbackMiddleware` and each fallback attempt gets a span of its own; before it, one span covers the whole chain.
+
 ## Per-request options
 
 `withOptions()` returns a client whose requests carry extra settings, and leaves the client you call it on unchanged. Use it for a request that runs in another workspace, needs a beta the rest of your app doesn't, or carries a tracing header:

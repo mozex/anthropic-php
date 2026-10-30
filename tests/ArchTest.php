@@ -61,7 +61,12 @@ arch('value objects')->expect('Anthropic\ValueObjects')->toOnlyUse([
 ]);
 
 arch('middleware')->expect('Anthropic\Middleware')->toOnlyUse([
+    'Anthropic\Exceptions\ConnectionException',
     'Anthropic\Exceptions\InvalidArgumentException',
+    'Anthropic\Exceptions\TimeoutException',
+    'OpenTelemetry\API',
+    'OpenTelemetry\Context',
+    'Psr\Http\Message\MessageInterface',
     'Http\Discovery\Psr17Factory',
     'Psr\Http\Message\RequestInterface',
     'Psr\Http\Message\ResponseInterface',
@@ -87,7 +92,10 @@ arch('anthropic')->expect('Anthropic')->toOnlyUse([
     'Psr\Http\Message\ResponseInterface',
     'Psr\Http\Message\StreamInterface',
     'Psr\Log\LoggerInterface',
-])->ignoring('Anthropic\Testing');
+])->ignoring(['Anthropic\Testing', 'Anthropic\Middleware\OpenTelemetryMiddleware']);
+
+// open-telemetry/api is only suggested: a class anywhere else that used it would break every app without it.
+arch('open telemetry')->expect('OpenTelemetry')->toOnlyBeUsedIn('Anthropic\Middleware\OpenTelemetryMiddleware');
 
 test('every test file ends in Test.php', function () {
     $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(__DIR__, FilesystemIterator::SKIP_DOTS));
