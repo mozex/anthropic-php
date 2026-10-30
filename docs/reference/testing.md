@@ -211,6 +211,8 @@ new RateLimitException(
 
 An `int` status code still works in place of the response, but it's deprecated, and `$e->response` is `null` then.
 
+The client throws a subclass for each status, such as `OverloadedException` for a 529, and you can queue those the same way: `new OverloadedException([...], new Response(529))`. Code that catches `ErrorException` catches them all.
+
 ## Assertions
 
 After running your code, use assertions to verify which requests were sent.

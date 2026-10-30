@@ -11,7 +11,7 @@ class RateLimitException extends ErrorException
     /**
      * Creates a new Exception instance.
      *
-     * @param  array{type?: ?string, message?: string|array<int, string>}  $contents
+     * @param  array{type?: ?string, message?: string|array<int, string>, details?: mixed, request_id?: ?string}  $contents
      */
     public function __construct(array $contents, ResponseInterface $response)
     {

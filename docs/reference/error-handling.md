@@ -27,13 +27,18 @@ try {
 }
 ```
 
-`ErrorException` provides three methods:
+`ErrorException` provides these methods:
 
 | Method | Returns | Description |
 |--------|---------|-------------|
 | `getMessage()` | `string` | The error message from the API, or the first line of a non-API error body |
 | `getErrorType()` | `?string` | The error type (e.g., `invalid_request_error`, `authentication_error`, `overloaded_error`) |
 | `getStatusCode()` | `int` | The HTTP status code |
+| `getRequestId()` | `?string` | The failed request's ID, from the error body's `request_id` or the `request-id` header |
+| `getErrorDetails()` | `?array` | The error's `details` object, such as `['error_code' => 'enforced_spend_limit_reached']` |
+| `getRetryAfter()` | `?int` | The seconds the `retry-after` header asks you to wait, from a number or an HTTP date |
+
+Quote `getRequestId()` when you contact support about a failure.
 
 The raw PSR-7 response is also available on the `response` property if you need to inspect headers or the full body:
 
@@ -41,22 +46,41 @@ The raw PSR-7 response is also available on the `response` property if you need 
 $e->response; // Psr\Http\Message\ResponseInterface or null
 ```
 
-> **Note:** For streamed requests, the status code might be `200` even when an error occurs, because the HTTP response started successfully before the error happened mid-stream. The error type is the same either way, so match errors with `getErrorType()` (for example `'overloaded_error'`) rather than the status code.
+> **Note:** For streamed requests, the status code might be `200` even when an error occurs, because the HTTP response started successfully before the error happened mid-stream. The client then picks the exception class from the error type, so an overload mid-stream is an `OverloadedException` too. Match errors by class or with `getErrorType()` (for example `'overloaded_error'`), not by the status code.
 
-### Common API errors
+### Error classes
 
-| Status | Error type | Typical cause |
-|--------|-----------|---------------|
-| 400 | `invalid_request_error` | Bad parameters, missing required fields |
-| 401 | `authentication_error` | Invalid or missing API key |
-| 402 | `billing_error` | Issue with billing or payment information |
-| 403 | `permission_error` | API key doesn't have access to the requested resource |
-| 404 | `not_found_error` | Invalid model name or resource ID |
-| 413 | `request_too_large` | Request exceeds the maximum allowed size (128 MB for Messages and Token Counting, 256 MB for Batches, on the Claude API; cloud platforms set their own limits) |
-| 429 | `rate_limit_error` | Too many requests (see below) |
-| 500 | `api_error` | Server-side issue |
-| 504 | `timeout_error` | Request timed out while processing; consider using [streaming](../usage/streaming.md) |
-| 529 | `overloaded_error` | API is temporarily overloaded |
+Each error status throws its own subclass of `ErrorException`, so you can catch one kind without inspecting the exception. Every subclass is an `ErrorException`, so a `catch (ErrorException $e)` still catches them all:
+
+| Status | Error type | Exception | Typical cause |
+|--------|-----------|-----------|---------------|
+| 400 | `invalid_request_error` | `BadRequestException` | Bad parameters, missing required fields |
+| 401 | `authentication_error` | `AuthenticationException` | Invalid or missing API key |
+| 402 | `billing_error` | `BillingException` | Issue with billing or payment information |
+| 403 | `permission_error` | `PermissionDeniedException` | API key doesn't have access to the requested resource |
+| 404 | `not_found_error` | `NotFoundException` | Invalid model name or resource ID |
+| 409 | `conflict_error` | `ConflictException` | The request conflicts with the resource's current state |
+| 413 | `request_too_large` | `RequestTooLargeException` | Request exceeds the maximum allowed size (128 MB for Messages and Token Counting, 256 MB for Batches, on the Claude API; cloud platforms set their own limits) |
+| 422 | | `UnprocessableEntityException` | The request was well formed but couldn't be processed |
+| 429 | `rate_limit_error` | `RateLimitException` | Too many requests (see below) |
+| 500 | `api_error` | `InternalServerException` | Server-side issue (other 5xx statuses too) |
+| 504 | `timeout_error` | `ApiTimeoutException` | Request timed out while processing; consider using [streaming](../usage/streaming.md) |
+| 529 | `overloaded_error` | `OverloadedException` | API is temporarily overloaded |
+
+All of them live in `Anthropic\Exceptions`. A status without its own class, such as 405, throws a plain `ErrorException`.
+
+```php
+use Anthropic\Exceptions\NotFoundException;
+use Anthropic\Exceptions\OverloadedException;
+
+try {
+    $response = $client->models()->retrieve($modelId);
+} catch (NotFoundException $e) {
+    // the model ID doesn't exist
+} catch (OverloadedException $e) {
+    // try again later
+}
+```
 
 ## Rate limit errors
 
@@ -69,27 +93,30 @@ use Anthropic\Exceptions\ErrorException;
 try {
     $response = $client->messages()->create([...]);
 } catch (RateLimitException $e) {
-    // Rate limited: check when you can retry
-    $retryAfter = $e->response->getHeaderLine('Retry-After');
-
-    // Wait and retry
-    sleep((int) $retryAfter);
+    // Rate limited: wait as long as the API asks, then retry
+    sleep($e->getRetryAfter() ?? 60);
 } catch (ErrorException $e) {
     // All other API errors
 }
 ```
 
-The `Retry-After` header tells you how many seconds to wait before retrying. It's available on the PSR-7 `response` object. Not every 429 carries it: once the organization reaches its tier's monthly spend cap, the 429 (with `error.details.error_code` set to `enforced_spend_limit_reached`) has no `Retry-After`, since retrying won't help until access resumes. A spend limit you set yourself returns a 400 instead.
+`getRetryAfter()` reads the `Retry-After` header: how many seconds to wait before retrying. Not every 429 carries it: once the organization reaches its tier's monthly spend cap, the 429 has no `Retry-After`, since retrying won't help until access resumes. Its details say so:
 
-To read it and the other headers as typed values, build a `MetaInformation` from the exception's response:
+```php
+$e->getErrorDetails(); // ['error_code' => 'enforced_spend_limit_reached']
+$e->getRetryAfter();   // null
+```
+
+A spend limit you set yourself on a workspace usually returns a 400 instead.
+
+The other headers are on the PSR-7 `response` property; to read them as typed values, build a `MetaInformation` from it:
 
 ```php
 use Anthropic\Responses\Meta\MetaInformation;
 
 $meta = MetaInformation::from($e->response?->getHeaders() ?? []);
 
-$meta->retryAfter; // 30, or null without the header
-$meta->requestId;  // 'req_012nTzj6kLoP8vZ1SGANvcgR'
+$meta->requestLimit?->remaining;
 ```
 
 `$e->response` is set on every `ErrorException` the client throws. It's `null` only on one you build yourself with a status code, as in older tests, hence the `?->`.
@@ -98,19 +125,25 @@ For more on rate limits, see [Meta Information](./meta-information.md), which co
 
 ## HTTP transport errors
 
-When the HTTP request itself fails (network error, DNS resolution failure, connection timeout, etc.), the client throws `Anthropic\Exceptions\TransporterException`:
+When the HTTP request itself fails and no response comes back, the client throws `Anthropic\Exceptions\TransporterException`, or one of its subclasses:
+
+- `ConnectionException`: the HTTP client reports a network failure, such as DNS resolution, a refused or reset connection, or a failed TLS handshake.
+- `TimeoutException`, a `ConnectionException` too: the HTTP client gave up waiting, on the connection or the response.
 
 ```php
+use Anthropic\Exceptions\TimeoutException;
 use Anthropic\Exceptions\TransporterException;
 
 try {
     $response = $client->messages()->create([...]);
+} catch (TimeoutException $e) {
+    // raise the HTTP client's timeout, or stream the response
 } catch (TransporterException $e) {
     $e->getMessage(); // The underlying HTTP client's error message
 }
 ```
 
-This wraps the PSR-18 `ClientExceptionInterface` from your HTTP client. The original exception is available via `getPrevious()`.
+These wrap the PSR-18 `ClientExceptionInterface` from your HTTP client, and the original exception is available via `getPrevious()`. A 504 from the API is an `ApiTimeoutException`, an `ErrorException`: the transport `TimeoutException` covers only your HTTP client giving up. A timeout is recognized by the HTTP client's message (cURL's "timed out", Symfony's "Idle timeout" and "Max duration"); any other client failure stays a plain `TransporterException`.
 
 ## Response parsing errors
 
@@ -133,25 +166,39 @@ This is rare in normal operation. It typically means a proxy or middleware answe
 
 ```
 ErrorException (API errors)
-├── RateLimitException (HTTP 429)
+├── BadRequestException (400)
+├── AuthenticationException (401)
+├── BillingException (402)
+├── PermissionDeniedException (403)
+├── NotFoundException (404)
+├── ConflictException (409)
+├── RequestTooLargeException (413)
+├── UnprocessableEntityException (422)
+├── RateLimitException (429)
+├── InternalServerException (500 and other 5xx)
+├── ApiTimeoutException (504)
+└── OverloadedException (529)
 TransporterException (HTTP client/network errors)
+└── ConnectionException
+    └── TimeoutException
 UnserializableResponse (a 2xx response that isn't valid JSON)
 ```
 
 A practical catch block that covers everything:
 
 ```php
-use Anthropic\Exceptions\RateLimitException;
 use Anthropic\Exceptions\ErrorException;
+use Anthropic\Exceptions\OverloadedException;
+use Anthropic\Exceptions\RateLimitException;
 use Anthropic\Exceptions\TransporterException;
 use Anthropic\Exceptions\UnserializableResponse;
 
 try {
     $response = $client->messages()->create([...]);
-} catch (RateLimitException $e) {
+} catch (RateLimitException|OverloadedException $e) {
     // Back off and retry
 } catch (ErrorException $e) {
-    // API returned an error (bad request, auth failure, overloaded, etc.)
+    // API returned another error (bad request, auth failure, not found, etc.)
 } catch (TransporterException $e) {
     // Network or HTTP client failure
 } catch (UnserializableResponse $e) {

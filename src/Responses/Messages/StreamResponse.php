@@ -39,11 +39,17 @@ class StreamResponse implements ResponseHasMetaInformationContract, ResponseStre
     public function getIterator(): Generator
     {
         foreach ($this->readEvents($this->response->getBody()) as $data) {
-            /** @var array{type: string, error?: array{type: ?string, message: string|array<int, string>}} $response */
+            /** @var array{type: string, error?: string|array{type: ?string, message: string|array<int, string>, details?: mixed}, request_id?: ?string} $response */
             $response = json_decode(trim($data), true, flags: JSON_THROW_ON_ERROR);
 
             if (isset($response['error'])) {
-                throw new ErrorException($response['error'], $this->response);
+                $error = is_string($response['error']) ? ['message' => $response['error']] : $response['error'];
+
+                if (is_string($response['request_id'] ?? null)) {
+                    $error['request_id'] = $response['request_id'];
+                }
+
+                throw ErrorException::forType($error, $this->response);
             }
 
             if ($response['type'] === 'message_stop') {

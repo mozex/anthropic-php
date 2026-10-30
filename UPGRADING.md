@@ -1,5 +1,15 @@
 # Upgrading
 
+## To 1.11.0
+
+### Error Statuses Throw Subclasses Of ErrorException
+
+**Likelihood Of Impact: Low**
+
+Each error status now throws its own subclass of `ErrorException`, such as `NotFoundException` for a 404 or `OverloadedException` for a 529, and an error in the middle of a stream throws the subclass of its error type. Every `catch (ErrorException $e)` and `$e instanceof ErrorException` keeps working. Code that compares the exact class, such as `get_class($e) === ErrorException::class`, no longer matches: use `instanceof`. Error trackers that group by class name file these under the new names. A `rate_limit_error` in the middle of a stream is now a `RateLimitException`, so a `catch (RateLimitException $e)` sees it too, with status 200 and no `Retry-After`.
+
+Connection failures throw `ConnectionException`, and timeouts `TimeoutException` (a `ConnectionException`), both subclasses of `TransporterException`, so `catch (TransporterException $e)` still catches them.
+
 ## To 1.10.0
 
 ### Every Error Status Throws ErrorException

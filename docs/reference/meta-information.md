@@ -116,7 +116,7 @@ $meta->fastOutputTokenLimit?->reset;
 $meta->retryAfter; // 30, or null
 ```
 
-A successful response rarely carries it: the API sends it with a 429, which throws an exception before you get a response object. Read it from the exception's response instead, as [Error Handling](./error-handling.md#rate-limit-errors) shows. A `Retry-After` given as an HTTP date leaves `retryAfter` `null`; the raw value stays in `custom`.
+A successful response rarely carries it: the API sends it with a 429, which throws an exception before you get a response object. Read it from the exception with `getRetryAfter()` instead, as [Error Handling](./error-handling.md#rate-limit-errors) shows. A `Retry-After` given as an HTTP date leaves `retryAfter` `null`; the raw value stays in `custom`.
 
 ## Raw header format
 

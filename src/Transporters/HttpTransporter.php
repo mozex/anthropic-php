@@ -6,8 +6,9 @@ namespace Anthropic\Transporters;
 
 use Anthropic\Contracts\TransporterContract;
 use Anthropic\Enums\Transporter\ContentType;
+use Anthropic\Exceptions\ConnectionException;
 use Anthropic\Exceptions\ErrorException;
-use Anthropic\Exceptions\RateLimitException;
+use Anthropic\Exceptions\TimeoutException;
 use Anthropic\Exceptions\TransporterException;
 use Anthropic\Exceptions\UnserializableResponse;
 use Anthropic\ValueObjects\Transporter\BaseUri;
@@ -17,9 +18,12 @@ use Anthropic\ValueObjects\Transporter\QueryParams;
 use Anthropic\ValueObjects\Transporter\Response;
 use Closure;
 use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Exception\RequestException;
 use JsonException;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
+use Psr\Http\Client\NetworkExceptionInterface;
+use Psr\Http\Client\RequestExceptionInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -123,8 +127,30 @@ class HttpTransporter implements TransporterContract
                 $this->throwIfError($clientException->getResponse());
             }
 
-            throw new TransporterException($clientException);
+            throw match (true) {
+                $this->isTimeout($clientException) => new TimeoutException($clientException),
+                // Guzzle reports a cURL failure without a response (a reset connection, a TLS error) as a RequestException.
+                $clientException instanceof NetworkExceptionInterface,
+                $clientException instanceof RequestException && ! $clientException->hasResponse() => new ConnectionException($clientException),
+                default => new TransporterException($clientException),
+            };
         }
+    }
+
+    /**
+     * Whether the HTTP client gave up waiting: cURL says "timed out", Symfony's client "Idle timeout" or "Max duration".
+     */
+    private function isTimeout(ClientExceptionInterface $exception): bool
+    {
+        $message = $exception->getMessage();
+
+        // The message ends with the request's URL, which may itself contain "timeout".
+        if ($exception instanceof NetworkExceptionInterface || $exception instanceof RequestExceptionInterface) {
+            $uri = $exception->getRequest()->getUri();
+            $message = str_replace([(string) $uri, (string) $uri->withUserInfo('')], '', $message);
+        }
+
+        return preg_match('/timed? ?out|max duration/i', $message) === 1;
     }
 
     /**
@@ -148,18 +174,19 @@ class HttpTransporter implements TransporterContract
 
         $error = is_array($data) ? $data['error'] ?? null : null;
 
-        /** @var array{message?: string|array<int, string>, type?: ?string}|null $error */
+        /** @var array{message?: string|array<int, string>, type?: ?string, details?: mixed, request_id?: ?string}|null $error */
         $error = match (true) {
             is_string($error) => ['message' => $error],
             is_array($error) => $error,
             default => null,
         };
 
-        if ($response->getStatusCode() === 429) {
-            throw new RateLimitException($error ?? [], $response);
+        // The body's request_id sits beside the error object, not inside it.
+        if ($error !== null && is_array($data) && is_string($data['request_id'] ?? null)) {
+            $error['request_id'] = $data['request_id'];
         }
 
-        throw new ErrorException($error ?? $this->firstLine($contents) ?? $response->getReasonPhrase(), $response);
+        throw ErrorException::forStatus($error ?? $this->firstLine($contents) ?? $response->getReasonPhrase(), $response);
     }
 
     /**
