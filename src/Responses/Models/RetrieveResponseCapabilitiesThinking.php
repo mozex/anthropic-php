@@ -7,7 +7,7 @@ namespace Anthropic\Responses\Models;
 class RetrieveResponseCapabilitiesThinking
 {
     /**
-     * @param  array{supported: bool, types: array{adaptive: array{supported: bool}, enabled: array{supported: bool}}}  $attributes
+     * @param  array{supported: bool, types: array{adaptive: array{supported: bool}, enabled: array{supported: bool}, disabled?: array{supported: bool}, between_tools?: array{supported: bool}}}  $attributes
      */
     private function __construct(
         public readonly bool $supported,
@@ -16,7 +16,7 @@ class RetrieveResponseCapabilitiesThinking
     ) {}
 
     /**
-     * @param  array{supported: bool, types: array{adaptive: array{supported: bool}, enabled: array{supported: bool}}}  $attributes
+     * @param  array{supported: bool, types: array{adaptive: array{supported: bool}, enabled: array{supported: bool}, disabled?: array{supported: bool}, between_tools?: array{supported: bool}}}  $attributes
      */
     public static function from(array $attributes): self
     {
@@ -28,7 +28,7 @@ class RetrieveResponseCapabilitiesThinking
     }
 
     /**
-     * @return array{supported: bool, types: array{adaptive: array{supported: bool}, enabled: array{supported: bool}}}
+     * @return array{supported: bool, types: array{adaptive: array{supported: bool}, enabled: array{supported: bool}, disabled?: array{supported: bool}, between_tools?: array{supported: bool}}}
      */
     public function toArray(): array
     {

@@ -10,7 +10,7 @@ namespace Anthropic\Responses\Batches;
 class BatchIndividualResponse
 {
     /**
-     * @param  array{custom_id: string, result: array{type: string, message?: array<string, mixed>, error?: array{type: string, request_id?: string, error: array{type: string, message: string}}}}  $attributes
+     * @param  array{custom_id: string, result: array{type: string, message?: array<string, mixed>, error?: array{type: string, request_id?: string|null, error: array{type: string, message: string}}|array{type: string, message: string, request_id?: string|null}}}  $attributes
      */
     private function __construct(
         public readonly string $customId,
@@ -21,7 +21,7 @@ class BatchIndividualResponse
     /**
      * Acts as static factory, and returns a new BatchIndividualResponse instance.
      *
-     * @param  array{custom_id: string, result: array{type: string, message?: array<string, mixed>, error?: array{type: string, request_id?: string, error: array{type: string, message: string}}}}  $attributes
+     * @param  array{custom_id: string, result: array{type: string, message?: array<string, mixed>, error?: array{type: string, request_id?: string|null, error: array{type: string, message: string}}|array{type: string, message: string, request_id?: string|null}}}  $attributes
      */
     public static function from(array $attributes): self
     {
@@ -33,7 +33,7 @@ class BatchIndividualResponse
     }
 
     /**
-     * @return array{custom_id: string, result: array{type: string, message?: array<string, mixed>, error?: array{type: string, message: string}}}
+     * @return array{custom_id: string, result: array{type: string, message?: array<string, mixed>, error?: array{type: string, message: string, request_id?: string|null}}}
      */
     public function toArray(): array
     {

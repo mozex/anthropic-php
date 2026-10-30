@@ -12,12 +12,12 @@ use Anthropic\Responses\Meta\MetaInformation;
 use Anthropic\Testing\Responses\Concerns\Models\Fakeable;
 
 /**
- * @implements ResponseContract<array{data: array<int, array{id: string, type: string, created_at: string, display_name: string, max_input_tokens: int, max_tokens: int, capabilities: array{batch: array{supported: bool}, citations: array{supported: bool}, code_execution: array{supported: bool}, context_management: array<string, bool|array{supported: bool}>, effort: array{supported: bool, low: array{supported: bool}, medium: array{supported: bool}, high: array{supported: bool}, max: array{supported: bool}}, image_input: array{supported: bool}, pdf_input: array{supported: bool}, structured_outputs: array{supported: bool}, thinking: array{supported: bool, types: array{adaptive: array{supported: bool}, enabled: array{supported: bool}}}}}>, first_id: string, last_id: string, has_more: bool}>
+ * @implements ResponseContract<array{data: array<int, array{id: string, type: string, created_at: string, display_name: string, max_input_tokens: int|null, max_tokens: int|null, capabilities: array{batch: array{supported: bool}, citations: array{supported: bool}, code_execution: array{supported: bool}, context_management: array<string, bool|array{supported: bool}|null>, effort: array{supported: bool, low: array{supported: bool}, medium: array{supported: bool}, high: array{supported: bool}, max: array{supported: bool}, xhigh?: array{supported: bool}|null}, image_input: array{supported: bool}, pdf_input: array{supported: bool}, structured_outputs: array{supported: bool}, thinking: array{supported: bool, types: array{adaptive: array{supported: bool}, enabled: array{supported: bool}, disabled?: array{supported: bool}, between_tools?: array{supported: bool}}}, server_tools?: array{supported: bool, code_execution: array{supported: bool}, web_search: array{supported: bool}}, compaction?: array{supported: bool, summarize: array{supported: bool}}|null}|null, deprecated_at?: string|null, lifecycle?: string, line?: string|null, retires_at?: string|null, allowed_fallback_models?: array<int, string>|null}>, first_id: string|null, last_id: string|null, has_more: bool}>
  */
 class ListResponse implements ResponseContract, ResponseHasMetaInformationContract
 {
     /**
-     * @use ArrayAccessible<array{data: array<int, array{id: string, type: string, created_at: string, display_name: string, max_input_tokens: int, max_tokens: int, capabilities: array{batch: array{supported: bool}, citations: array{supported: bool}, code_execution: array{supported: bool}, context_management: array<string, bool|array{supported: bool}>, effort: array{supported: bool, low: array{supported: bool}, medium: array{supported: bool}, high: array{supported: bool}, max: array{supported: bool}}, image_input: array{supported: bool}, pdf_input: array{supported: bool}, structured_outputs: array{supported: bool}, thinking: array{supported: bool, types: array{adaptive: array{supported: bool}, enabled: array{supported: bool}}}}}>, first_id: string, last_id: string, has_more: bool}>
+     * @use ArrayAccessible<array{data: array<int, array{id: string, type: string, created_at: string, display_name: string, max_input_tokens: int|null, max_tokens: int|null, capabilities: array{batch: array{supported: bool}, citations: array{supported: bool}, code_execution: array{supported: bool}, context_management: array<string, bool|array{supported: bool}|null>, effort: array{supported: bool, low: array{supported: bool}, medium: array{supported: bool}, high: array{supported: bool}, max: array{supported: bool}, xhigh?: array{supported: bool}|null}, image_input: array{supported: bool}, pdf_input: array{supported: bool}, structured_outputs: array{supported: bool}, thinking: array{supported: bool, types: array{adaptive: array{supported: bool}, enabled: array{supported: bool}, disabled?: array{supported: bool}, between_tools?: array{supported: bool}}}, server_tools?: array{supported: bool, code_execution: array{supported: bool}, web_search: array{supported: bool}}, compaction?: array{supported: bool, summarize: array{supported: bool}}|null}|null, deprecated_at?: string|null, lifecycle?: string, line?: string|null, retires_at?: string|null, allowed_fallback_models?: array<int, string>|null}>, first_id: string|null, last_id: string|null, has_more: bool}>
      */
     use ArrayAccessible;
 
@@ -26,12 +26,12 @@ class ListResponse implements ResponseContract, ResponseHasMetaInformationContra
 
     /**
      * @param  array<int, RetrieveResponse>  $data
-     * @param  array{data: array<int, array{id: string, type: string, created_at: string, display_name: string, max_input_tokens: int, max_tokens: int, capabilities: array{batch: array{supported: bool}, citations: array{supported: bool}, code_execution: array{supported: bool}, context_management: array<string, bool|array{supported: bool}>, effort: array{supported: bool, low: array{supported: bool}, medium: array{supported: bool}, high: array{supported: bool}, max: array{supported: bool}}, image_input: array{supported: bool}, pdf_input: array{supported: bool}, structured_outputs: array{supported: bool}, thinking: array{supported: bool, types: array{adaptive: array{supported: bool}, enabled: array{supported: bool}}}}}>, first_id: string, last_id: string, has_more: bool}  $attributes
+     * @param  array{data: array<int, array{id: string, type: string, created_at: string, display_name: string, max_input_tokens?: int|null, max_tokens?: int|null, capabilities?: array{batch: array{supported: bool}, citations: array{supported: bool}, code_execution: array{supported: bool}, context_management: array<string, bool|array{supported: bool}|null>, effort: array{supported: bool, low: array{supported: bool}, medium: array{supported: bool}, high: array{supported: bool}, max: array{supported: bool}, xhigh?: array{supported: bool}|null}, image_input: array{supported: bool}, pdf_input: array{supported: bool}, structured_outputs: array{supported: bool}, thinking: array{supported: bool, types: array{adaptive: array{supported: bool}, enabled: array{supported: bool}, disabled?: array{supported: bool}, between_tools?: array{supported: bool}}}, server_tools?: array{supported: bool, code_execution: array{supported: bool}, web_search: array{supported: bool}}, compaction?: array{supported: bool, summarize: array{supported: bool}}|null}|null, deprecated_at?: string|null, lifecycle?: string, line?: string|null, retires_at?: string|null, allowed_fallback_models?: array<int, string>|null}>, first_id?: string|null, last_id?: string|null, has_more: bool}  $attributes
      */
     private function __construct(
         public readonly array $data,
-        public readonly string $firstId,
-        public readonly string $lastId,
+        public readonly ?string $firstId,
+        public readonly ?string $lastId,
         public readonly bool $hasMore,
         private readonly MetaInformation $meta,
         protected readonly array $attributes,
@@ -40,7 +40,7 @@ class ListResponse implements ResponseContract, ResponseHasMetaInformationContra
     /**
      * Acts as static factory, and returns a new Response instance.
      *
-     * @param  array{data: array<int, array{id: string, type: string, created_at: string, display_name: string, max_input_tokens: int, max_tokens: int, capabilities: array{batch: array{supported: bool}, citations: array{supported: bool}, code_execution: array{supported: bool}, context_management: array<string, bool|array{supported: bool}>, effort: array{supported: bool, low: array{supported: bool}, medium: array{supported: bool}, high: array{supported: bool}, max: array{supported: bool}}, image_input: array{supported: bool}, pdf_input: array{supported: bool}, structured_outputs: array{supported: bool}, thinking: array{supported: bool, types: array{adaptive: array{supported: bool}, enabled: array{supported: bool}}}}}>, first_id: string, last_id: string, has_more: bool}  $attributes
+     * @param  array{data: array<int, array{id: string, type: string, created_at: string, display_name: string, max_input_tokens?: int|null, max_tokens?: int|null, capabilities?: array{batch: array{supported: bool}, citations: array{supported: bool}, code_execution: array{supported: bool}, context_management: array<string, bool|array{supported: bool}|null>, effort: array{supported: bool, low: array{supported: bool}, medium: array{supported: bool}, high: array{supported: bool}, max: array{supported: bool}, xhigh?: array{supported: bool}|null}, image_input: array{supported: bool}, pdf_input: array{supported: bool}, structured_outputs: array{supported: bool}, thinking: array{supported: bool, types: array{adaptive: array{supported: bool}, enabled: array{supported: bool}, disabled?: array{supported: bool}, between_tools?: array{supported: bool}}}, server_tools?: array{supported: bool, code_execution: array{supported: bool}, web_search: array{supported: bool}}, compaction?: array{supported: bool, summarize: array{supported: bool}}|null}|null, deprecated_at?: string|null, lifecycle?: string, line?: string|null, retires_at?: string|null, allowed_fallback_models?: array<int, string>|null}>, first_id?: string|null, last_id?: string|null, has_more: bool}  $attributes
      */
     public static function from(array $attributes, MetaInformation $meta): self
     {
@@ -51,8 +51,8 @@ class ListResponse implements ResponseContract, ResponseHasMetaInformationContra
 
         return new self(
             $data,
-            $attributes['first_id'],
-            $attributes['last_id'],
+            $attributes['first_id'] ?? null,
+            $attributes['last_id'] ?? null,
             $attributes['has_more'],
             $meta,
             $attributes,

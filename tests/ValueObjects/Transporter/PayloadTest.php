@@ -216,3 +216,11 @@ test('withBetas on a payload with no user-provided betas still sets the header',
 
     expect($request->getHeaderLine('anthropic-beta'))->toBe('files-api-2025-04-14');
 });
+
+test('a list parameter goes into the query with indexed brackets', function () {
+    $payload = Payload::list('models', ['lifecycle' => ['retired']]);
+
+    $request = $payload->toRequest(BaseUri::from('api.anthropic.com/v1'), Headers::withAuthorization(ApiKey::from('foo')), QueryParams::create());
+
+    expect($request->getUri()->getQuery())->toBe('lifecycle%5B0%5D=retired');
+});

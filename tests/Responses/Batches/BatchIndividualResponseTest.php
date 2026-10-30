@@ -65,6 +65,7 @@ test('to array from errored', function () {
                 'error' => [
                     'type' => 'invalid_request_error',
                     'message' => 'max_tokens: Field required',
+                    'request_id' => 'req_abcdef123456',
                 ],
             ],
         ]);

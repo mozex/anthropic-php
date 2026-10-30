@@ -168,3 +168,91 @@ test('to array excludes custom key when no custom headers', function () {
 
     expect($meta->toArray())->not->toHaveKey('custom');
 });
+
+test('the organization, workspace, retry-after and fast mode headers are typed', function () {
+    // composed: the docs name these headers without example values
+    $meta = MetaInformation::from((new Response(headers: [
+        ...metaHeaders(),
+        'anthropic-organization-id' => ['8a3c3a4e-3f3b-4d2a-9c41-5f4e1b2a7c90'],
+        'anthropic-workspace-id' => ['wrkspc_011CZkZaBF1tNoB5wlCeusgy'],
+        'retry-after' => ['30'],
+        'anthropic-fast-input-tokens-limit' => ['40000'],
+        'anthropic-fast-input-tokens-remaining' => ['39000'],
+        'anthropic-fast-input-tokens-reset' => ['2024-04-30T15:56:17Z'],
+        'anthropic-fast-output-tokens-limit' => ['8000'],
+        'anthropic-fast-output-tokens-remaining' => ['7900'],
+        'anthropic-fast-output-tokens-reset' => ['2024-04-30T15:56:17Z'],
+    ]))->getHeaders());
+
+    expect($meta)
+        ->organizationId->toBe('8a3c3a4e-3f3b-4d2a-9c41-5f4e1b2a7c90')
+        ->workspaceId->toBe('wrkspc_011CZkZaBF1tNoB5wlCeusgy')
+        ->retryAfter->toBe(30)
+        ->fastInputTokenLimit->toBeInstanceOf(MetaInformationRateLimit::class)
+        ->fastInputTokenLimit->limit->toBe(40000)
+        ->fastInputTokenLimit->remaining->toBe(39000)
+        ->fastInputTokenLimit->reset->toBe('2024-04-30T15:56:17Z')
+        ->fastOutputTokenLimit->limit->toBe(8000)
+        ->fastOutputTokenLimit->remaining->toBe(7900)
+        ->fastOutputTokenLimit->reset->toBe('2024-04-30T15:56:17Z');
+
+    expect($meta->toArray())
+        ->toHaveKey('anthropic-organization-id', '8a3c3a4e-3f3b-4d2a-9c41-5f4e1b2a7c90')
+        ->toHaveKey('anthropic-workspace-id', 'wrkspc_011CZkZaBF1tNoB5wlCeusgy')
+        ->toHaveKey('retry-after', 30)
+        ->toHaveKey('anthropic-fast-input-tokens-limit', 40000)
+        ->toHaveKey('anthropic-fast-output-tokens-reset', '2024-04-30T15:56:17Z')
+        ->and($meta['retry-after'])->toBe(30);
+});
+
+test('typed headers that used to be custom stay in custom', function () {
+    // composed: the docs name these headers without example values
+    $meta = MetaInformation::from([
+        ...metaHeaders(),
+        'anthropic-organization-id' => ['8a3c3a4e-3f3b-4d2a-9c41-5f4e1b2a7c90'],
+        'retry-after' => ['30'],
+        'anthropic-fast-input-tokens-remaining' => ['39000'],
+    ]);
+
+    expect($meta->custom->toArray())->toBe([
+        'anthropic-organization-id' => '8a3c3a4e-3f3b-4d2a-9c41-5f4e1b2a7c90',
+        'retry-after' => '30',
+        'anthropic-fast-input-tokens-remaining' => '39000',
+    ]);
+});
+
+test('a retry-after that is not a number of seconds is not typed', function () {
+    $meta = MetaInformation::from([...metaHeaders(), 'retry-after' => ['Wed, 21 Oct 2026 07:28:00 GMT']]);
+
+    expect($meta->retryAfter)->toBeNull()
+        ->and($meta->custom->toArray())->toBe(['retry-after' => 'Wed, 21 Oct 2026 07:28:00 GMT'])
+        ->and($meta->toArray())->not->toHaveKey('retry-after');
+});
+
+test('the new headers are null when absent', function () {
+    expect(MetaInformation::from(metaHeaders()))
+        ->organizationId->toBeNull()
+        ->workspaceId->toBeNull()
+        ->retryAfter->toBeNull()
+        ->fastInputTokenLimit->toBeNull()
+        ->fastOutputTokenLimit->toBeNull();
+});
+
+test('typed string headers built by hand from numbers become strings', function () {
+    // composed: the docs name these headers without example values
+    $meta = MetaInformation::from([
+        'anthropic-organization-id' => [123],
+        'anthropic-fast-input-tokens-remaining' => [5],
+        'anthropic-fast-input-tokens-reset' => [1714492577],
+    ]);
+
+    expect($meta)
+        ->organizationId->toBe('123')
+        ->fastInputTokenLimit->remaining->toBe(5)
+        ->fastInputTokenLimit->reset->toBe('1714492577');
+});
+
+test('a retry-after with leading zeros is read as seconds', function () {
+    expect(MetaInformation::from([...metaHeaders(), 'retry-after' => ['007']])->retryAfter)->toBe(7)
+        ->and(MetaInformation::from([...metaHeaders(), 'retry-after' => [30]])->retryAfter)->toBe(30);
+});

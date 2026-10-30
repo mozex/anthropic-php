@@ -59,7 +59,7 @@ class Batches implements BatchesContract
     {
         $payload = Payload::list('messages/batches', $parameters);
 
-        /** @var Response<array{data: array<int, array{id: string, type: string, processing_status: string, request_counts: array{processing: int, succeeded: int, errored: int, canceled: int, expired: int}, created_at: string, expires_at: string, ended_at: ?string, cancel_initiated_at: ?string, archived_at: ?string, results_url: ?string}>, first_id: string, last_id: string, has_more: bool}> $response */
+        /** @var Response<array{data: array<int, array{id: string, type: string, processing_status: string, request_counts: array{processing: int, succeeded: int, errored: int, canceled: int, expired: int}, created_at: string, expires_at: string, ended_at: ?string, cancel_initiated_at: ?string, archived_at: ?string, results_url: ?string}>, first_id?: string|null, last_id?: string|null, has_more: bool}> $response */
         $response = $this->transporter->requestObject($payload);
 
         return BatchListResponse::from($response->data(), $response->meta());

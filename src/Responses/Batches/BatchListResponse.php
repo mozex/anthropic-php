@@ -12,12 +12,12 @@ use Anthropic\Responses\Meta\MetaInformation;
 use Anthropic\Testing\Responses\Concerns\Batches\Fakeable;
 
 /**
- * @implements ResponseContract<array{data: array<int, array{id: string, type: string, processing_status: string, request_counts: array{processing: int, succeeded: int, errored: int, canceled: int, expired: int}, created_at: string, expires_at: string, ended_at: ?string, cancel_initiated_at: ?string, archived_at: ?string, results_url: ?string}>, first_id: string, last_id: string, has_more: bool}>
+ * @implements ResponseContract<array{data: array<int, array{id: string, type: string, processing_status: string, request_counts: array{processing: int, succeeded: int, errored: int, canceled: int, expired: int}, created_at: string, expires_at: string, ended_at: ?string, cancel_initiated_at: ?string, archived_at: ?string, results_url: ?string}>, first_id: string|null, last_id: string|null, has_more: bool}>
  */
 class BatchListResponse implements ResponseContract, ResponseHasMetaInformationContract
 {
     /**
-     * @use ArrayAccessible<array{data: array<int, array{id: string, type: string, processing_status: string, request_counts: array{processing: int, succeeded: int, errored: int, canceled: int, expired: int}, created_at: string, expires_at: string, ended_at: ?string, cancel_initiated_at: ?string, archived_at: ?string, results_url: ?string}>, first_id: string, last_id: string, has_more: bool}>
+     * @use ArrayAccessible<array{data: array<int, array{id: string, type: string, processing_status: string, request_counts: array{processing: int, succeeded: int, errored: int, canceled: int, expired: int}, created_at: string, expires_at: string, ended_at: ?string, cancel_initiated_at: ?string, archived_at: ?string, results_url: ?string}>, first_id: string|null, last_id: string|null, has_more: bool}>
      */
     use ArrayAccessible;
 
@@ -26,12 +26,12 @@ class BatchListResponse implements ResponseContract, ResponseHasMetaInformationC
 
     /**
      * @param  array<int, BatchResponse>  $data
-     * @param  array{data: array<int, array{id: string, type: string, processing_status: string, request_counts: array{processing: int, succeeded: int, errored: int, canceled: int, expired: int}, created_at: string, expires_at: string, ended_at: ?string, cancel_initiated_at: ?string, archived_at: ?string, results_url: ?string}>, first_id: string, last_id: string, has_more: bool}  $attributes
+     * @param  array{data: array<int, array{id: string, type: string, processing_status: string, request_counts: array{processing: int, succeeded: int, errored: int, canceled: int, expired: int}, created_at: string, expires_at: string, ended_at: ?string, cancel_initiated_at: ?string, archived_at: ?string, results_url: ?string}>, first_id?: string|null, last_id?: string|null, has_more: bool}  $attributes
      */
     private function __construct(
         public readonly array $data,
-        public readonly string $firstId,
-        public readonly string $lastId,
+        public readonly ?string $firstId,
+        public readonly ?string $lastId,
         public readonly bool $hasMore,
         private readonly MetaInformation $meta,
         protected readonly array $attributes,
@@ -40,7 +40,7 @@ class BatchListResponse implements ResponseContract, ResponseHasMetaInformationC
     /**
      * Acts as static factory, and returns a new Response instance.
      *
-     * @param  array{data: array<int, array{id: string, type: string, processing_status: string, request_counts: array{processing: int, succeeded: int, errored: int, canceled: int, expired: int}, created_at: string, expires_at: string, ended_at: ?string, cancel_initiated_at: ?string, archived_at: ?string, results_url: ?string}>, first_id: string, last_id: string, has_more: bool}  $attributes
+     * @param  array{data: array<int, array{id: string, type: string, processing_status: string, request_counts: array{processing: int, succeeded: int, errored: int, canceled: int, expired: int}, created_at: string, expires_at: string, ended_at: ?string, cancel_initiated_at: ?string, archived_at: ?string, results_url: ?string}>, first_id?: string|null, last_id?: string|null, has_more: bool}  $attributes
      */
     public static function from(array $attributes, MetaInformation $meta): self
     {
@@ -51,8 +51,8 @@ class BatchListResponse implements ResponseContract, ResponseHasMetaInformationC
 
         return new self(
             $data,
-            $attributes['first_id'],
-            $attributes['last_id'],
+            $attributes['first_id'] ?? null,
+            $attributes['last_id'] ?? null,
             $attributes['has_more'],
             $meta,
             $attributes,

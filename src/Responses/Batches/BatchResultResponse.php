@@ -39,7 +39,7 @@ class BatchResultResponse implements ResponseHasMetaInformationContract, Respons
                 continue;
             }
 
-            /** @var array{custom_id: string, result: array{type: string, message?: array<string, mixed>, error?: array{type: string, request_id?: string, error: array{type: string, message: string}}}} $data */
+            /** @var array{custom_id: string, result: array{type: string, message?: array<string, mixed>, error?: array{type: string, request_id?: string|null, error: array{type: string, message: string}}|array{type: string, message: string, request_id?: string|null}}} $data */
             $data = json_decode($line, true, flags: JSON_THROW_ON_ERROR);
 
             yield BatchIndividualResponse::from($data);

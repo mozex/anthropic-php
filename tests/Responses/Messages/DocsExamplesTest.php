@@ -10,46 +10,12 @@ function messagesDocsExample(string $name): CreateResponse
     return CreateResponse::from(json_decode(messagesDocsExamples()[$name], true, flags: JSON_THROW_ON_ERROR), meta());
 }
 
-/**
- * Adds the keys `toArray()` always emits that a docs example may leave out.
- */
-function docsExampleWithAlwaysEmittedKeys(stdClass $message): stdClass
-{
-    $message->stop_sequence ??= null;
-    $message->usage->cache_creation_input_tokens ??= 0;
-    $message->usage->cache_read_input_tokens ??= 0;
-
-    foreach ($message->usage->iterations ?? [] as $iteration) {
-        $iteration->cache_read_input_tokens ??= 0;
-        $iteration->cache_creation_input_tokens ??= 0;
-    }
-
-    return $message;
-}
-
-/**
- * Sorts object keys at every depth, so two decoded JSON values compare exactly apart from key order.
- */
-function docsExampleWithSortedKeys(mixed $value): mixed
-{
-    if ($value instanceof stdClass) {
-        $properties = get_object_vars($value);
-        ksort($properties);
-
-        return (object) array_map(docsExampleWithSortedKeys(...), $properties);
-    }
-
-    return is_array($value) ? array_map(docsExampleWithSortedKeys(...), $value) : $value;
-}
-
 test('docs examples round-trip through toArray()', function (string $json) {
     $response = CreateResponse::from(json_decode($json, true, flags: JSON_THROW_ON_ERROR), meta());
 
-    $actual = json_decode(json_encode($response->toArray(), JSON_THROW_ON_ERROR), flags: JSON_THROW_ON_ERROR);
     $expected = docsExampleWithAlwaysEmittedKeys(json_decode($json, flags: JSON_THROW_ON_ERROR));
 
-    expect(json_encode(docsExampleWithSortedKeys($actual), JSON_THROW_ON_ERROR))
-        ->toBe(json_encode(docsExampleWithSortedKeys($expected), JSON_THROW_ON_ERROR));
+    expect(docsExampleJson($response->toArray()))->toBe(docsExampleJson($expected));
 })->with(fn (): array => messagesDocsExamples());
 
 test('an unknown block and an unknown top-level key survive toArray()', function () {

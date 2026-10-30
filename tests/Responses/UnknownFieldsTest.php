@@ -104,8 +104,11 @@ test('message_start keeps its usage once', function () {
         ->and($event['message'])->not->toHaveKey('usage');
 });
 
-test('an errored batch result keeps its inner error once', function () {
+test('an errored batch result keeps its inner error once, with the request id', function () {
     $result = BatchIndividualResponse::from(batchIndividualErroredResponse())->toArray();
 
-    expect($result['result']['error'])->toBe(batchIndividualErroredResponse()['result']['error']['error']);
+    expect($result['result']['error'])->toBe([
+        ...batchIndividualErroredResponse()['result']['error']['error'],
+        'request_id' => 'req_abcdef123456',
+    ]);
 });

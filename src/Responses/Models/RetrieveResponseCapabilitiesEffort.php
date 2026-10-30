@@ -7,7 +7,7 @@ namespace Anthropic\Responses\Models;
 class RetrieveResponseCapabilitiesEffort
 {
     /**
-     * @param  array{supported: bool, low: array{supported: bool}, medium: array{supported: bool}, high: array{supported: bool}, max: array{supported: bool}}  $attributes
+     * @param  array{supported: bool, low: array{supported: bool}, medium: array{supported: bool}, high: array{supported: bool}, max: array{supported: bool}, xhigh?: array{supported: bool}|null}  $attributes
      */
     private function __construct(
         public readonly bool $supported,
@@ -15,11 +15,12 @@ class RetrieveResponseCapabilitiesEffort
         public readonly RetrieveResponseCapabilitySupport $medium,
         public readonly RetrieveResponseCapabilitySupport $high,
         public readonly RetrieveResponseCapabilitySupport $max,
+        public readonly ?RetrieveResponseCapabilitySupport $xhigh,
         protected readonly array $attributes,
     ) {}
 
     /**
-     * @param  array{supported: bool, low: array{supported: bool}, medium: array{supported: bool}, high: array{supported: bool}, max: array{supported: bool}}  $attributes
+     * @param  array{supported: bool, low: array{supported: bool}, medium: array{supported: bool}, high: array{supported: bool}, max: array{supported: bool}, xhigh?: array{supported: bool}|null}  $attributes
      */
     public static function from(array $attributes): self
     {
@@ -29,21 +30,23 @@ class RetrieveResponseCapabilitiesEffort
             RetrieveResponseCapabilitySupport::from($attributes['medium']),
             RetrieveResponseCapabilitySupport::from($attributes['high']),
             RetrieveResponseCapabilitySupport::from($attributes['max']),
+            isset($attributes['xhigh']) ? RetrieveResponseCapabilitySupport::from($attributes['xhigh']) : null,
             $attributes,
         );
     }
 
     /**
-     * @return array{supported: bool, low: array{supported: bool}, medium: array{supported: bool}, high: array{supported: bool}, max: array{supported: bool}}
+     * @return array{supported: bool, low: array{supported: bool}, medium: array{supported: bool}, high: array{supported: bool}, max: array{supported: bool}, xhigh?: array{supported: bool}|null}
      */
     public function toArray(): array
     {
-        return array_replace($this->attributes, [
+        return array_replace($this->attributes, array_filter([
             'supported' => $this->supported,
             'low' => $this->low->toArray(),
             'medium' => $this->medium->toArray(),
             'high' => $this->high->toArray(),
             'max' => $this->max->toArray(),
-        ]);
+            'xhigh' => $this->xhigh?->toArray(),
+        ], fn (mixed $value): bool => ! is_null($value)));
     }
 }

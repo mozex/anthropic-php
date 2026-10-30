@@ -8,7 +8,7 @@ class RetrieveResponseCapabilitiesContextManagement
 {
     /**
      * @param  array<string, RetrieveResponseCapabilitySupport>  $strategies
-     * @param  array<string, bool|array{supported: bool}>  $attributes
+     * @param  array<string, bool|array{supported: bool}|null>  $attributes
      */
     private function __construct(
         public readonly bool $supported,
@@ -17,7 +17,7 @@ class RetrieveResponseCapabilitiesContextManagement
     ) {}
 
     /**
-     * @param  array<string, bool|array{supported: bool}>  $attributes
+     * @param  array<string, bool|array{supported: bool}|null>  $attributes
      */
     public static function from(array $attributes): self
     {
@@ -43,7 +43,7 @@ class RetrieveResponseCapabilitiesContextManagement
     }
 
     /**
-     * @return array<string, bool|array{supported: bool}>
+     * @return array<string, bool|array{supported: bool}|null>
      */
     public function toArray(): array
     {

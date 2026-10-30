@@ -7,7 +7,7 @@ namespace Anthropic\Responses\Models;
 class RetrieveResponseCapabilities
 {
     /**
-     * @param  array{batch: array{supported: bool}, citations: array{supported: bool}, code_execution: array{supported: bool}, context_management: array<string, bool|array{supported: bool}>, effort: array{supported: bool, low: array{supported: bool}, medium: array{supported: bool}, high: array{supported: bool}, max: array{supported: bool}}, image_input: array{supported: bool}, pdf_input: array{supported: bool}, structured_outputs: array{supported: bool}, thinking: array{supported: bool, types: array{adaptive: array{supported: bool}, enabled: array{supported: bool}}}}  $attributes
+     * @param  array{batch: array{supported: bool}, citations: array{supported: bool}, code_execution: array{supported: bool}, context_management: array<string, bool|array{supported: bool}|null>, effort: array{supported: bool, low: array{supported: bool}, medium: array{supported: bool}, high: array{supported: bool}, max: array{supported: bool}, xhigh?: array{supported: bool}|null}, image_input: array{supported: bool}, pdf_input: array{supported: bool}, structured_outputs: array{supported: bool}, thinking: array{supported: bool, types: array{adaptive: array{supported: bool}, enabled: array{supported: bool}, disabled?: array{supported: bool}, between_tools?: array{supported: bool}}}, server_tools?: array{supported: bool, code_execution: array{supported: bool}, web_search: array{supported: bool}}, compaction?: array{supported: bool, summarize: array{supported: bool}}|null}  $attributes
      */
     private function __construct(
         public readonly RetrieveResponseCapabilitySupport $batch,
@@ -19,11 +19,13 @@ class RetrieveResponseCapabilities
         public readonly RetrieveResponseCapabilitySupport $pdfInput,
         public readonly RetrieveResponseCapabilitySupport $structuredOutputs,
         public readonly RetrieveResponseCapabilitiesThinking $thinking,
+        public readonly ?RetrieveResponseCapabilitiesServerTools $serverTools,
+        public readonly ?RetrieveResponseCapabilitiesCompaction $compaction,
         protected readonly array $attributes,
     ) {}
 
     /**
-     * @param  array{batch: array{supported: bool}, citations: array{supported: bool}, code_execution: array{supported: bool}, context_management: array<string, bool|array{supported: bool}>, effort: array{supported: bool, low: array{supported: bool}, medium: array{supported: bool}, high: array{supported: bool}, max: array{supported: bool}}, image_input: array{supported: bool}, pdf_input: array{supported: bool}, structured_outputs: array{supported: bool}, thinking: array{supported: bool, types: array{adaptive: array{supported: bool}, enabled: array{supported: bool}}}}  $attributes
+     * @param  array{batch: array{supported: bool}, citations: array{supported: bool}, code_execution: array{supported: bool}, context_management: array<string, bool|array{supported: bool}|null>, effort: array{supported: bool, low: array{supported: bool}, medium: array{supported: bool}, high: array{supported: bool}, max: array{supported: bool}, xhigh?: array{supported: bool}|null}, image_input: array{supported: bool}, pdf_input: array{supported: bool}, structured_outputs: array{supported: bool}, thinking: array{supported: bool, types: array{adaptive: array{supported: bool}, enabled: array{supported: bool}, disabled?: array{supported: bool}, between_tools?: array{supported: bool}}}, server_tools?: array{supported: bool, code_execution: array{supported: bool}, web_search: array{supported: bool}}, compaction?: array{supported: bool, summarize: array{supported: bool}}|null}  $attributes
      */
     public static function from(array $attributes): self
     {
@@ -37,16 +39,18 @@ class RetrieveResponseCapabilities
             RetrieveResponseCapabilitySupport::from($attributes['pdf_input']),
             RetrieveResponseCapabilitySupport::from($attributes['structured_outputs']),
             RetrieveResponseCapabilitiesThinking::from($attributes['thinking']),
+            isset($attributes['server_tools']) ? RetrieveResponseCapabilitiesServerTools::from($attributes['server_tools']) : null,
+            isset($attributes['compaction']) ? RetrieveResponseCapabilitiesCompaction::from($attributes['compaction']) : null,
             $attributes,
         );
     }
 
     /**
-     * @return array{batch: array{supported: bool}, citations: array{supported: bool}, code_execution: array{supported: bool}, context_management: array<string, bool|array{supported: bool}>, effort: array{supported: bool, low: array{supported: bool}, medium: array{supported: bool}, high: array{supported: bool}, max: array{supported: bool}}, image_input: array{supported: bool}, pdf_input: array{supported: bool}, structured_outputs: array{supported: bool}, thinking: array{supported: bool, types: array{adaptive: array{supported: bool}, enabled: array{supported: bool}}}}
+     * @return array{batch: array{supported: bool}, citations: array{supported: bool}, code_execution: array{supported: bool}, context_management: array<string, bool|array{supported: bool}|null>, effort: array{supported: bool, low: array{supported: bool}, medium: array{supported: bool}, high: array{supported: bool}, max: array{supported: bool}, xhigh?: array{supported: bool}|null}, image_input: array{supported: bool}, pdf_input: array{supported: bool}, structured_outputs: array{supported: bool}, thinking: array{supported: bool, types: array{adaptive: array{supported: bool}, enabled: array{supported: bool}, disabled?: array{supported: bool}, between_tools?: array{supported: bool}}}, server_tools?: array{supported: bool, code_execution: array{supported: bool}, web_search: array{supported: bool}}, compaction?: array{supported: bool, summarize: array{supported: bool}}|null}
      */
     public function toArray(): array
     {
-        return array_replace($this->attributes, [
+        return array_replace($this->attributes, array_filter([
             'batch' => $this->batch->toArray(),
             'citations' => $this->citations->toArray(),
             'code_execution' => $this->codeExecution->toArray(),
@@ -56,6 +60,8 @@ class RetrieveResponseCapabilities
             'pdf_input' => $this->pdfInput->toArray(),
             'structured_outputs' => $this->structuredOutputs->toArray(),
             'thinking' => $this->thinking->toArray(),
-        ]);
+            'server_tools' => $this->serverTools?->toArray(),
+            'compaction' => $this->compaction?->toArray(),
+        ], fn (mixed $value): bool => ! is_null($value)));
     }
 }
