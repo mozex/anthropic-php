@@ -32,4 +32,12 @@ trait Testable
     {
         $this->fake->assertNotSent($this->resource(), $callback);
     }
+
+    /**
+     * @param  array<string, mixed>  $options
+     */
+    public function assertSentWithOptions(array $options): void
+    {
+        $this->fake->assertSentWithOptions($this->resource(), $options);
+    }
 }

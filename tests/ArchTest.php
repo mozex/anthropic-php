@@ -56,6 +56,7 @@ arch('value objects')->expect('Anthropic\ValueObjects')->toOnlyUse([
     'Psr\Http\Message\StreamInterface',
     'Anthropic\Enums',
     'Anthropic\Contracts',
+    'Anthropic\Exceptions\InvalidArgumentException',
     'Anthropic\Responses\Meta\MetaInformation',
 ]);
 

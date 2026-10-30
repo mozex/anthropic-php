@@ -277,6 +277,24 @@ $client->messages()->assertSent(function (string $method, array $parameters): bo
 $client->batches()->assertNotSent();
 ```
 
+### assertSentWithOptions
+
+`withOptions()` on the fake returns a fake that shares its queue and recorded requests, so the code under test can call it freely. Each request it sends records the options, and `assertSentWithOptions()` checks them:
+
+```php
+use Anthropic\Resources\Messages;
+
+$client = new ClientFake([CreateResponse::fake()]);
+
+// the code under test
+$client->withOptions(['workspace_id' => 'wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ'])->messages()->create([...]);
+
+$client->assertSent(Messages::class, 1);
+$client->assertSentWithOptions(Messages::class, ['workspace_id' => 'wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ']);
+```
+
+The expected options can be a subset: a request carrying more options still matches, and header names match whatever their spelling. On a resource, `$client->messages()->assertSentWithOptions([...])` does the same.
+
 ## Adding responses dynamically
 
 If you need to add responses after creating the fake client (for example, in a loop or conditional logic):

@@ -48,4 +48,12 @@ interface ClientContract
      * @see https://platform.claude.com/docs/en/build-with-claude/files
      */
     public function files(): FilesContract;
+
+    /**
+     * Returns a client whose requests also carry these options: `headers`, `query`, `betas`, `api_version`,
+     * `workspace_id` and `user_profile_id`. The client it's called on is left unchanged.
+     *
+     * @param  array<string, mixed>  $options
+     */
+    public function withOptions(array $options): ClientContract;
 }

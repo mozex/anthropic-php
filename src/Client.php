@@ -73,4 +73,16 @@ class Client implements ClientContract
     {
         return new Files($this->transporter);
     }
+
+    /**
+     * Returns a client whose requests also carry these options: `headers`, `query`, `betas`, `api_version`,
+     * `workspace_id` and `user_profile_id`. The client it's called on is left unchanged.
+     *
+     * @param  array<string, mixed>  $options
+     */
+    public function withOptions(array $options): static
+    {
+        // @phpstan-ignore new.static (users extend Client; a subclass keeps the constructor or overrides this)
+        return new static($this->transporter->withOptions($options));
+    }
 }

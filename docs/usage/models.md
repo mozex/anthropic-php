@@ -206,7 +206,7 @@ Keys match the raw JSON exactly, so anything documented on the [Anthropic contex
 
 ### Beta fields
 
-Two fields come only with the matching beta header: `allowedFallbackModels` with `server-side-fallback-2026-07-01`, and the `compaction` capability with `compact-2026-09-04`. `list()` takes the headers as `betas`; for `retrieve()`, set the header on the client with `withHttpHeader('anthropic-beta', ...)`:
+Two fields come only with the matching beta header: `allowedFallbackModels` with `server-side-fallback-2026-07-01`, and the `compaction` capability with `compact-2026-09-04`. `list()` takes the headers as `betas`; for `retrieve()`, which takes only an ID, pass them through [`withOptions()`](../reference/configuration.md#per-request-options):
 
 ```php
 $models = $client->models()->list(['betas' => ['server-side-fallback-2026-07-01', 'compact-2026-09-04']])->data;
@@ -218,7 +218,13 @@ foreach ($models as $model) {
 }
 ```
 
-Each is `null` without its header.
+Each is `null` without its header. For one model:
+
+```php
+$model = $client->withOptions(['betas' => ['compact-2026-09-04']])->models()->retrieve('claude-opus-5-5');
+
+$model->capabilities?->compaction?->summarize->supported;
+```
 
 ### Building a feature check
 

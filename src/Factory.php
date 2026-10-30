@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Anthropic;
 
+use Anthropic\Exceptions\InvalidArgumentException;
 use Anthropic\Transporters\HttpTransporter;
 use Anthropic\ValueObjects\ApiKey;
 use Anthropic\ValueObjects\Transporter\BaseUri;
@@ -26,9 +27,21 @@ class Factory
     private ?string $apiKey = null;
 
     /**
+     * The bearer token for the requests, such as a Workload Identity Federation access token.
+     */
+    private ?string $authToken = null;
+
+    /**
      * The API version for the requests.
      */
     private ?string $apiVersion = null;
+
+    /**
+     * The timeouts, in seconds, of the HTTP client the factory builds.
+     */
+    private int|float|null $timeout = null;
+
+    private int|float|null $connectTimeout = null;
 
     /**
      * The HTTP client for the requests.
@@ -64,6 +77,33 @@ class Factory
         $this->apiKey = trim($apiKey);
 
         return $this;
+    }
+
+    /**
+     * Sets a bearer token sent as `Authorization: Bearer <token>`, such as an access token from
+     * Workload Identity Federation. With an API key set too, both headers are sent; a blank token sends none.
+     */
+    public function withAuthToken(string $authToken): self
+    {
+        $this->authToken = trim($authToken);
+
+        return $this;
+    }
+
+    /**
+     * Sets the workspace the requests run in, sent as the anthropic-workspace-id header.
+     * Required with an API key that isn't scoped to one workspace.
+     */
+    public function withWorkspaceId(string $workspaceId): self
+    {
+        $workspaceId = trim($workspaceId);
+
+        // The API rejects an empty header, so a blank value sends none, as the other setters do.
+        if ($workspaceId === '') {
+            return $this;
+        }
+
+        return $this->withHttpHeader('anthropic-workspace-id', $workspaceId);
     }
 
     /**
@@ -110,6 +150,43 @@ class Factory
     }
 
     /**
+     * Sets the base URL the way the official SDKs read ANTHROPIC_BASE_URL: the URL without the API's /v1,
+     * which is added unless the URL already ends in it. A blank value keeps the default.
+     */
+    public function withBaseUrl(string $baseUrl): self
+    {
+        $baseUrl = rtrim(trim($baseUrl), '/');
+
+        if ($baseUrl === '') {
+            return $this;
+        }
+
+        return $this->withBaseUri(str_ends_with($baseUrl, '/v1') ? $baseUrl : $baseUrl.'/v1');
+    }
+
+    /**
+     * Sets the total timeout, in seconds, of the Guzzle client the factory builds.
+     * A client passed to withHttpClient() keeps its own settings, so the factory throws then.
+     */
+    public function withTimeout(int|float $seconds): self
+    {
+        $this->timeout = $seconds;
+
+        return $this;
+    }
+
+    /**
+     * Sets the connection timeout, in seconds, of the Guzzle client the factory builds.
+     * A client passed to withHttpClient() keeps its own settings, so the factory throws then.
+     */
+    public function withConnectTimeout(int|float $seconds): self
+    {
+        $this->connectTimeout = $seconds;
+
+        return $this;
+    }
+
+    /**
      * Adds a custom HTTP header to the requests.
      */
     public function withHttpHeader(string $name, string $value): self
@@ -134,10 +211,18 @@ class Factory
      */
     public function make(): Client
     {
+        if ($this->httpClient !== null && ($this->timeout !== null || $this->connectTimeout !== null)) {
+            throw new InvalidArgumentException('withTimeout() and withConnectTimeout() apply to the HTTP client the factory builds: set the timeouts on the client you passed to withHttpClient() instead.');
+        }
+
         $headers = Headers::create();
 
         if ($this->apiKey !== null) {
             $headers = Headers::withAuthorization(ApiKey::from($this->apiKey));
+        }
+
+        if ($this->authToken !== null && $this->authToken !== '') {
+            $headers = $headers->withCustomHeader('Authorization', 'Bearer '.$this->authToken);
         }
 
         $headers = $headers->withCustomHeader('anthropic-version', $this->apiVersion ?: '2023-06-01');
@@ -153,13 +238,33 @@ class Factory
             $queryParams = $queryParams->withParam($name, $value);
         }
 
-        $client = $this->httpClient ??= Psr18ClientDiscovery::find();
+        // Only a client from withHttpClient() is kept: a built one would make the next make() refuse the timeouts.
+        $client = $this->httpClient ?? $this->makeHttpClient();
 
         $sendAsync = $this->makeStreamHandler($client);
 
         $transporter = new HttpTransporter($client, $baseUri, $headers, $queryParams, $sendAsync);
 
         return new Client($transporter);
+    }
+
+    /**
+     * Builds a Guzzle client when a timeout is set, otherwise finds one through PSR-18 HTTP Client Discovery.
+     */
+    private function makeHttpClient(): ClientInterface
+    {
+        if ($this->timeout === null && $this->connectTimeout === null) {
+            return Psr18ClientDiscovery::find();
+        }
+
+        if (! class_exists(GuzzleClient::class)) {
+            throw new InvalidArgumentException('withTimeout() and withConnectTimeout() configure a Guzzle client, which isn\'t installed: run `composer require guzzlehttp/guzzle`, or pass a client with its own timeouts to withHttpClient().');
+        }
+
+        return new GuzzleClient(array_filter([
+            'timeout' => $this->timeout,
+            'connect_timeout' => $this->connectTimeout,
+        ], fn (int|float|null $seconds): bool => $seconds !== null));
     }
 
     /**

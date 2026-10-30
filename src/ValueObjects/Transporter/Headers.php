@@ -56,10 +56,37 @@ class Headers
      */
     public function withCustomHeader(string $name, string $value): self
     {
+        // Header names are case-insensitive: drop any spelling of the name, so the new value is the one sent.
+        $headers = array_filter(
+            $this->headers,
+            fn (int|string $key): bool => strcasecmp((string) $key, $name) !== 0,
+            ARRAY_FILTER_USE_KEY,
+        );
+
         return new self([
-            ...$this->headers,
+            ...$headers,
             $name => $value,
         ]);
+    }
+
+    /**
+     * Creates a new Headers value object whose `anthropic-beta` header also lists the given betas, de-duplicated.
+     *
+     * @param  list<string>  $betas
+     */
+    public function withBetas(array $betas): self
+    {
+        $existing = [];
+
+        foreach ($this->headers as $name => $value) {
+            if (strcasecmp($name, 'anthropic-beta') === 0) {
+                $existing = [...$existing, ...array_map(trim(...), explode(',', $value))];
+            }
+        }
+
+        $merged = array_values(array_unique(array_filter([...$existing, ...$betas], fn (string $beta): bool => $beta !== '')));
+
+        return $this->withCustomHeader('anthropic-beta', implode(',', $merged));
     }
 
     /**

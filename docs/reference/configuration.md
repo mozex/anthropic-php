@@ -11,6 +11,14 @@ $client = Anthropic::client('your-api-key');
 
 This uses auto-discovered defaults: the official Anthropic API endpoint, a PSR-18 HTTP client found via `php-http/discovery`, and standard headers. For most projects, this is enough.
 
+To configure the client from the environment variables the official SDKs read, use `Anthropic::fromEnvironment()`:
+
+```php
+$client = Anthropic::fromEnvironment();
+```
+
+It reads `ANTHROPIC_API_KEY`, or `ANTHROPIC_AUTH_TOKEN` when no key is set (one credential, as the official SDKs use), `ANTHROPIC_BASE_URL` with the official SDKs' meaning (see [Base URI](#base-uri)), and `ANTHROPIC_CUSTOM_HEADERS`, one `Name: value` header per line. It throws an `InvalidArgumentException` when neither credential is set. `Anthropic::client($apiKey)` stays as it was.
+
 When you need to customize anything, use the factory.
 
 ## Factory options
@@ -20,6 +28,7 @@ The factory lets you configure every aspect of the client:
 ```php
 $client = Anthropic::factory()
     ->withApiKey('your-api-key')
+    ->withWorkspaceId('wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ')
     ->withApiVersion('2026-10-21')
     ->withBaseUri('anthropic.example.com/v1')
     ->withHttpClient($httpClient)
@@ -37,7 +46,23 @@ Call `make()` at the end to create the client. Each `with*` method returns the f
 ->withApiKey('your-api-key')
 ```
 
-Required. The client sends this as a `x-api-key` header on every request. Leading and trailing whitespace is trimmed automatically.
+The client sends this as a `x-api-key` header on every request. Leading and trailing whitespace is trimmed automatically.
+
+### Auth token
+
+```php
+->withAuthToken('your-access-token')
+```
+
+Sends `Authorization: Bearer <token>` instead, for a short-lived access token from [Workload Identity Federation](https://platform.claude.com/docs/en/manage-claude/workload-identity-federation) (`POST /v1/oauth/token`) or an API key you'd rather send that way. Set it in place of the API key; with both set, both headers go out.
+
+### Workspace
+
+```php
+->withWorkspaceId('wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ')
+```
+
+Sends the `anthropic-workspace-id` header, which selects the workspace a request runs in. An API key that isn't scoped to one workspace needs it; a key created for a single workspace runs there without it, and Workload Identity Federation tokens pick the workspace when you exchange them.
 
 ### API version
 
@@ -59,11 +84,13 @@ A `withHttpHeader('anthropic-version', ...)` call still wins over this option, s
 
 Defaults to `api.anthropic.com/v1`. Override this when you're routing through a proxy, a gateway, or a self-hosted endpoint. Pass the full API root, `/v1` included: the client adds only the endpoint path (`/messages`, `/models`) after it, and drops a trailing slash.
 
-The official Anthropic SDKs read a base URL from `ANTHROPIC_BASE_URL` with a different meaning: the URL without `/v1`, which they always add. If you take a value meant for them, such as a gateway's documented `https://gateway.example.com/anthropic`, add `/v1` yourself:
+The official Anthropic SDKs read a base URL from `ANTHROPIC_BASE_URL` with a different meaning: the URL without `/v1`, which they add. For a value meant for them, such as a gateway's documented `https://gateway.example.com/anthropic`, use `withBaseUrl()`, which adds `/v1` unless the URL already ends in it:
 
 ```php
-->withBaseUri('https://gateway.example.com/anthropic/v1')
+->withBaseUrl('https://gateway.example.com/anthropic') // requests go to .../anthropic/v1/messages
 ```
+
+A blank value keeps the default endpoint.
 
 ### HTTP client
 
@@ -198,7 +225,19 @@ Without a stream handler, calling `createStreamed()` will throw an exception.
 
 The default timeout depends on your HTTP client. For long-running requests (large context windows, [extended thinking](../usage/thinking.md), [code execution](../usage/server-tools.md)), you'll likely want to increase it.
 
-With Guzzle:
+When the factory builds the HTTP client, set the timeouts on the factory:
+
+```php
+$client = Anthropic::factory()
+    ->withApiKey('your-api-key')
+    ->withTimeout(300)        // seconds for a request; on a stream, Guzzle applies it to each read
+    ->withConnectTimeout(5)   // seconds to connect
+    ->make();
+```
+
+These build a Guzzle client, so they need `guzzlehttp/guzzle` installed. With a client of your own passed to `withHttpClient()`, `make()` throws an `InvalidArgumentException`: set the timeouts on that client instead, as below. A timeout that runs out throws a `TimeoutException` (see [Error Handling](./error-handling.md#http-transport-errors)).
+
+On a client you pass in, with Guzzle:
 
 ```php
 $client = Anthropic::factory()
@@ -219,6 +258,32 @@ $client = Anthropic::factory()
     ->withHttpClient(new Psr18Client($httpClient))
     ->make();
 ```
+
+## Per-request options
+
+`withOptions()` returns a client whose requests carry extra settings, and leaves the client you call it on unchanged. Use it for a request that runs in another workspace, needs a beta the rest of your app doesn't, or carries a tracing header:
+
+```php
+$tenant = $client->withOptions([
+    'workspace_id' => 'wrkspc_01JwQvzr7rXLA5AGx3HKfFUJ',
+    'betas' => ['server-side-fallback-2026-07-01'],
+    'headers' => ['X-Request-Source' => 'billing-report'],
+]);
+
+$tenant->models()->retrieve('claude-sonnet-5-5'); // carries all three
+$client->models()->retrieve('claude-sonnet-5-5'); // carries none of them
+```
+
+| Option | Sends |
+|--------|-------|
+| `headers` | Extra headers, as name => value pairs |
+| `query` | Extra query parameters |
+| `betas` | Betas added to the `anthropic-beta` header, with the factory's and any `betas` passed on a call |
+| `api_version` | The `anthropic-version` header, in place of the factory's |
+| `workspace_id` | The `anthropic-workspace-id` header |
+| `user_profile_id` | The `anthropic-user-profile-id` header, for requests made on an end user's behalf |
+
+This is also how methods that take only an ID, such as `models()->retrieve()` or `batches()->results()`, get a beta header. Calling `withOptions()` on a client that already has options merges them: headers and query parameters by name, betas added up, the rest replaced. An unknown option throws an `InvalidArgumentException`. A timeout per request isn't possible through PSR-18; build a separate client with its own HTTP client for that.
 
 ## PSR-18 client discovery
 

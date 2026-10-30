@@ -10,6 +10,22 @@ Each error status now throws its own subclass of `ErrorException`, such as `NotF
 
 Connection failures throw `ConnectionException`, and timeouts `TimeoutException` (a `ConnectionException`), both subclasses of `TransporterException`, so `catch (TransporterException $e)` still catches them.
 
+### The Contracts Gain withOptions()
+
+**Likelihood Of Impact: Low**
+
+For implementers of the contracts: `ClientContract` and the `@internal` `TransporterContract` have a new `withOptions(array $options)` method, which returns a client (or transporter) whose requests carry extra headers, query parameters, betas, an API version, a workspace or a user profile. A class of your own that implements either interface needs it:
+
+```php
+// ClientContract
+public function withOptions(array $options): ClientContract;
+
+// TransporterContract
+public function withOptions(array $options): self;
+```
+
+`ClientFake` implements it, sharing its queue with the fake it returns.
+
 ## To 1.10.0
 
 ### Every Error Status Throws ErrorException

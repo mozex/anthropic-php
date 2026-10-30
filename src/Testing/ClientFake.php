@@ -15,6 +15,7 @@ use Anthropic\Testing\Resources\CompletionsTestResource;
 use Anthropic\Testing\Resources\FilesTestResource;
 use Anthropic\Testing\Resources\MessagesTestResource;
 use Anthropic\Testing\Resources\ModelsTestResource;
+use Anthropic\ValueObjects\Transporter\RequestOptions;
 use PHPUnit\Framework\Assert as PHPUnit;
 use Stringable;
 use Throwable;
@@ -27,6 +28,18 @@ class ClientFake implements ClientContract
     private array $requests = [];
 
     /**
+     * The options of a fake returned by withOptions(), recorded on each request it sends.
+     *
+     * @var array<string, mixed>
+     */
+    private array $options = [];
+
+    /**
+     * The fake a withOptions() fake came from: it holds the queue and the recorded requests for all of them.
+     */
+    private ?ClientFake $root = null;
+
+    /**
      * @param  array<array-key, ResponseContract|ResponseStreamContract|CompletionsStreamResponse|MessagesStreamResponse|Throwable|Stringable|string>  $responses
      */
     public function __construct(protected array $responses = []) {}
@@ -36,7 +49,46 @@ class ClientFake implements ClientContract
      */
     public function addResponses(array $responses): void
     {
-        $this->responses = [...$this->responses, ...$responses];
+        $root = $this->root();
+        $root->responses = [...$root->responses, ...$responses];
+    }
+
+    /**
+     * Returns a fake that shares this one's queue and recorded requests, and records these options on its requests.
+     *
+     * @param  array<string, mixed>  $options
+     */
+    public function withOptions(array $options): static
+    {
+        // Throws on the options the client would reject.
+        RequestOptions::from($options);
+
+        $fake = clone $this;
+        $fake->root = $this->root();
+        $fake->options = self::mergeOptions($this->options, self::normalizeOptions($options));
+
+        return $fake;
+    }
+
+    /**
+     * Asserts a request to the resource was sent by a withOptions() client carrying at least these options.
+     *
+     * @param  array<string, mixed>  $options
+     */
+    public function assertSentWithOptions(string $resource, array $options): void
+    {
+        if ($options === []) {
+            throw new \InvalidArgumentException('Pass the options to look for.');
+        }
+
+        $options = self::normalizeOptions($options);
+
+        $matching = array_filter(
+            $this->resourcesOf($resource),
+            fn (TestRequest $request): bool => self::containsOptions($request->options(), $options),
+        );
+
+        PHPUnit::assertNotEmpty($matching, "The expected [{$resource}] request with these options was not sent.");
     }
 
     public function assertSent(string $resource, callable|int|null $callback = null): void
@@ -111,12 +163,14 @@ class ClientFake implements ClientContract
 
     public function assertNothingSent(): void
     {
+        $requests = $this->root()->requests;
+
         $resourceNames = implode(
             separator: ', ',
-            array: array_map(fn (TestRequest $request): string => $request->resource(), $this->requests)
+            array: array_map(fn (TestRequest $request): string => $request->resource(), $requests)
         );
 
-        PHPUnit::assertEmpty($this->requests, 'The following requests were sent unexpectedly: '.$resourceNames);
+        PHPUnit::assertEmpty($requests, 'The following requests were sent unexpectedly: '.$resourceNames);
     }
 
     /**
@@ -124,14 +178,19 @@ class ClientFake implements ClientContract
      */
     private function resourcesOf(string $type): array
     {
-        return array_filter($this->requests, fn (TestRequest $request): bool => $request->resource() === $type);
+        return array_filter($this->root()->requests, fn (TestRequest $request): bool => $request->resource() === $type);
     }
 
     public function record(TestRequest $request): ResponseContract|ResponseStreamContract|string
     {
-        $this->requests[] = $request;
+        if ($this->options !== []) {
+            $request = new TestRequest($request->resource(), $request->method(), $request->args(), $this->options);
+        }
 
-        $response = array_shift($this->responses);
+        $root = $this->root();
+        $root->requests[] = $request;
+
+        $response = array_shift($root->responses);
 
         if (is_null($response)) {
             throw new \Exception('No fake responses left.');
@@ -175,5 +234,91 @@ class ClientFake implements ClientContract
     public function files(): FilesTestResource
     {
         return new FilesTestResource($this);
+    }
+
+    private function root(): ClientFake
+    {
+        return $this->root ?? $this;
+    }
+
+    /**
+     * Trims betas and the string options as the client does, and lowercases header names, so assertions don't
+     * depend on spelling.
+     *
+     * @param  array<string, mixed>  $options
+     * @return array<string, mixed>
+     */
+    private static function normalizeOptions(array $options): array
+    {
+        foreach ($options as $key => $value) {
+            $options[$key] = match (true) {
+                $key === 'betas' && is_array($value) => self::normalizeBetas($value),
+                $key === 'headers' && is_array($value) => array_change_key_case($value, CASE_LOWER),
+                is_string($value) => trim($value),
+                default => $value,
+            };
+        }
+
+        return $options;
+    }
+
+    /**
+     * Trims the betas, drops blank ones and de-duplicates the rest.
+     *
+     * @param  array<array-key, mixed>  $betas
+     * @return list<mixed>
+     */
+    private static function normalizeBetas(array $betas): array
+    {
+        $betas = array_map(fn (mixed $beta): mixed => is_string($beta) ? trim($beta) : $beta, $betas);
+
+        return array_values(array_unique(array_filter($betas, fn (mixed $beta): bool => $beta !== '')));
+    }
+
+    /**
+     * Later options win; headers and query merge by name, betas add up.
+     *
+     * @param  array<string, mixed>  $current
+     * @param  array<string, mixed>  $new
+     * @return array<string, mixed>
+     */
+    private static function mergeOptions(array $current, array $new): array
+    {
+        foreach ($new as $key => $value) {
+            $current[$key] = match (true) {
+                in_array($key, ['headers', 'query'], true) && is_array($value) && is_array($current[$key] ?? null) => [...$current[$key], ...$value],
+                $key === 'betas' && is_array($value) && is_array($current[$key] ?? null) => array_values(array_unique([...$current[$key], ...$value])),
+                default => $value,
+            };
+        }
+
+        return $current;
+    }
+
+    /**
+     * @param  array<array-key, mixed>  $options
+     * @param  array<array-key, mixed>  $expected
+     */
+    private static function containsOptions(array $options, array $expected): bool
+    {
+        foreach ($expected as $key => $value) {
+            if (! array_key_exists($key, $options)) {
+                return false;
+            }
+
+            $actual = $options[$key];
+
+            $matches = match (true) {
+                ! is_array($value) || ! is_array($actual) => $actual === $value,
+                array_is_list($value) => array_diff($value, $actual) === [],
+                default => self::containsOptions($actual, $value),
+            };
+
+            if (! $matches) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

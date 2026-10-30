@@ -44,4 +44,11 @@ interface TransporterContract
      * Adds a custom header to the transporter.
      */
     public function addHeader(string $name, string $value): self;
+
+    /**
+     * Returns a transporter whose requests also carry the given options, leaving this one unchanged.
+     *
+     * @param  array<array-key, mixed>  $options
+     */
+    public function withOptions(array $options): self;
 }

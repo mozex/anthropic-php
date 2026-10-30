@@ -15,6 +15,7 @@ use Anthropic\ValueObjects\Transporter\BaseUri;
 use Anthropic\ValueObjects\Transporter\Headers;
 use Anthropic\ValueObjects\Transporter\Payload;
 use Anthropic\ValueObjects\Transporter\QueryParams;
+use Anthropic\ValueObjects\Transporter\RequestOptions;
 use Anthropic\ValueObjects\Transporter\Response;
 use Closure;
 use GuzzleHttp\Exception\BadResponseException;
@@ -112,6 +113,22 @@ class HttpTransporter implements TransporterContract
         $this->headers = $this->headers->withCustomHeader($name, $value);
 
         return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function withOptions(array $options): self
+    {
+        $options = RequestOptions::from($options);
+
+        return new self(
+            $this->client,
+            $this->baseUri,
+            $options->applyToHeaders($this->headers),
+            $options->applyToQueryParams($this->queryParams),
+            $this->streamHandler,
+        );
     }
 
     /**

@@ -79,9 +79,13 @@ $client = Anthropic::factory()
 
 | Method | Purpose |
 |--------|---------|
-| `withApiKey()` | Your Anthropic API key. Required. |
+| `withApiKey()` | Your Anthropic API key. |
+| `withAuthToken()` | A bearer token, such as a Workload Identity Federation access token, in place of the API key. |
+| `withWorkspaceId()` | The workspace requests run in, for keys that aren't scoped to one. |
 | `withApiVersion()` | The `anthropic-version` header. Defaults to `2023-06-01`; `2026-10-21` rejects some requests the older version accepts. |
 | `withBaseUri()` | Override the API endpoint, `/v1` included. Defaults to `api.anthropic.com/v1`. Useful for proxies or self-hosted setups. |
+| `withBaseUrl()` | Override it with a URL meant for the official SDKs' `ANTHROPIC_BASE_URL`, which leaves out `/v1`. |
+| `withTimeout()`, `withConnectTimeout()` | Timeouts of the Guzzle client the factory builds. |
 | `withHttpClient()` | Provide your own PSR-18 HTTP client instead of auto-discovery. |
 | `withHttpHeader()` | Add custom HTTP headers to every request. |
 | `withQueryParam()` | Add query parameters to every request URL. |
