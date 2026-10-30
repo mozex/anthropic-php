@@ -103,6 +103,27 @@ class HttpTransporter implements TransporterContract
     /**
      * {@inheritDoc}
      */
+    public function requestRaw(Payload $payload): Response
+    {
+        $request = $payload->toRequest($this->baseUri, $this->headers, $this->queryParams);
+
+        $response = $this->send($request, $this->client->sendRequest(...));
+
+        $contents = (string) $response->getBody();
+
+        $this->throwIfError($response, $contents);
+
+        // A body that isn't a JSON object or array, a 204's empty one and JSONL included, stays a string.
+        $mediaType = strtolower(trim(explode(';', $response->getHeaderLine('Content-Type'))[0]));
+        $isJson = $mediaType === 'application/json' || str_ends_with($mediaType, '+json');
+        $data = $isJson ? json_decode($contents, true) : null;
+
+        return Response::from(is_array($data) ? $data : $contents, $response->getHeaders(), $response->getStatusCode());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function requestStream(Payload $payload): ResponseInterface
     {
         $request = $payload->toRequest($this->baseUri, $this->headers, $this->queryParams);

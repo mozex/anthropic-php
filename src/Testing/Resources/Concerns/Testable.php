@@ -6,6 +6,7 @@ namespace Anthropic\Testing\Resources\Concerns;
 
 use Anthropic\Contracts\ResponseContract;
 use Anthropic\Contracts\ResponseStreamContract;
+use Anthropic\Responses\Raw\RawResponse;
 use Anthropic\Testing\ClientFake;
 use Anthropic\Testing\Requests\TestRequest;
 
@@ -18,7 +19,7 @@ trait Testable
     /**
      * @param  array<string, mixed>  $args
      */
-    protected function record(string $method, array $args = []): ResponseContract|ResponseStreamContract|string
+    protected function record(string $method, array $args = []): ResponseContract|ResponseStreamContract|RawResponse|string
     {
         return $this->fake->record(new TestRequest($this->resource(), $method, $args));
     }

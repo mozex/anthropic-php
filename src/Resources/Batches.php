@@ -11,9 +11,11 @@ use Anthropic\Responses\Batches\BatchResultResponse;
 use Anthropic\Responses\Batches\DeletedBatchResponse;
 use Anthropic\ValueObjects\Transporter\Payload;
 use Anthropic\ValueObjects\Transporter\Response;
+use Generator;
 
 class Batches implements BatchesContract
 {
+    use Concerns\Paginates;
     use Concerns\Transportable;
 
     /**
@@ -63,6 +65,18 @@ class Batches implements BatchesContract
         $response = $this->transporter->requestObject($payload);
 
         return BatchListResponse::from($response->data(), $response->meta());
+    }
+
+    /**
+     * Lists every Message Batch, page by page: the client follows the cursor until the last page and yields one
+     * `BatchResponse` at a time. Nothing is requested until you loop over it.
+     *
+     * @param  array<string, mixed>  $parameters
+     * @return Generator<int, BatchResponse, mixed, void>
+     */
+    public function iterate(array $parameters = []): Generator
+    {
+        return $this->paginate($parameters, $this->list(...), fn (BatchListResponse $page): array => $page->data);
     }
 
     /**

@@ -34,6 +34,15 @@ interface TransporterContract
     public function requestContent(Payload $payload): string;
 
     /**
+     * Sends a request to any path, returning the status, the body (decoded when it's JSON) and the headers.
+     *
+     * @return Response<array<array-key, mixed>|string>
+     *
+     * @throws ErrorException|TransporterException|RateLimitException
+     */
+    public function requestRaw(Payload $payload): Response;
+
+    /**
      * Sends a stream request to a server.
      *
      * @throws ErrorException|RateLimitException

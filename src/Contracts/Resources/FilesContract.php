@@ -7,6 +7,7 @@ namespace Anthropic\Contracts\Resources;
 use Anthropic\Responses\Files\DeletedFileResponse;
 use Anthropic\Responses\Files\FileListResponse;
 use Anthropic\Responses\Files\FileResponse;
+use Generator;
 
 interface FilesContract
 {
@@ -27,6 +28,15 @@ interface FilesContract
      * @param  array<string, mixed>  $parameters
      */
     public function list(array $parameters = []): FileListResponse;
+
+    /**
+     * Lists every file, page by page: the client follows the cursor until the last page and yields one
+     * `FileResponse` at a time. Nothing is requested until you loop over it.
+     *
+     * @param  array<string, mixed>  $parameters
+     * @return Generator<int, FileResponse, mixed, void>
+     */
+    public function iterate(array $parameters = []): Generator;
 
     /**
      * Retrieves metadata for a specific file.

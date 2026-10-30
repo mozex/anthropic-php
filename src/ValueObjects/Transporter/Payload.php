@@ -7,6 +7,7 @@ namespace Anthropic\ValueObjects\Transporter;
 use Anthropic\Contracts\Request;
 use Anthropic\Enums\Transporter\ContentType;
 use Anthropic\Enums\Transporter\Method;
+use Anthropic\Exceptions\InvalidArgumentException;
 use Anthropic\ValueObjects\ResourceUri;
 use Http\Discovery\Psr17Factory;
 use Http\Message\MultipartStream\MultipartStreamBuilder;
@@ -119,6 +120,25 @@ class Payload
     }
 
     /**
+     * Creates a new Payload value object for any path: the parameters go in the query for GET and DELETE, and in a
+     * JSON body for POST and PUT. A `betas` parameter becomes the request's `anthropic-beta` header, as elsewhere.
+     *
+     * @param  array<string, mixed>  $parameters
+     */
+    public static function raw(string $method, string $path, array $parameters = []): self
+    {
+        $httpMethod = Method::tryFrom(strtoupper(trim($method)));
+
+        if ($httpMethod === null) {
+            throw new InvalidArgumentException("The method [{$method}] isn't one of GET, POST, PUT or DELETE.");
+        }
+
+        [$parameters, $betas] = self::splitBetas($parameters);
+
+        return new self(ContentType::JSON, $httpMethod, ResourceUri::raw($path), $parameters, $betas);
+    }
+
+    /**
      * Returns a new Payload with the given betas merged into this one.
      *
      * Resources use this to auto-inject the beta header they need (e.g. `files-api-2025-04-14`) while keeping any betas the user already passed via the `betas` parameter.
@@ -148,17 +168,20 @@ class Payload
         $uri = $baseUri->toString().$this->uri->toString();
 
         $queryParams = $queryParams->toArray();
-        if ($this->method === Method::GET) {
+        if ($this->method === Method::GET || $this->method === Method::DELETE) {
             $queryParams = [...$queryParams, ...$this->parameters];
         }
 
-        if ($queryParams !== []) {
-            $uri .= '?'.http_build_query($queryParams);
+        $query = self::buildQuery($queryParams);
+
+        if ($query !== '') {
+            // A raw request's path may carry a query of its own.
+            $uri .= (str_contains($uri, '?') ? '&' : '?').$query;
         }
 
         $headers = $headers->withContentType($this->contentType);
 
-        if ($this->method === Method::POST) {
+        if ($this->method === Method::POST || $this->method === Method::PUT) {
             if ($this->contentType === ContentType::MULTIPART) {
                 $streamBuilder = new MultipartStreamBuilder($psr17Factory);
 
@@ -204,6 +227,32 @@ class Payload
         }
 
         return $request;
+    }
+
+    /**
+     * Builds the query string, sending a top-level list (an array with int keys, gaps included, as `array_filter()`
+     * leaves them) as `key[]=` once per value: the API ignores the indexed `key[0]=` that `http_build_query()` writes
+     * for one. Other values keep `http_build_query()`'s form.
+     *
+     * @param  array<array-key, mixed>  $parameters
+     */
+    private static function buildQuery(array $parameters): string
+    {
+        $pairs = [];
+
+        foreach ($parameters as $key => $value) {
+            if (is_array($value) && array_filter(array_keys($value), is_string(...)) === []) {
+                foreach ($value as $item) {
+                    $pairs[] = http_build_query([$key.'[]' => $item]);
+                }
+
+                continue;
+            }
+
+            $pairs[] = http_build_query([$key => $value]);
+        }
+
+        return implode('&', array_filter($pairs, fn (string $pair): bool => $pair !== ''));
     }
 
     /**

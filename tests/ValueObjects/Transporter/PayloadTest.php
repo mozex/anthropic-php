@@ -3,11 +3,13 @@
 declare(strict_types=1);
 
 use Anthropic\Enums\Transporter\ContentType;
+use Anthropic\Exceptions\InvalidArgumentException;
 use Anthropic\ValueObjects\ApiKey;
 use Anthropic\ValueObjects\Transporter\BaseUri;
 use Anthropic\ValueObjects\Transporter\Headers;
 use Anthropic\ValueObjects\Transporter\Payload;
 use Anthropic\ValueObjects\Transporter\QueryParams;
+use Psr\Http\Message\RequestInterface;
 
 it('has a method', function () {
     $payload = Payload::create('models', []);
@@ -217,10 +219,81 @@ test('withBetas on a payload with no user-provided betas still sets the header',
     expect($request->getHeaderLine('anthropic-beta'))->toBe('files-api-2025-04-14');
 });
 
-test('a list parameter goes into the query with indexed brackets', function () {
-    $payload = Payload::list('models', ['lifecycle' => ['retired']]);
+/**
+ * The request a payload builds against the default base URI and a key.
+ */
+function payloadRequest(Payload $payload, ?QueryParams $queryParams = null): RequestInterface
+{
+    return $payload->toRequest(BaseUri::from('api.anthropic.com/v1'), Headers::withAuthorization(ApiKey::from('foo')), $queryParams ?? QueryParams::create());
+}
 
-    $request = $payload->toRequest(BaseUri::from('api.anthropic.com/v1'), Headers::withAuthorization(ApiKey::from('foo')), QueryParams::create());
+test('a list parameter goes into the query as key[]= once per value', function () {
+    expect(payloadRequest(Payload::list('models', ['lifecycle' => ['retired']]))->getUri()->getQuery())->toBe('lifecycle%5B%5D=retired')
+        ->and(payloadRequest(Payload::list('models', ['lifecycle' => ['active', 'deprecated'], 'limit' => 2]))->getUri()->getQuery())
+        ->toBe('lifecycle%5B%5D=active&lifecycle%5B%5D=deprecated&limit=2')
+        // array_filter() leaves gaps in the keys
+        ->and(payloadRequest(Payload::list('models', ['lifecycle' => [0 => 'active', 2 => 'retired']]))->getUri()->getQuery())
+        ->toBe('lifecycle%5B%5D=active&lifecycle%5B%5D=retired');
+});
 
-    expect($request->getUri()->getQuery())->toBe('lifecycle%5B0%5D=retired');
+test('the query keeps the keys of a map, skips nulls and empty lists, and keeps the factory query params', function () {
+    // composed: no list endpoint takes a map today
+    $request = payloadRequest(
+        Payload::list('models', ['metadata' => ['team' => 'billing'], 'after_id' => null, 'lifecycle' => []]),
+        QueryParams::create()->withParam('region', 'eu'),
+    );
+
+    expect($request->getUri()->getQuery())->toBe('region=eu&metadata%5Bteam%5D=billing');
+});
+
+test('a raw payload sends GET and DELETE parameters in the query and POST and PUT ones in a JSON body', function (string $method, string $query, string $body) {
+    // composed: the Files list's parameters, sent with every method to show where they go
+    $request = payloadRequest(Payload::raw($method, 'files', ['limit' => 2, 'ids' => ['file_011CNha8iCJcU1wXNR6q4V8w']]));
+
+    expect($request->getMethod())->toBe($method)
+        ->and($request->getUri()->getQuery())->toBe($query)
+        ->and((string) $request->getBody())->toBe($body);
+})->with([
+    'GET' => ['GET', 'limit=2&ids%5B%5D=file_011CNha8iCJcU1wXNR6q4V8w', ''],
+    'DELETE' => ['DELETE', 'limit=2&ids%5B%5D=file_011CNha8iCJcU1wXNR6q4V8w', ''],
+    'POST' => ['POST', '', '{"limit":2,"ids":["file_011CNha8iCJcU1wXNR6q4V8w"]}'],
+    'PUT' => ['PUT', '', '{"limit":2,"ids":["file_011CNha8iCJcU1wXNR6q4V8w"]}'],
+]);
+
+test('a raw path may start with a slash or /v1, as the API reference prints it', function (string $path) {
+    expect(payloadRequest(Payload::raw('GET', $path))->getUri()->getPath())->toBe('/v1/models/claude-opus-5-5');
+})->with(['models/claude-opus-5-5', '/models/claude-opus-5-5', '/v1/models/claude-opus-5-5', 'v1/models/claude-opus-5-5', ' /v1/models/claude-opus-5-5 ']);
+
+test('a full URL in place of a raw path throws, and a bare v1 is the root', function () {
+    expect(fn () => Payload::raw('GET', 'https://api.anthropic.com/v1/models'))->toThrow(InvalidArgumentException::class, 'is a URL')
+        ->and(payloadRequest(Payload::raw('GET', '/v1'))->getUri()->getPath())->toBe('/v1/');
+});
+
+test('a raw path with a query of its own gets the parameters after it', function () {
+    expect(payloadRequest(Payload::raw('GET', 'models?limit=1', ['after_id' => 'claude-opus-5-5']))->getUri()->getQuery())
+        ->toBe('limit=1&after_id=claude-opus-5-5');
+});
+
+test('a raw payload takes the method in any case and rejects one the API has no use for', function () {
+    expect(payloadRequest(Payload::raw('get', 'models'))->getMethod())->toBe('GET')
+        ->and(fn () => Payload::raw('PATCH', 'models'))->toThrow(InvalidArgumentException::class, 'The method [PATCH]');
+});
+
+test('betas in raw params become a header', function () {
+    $request = payloadRequest(Payload::raw('GET', 'skills', ['source' => 'custom', 'betas' => ['skills-2025-10-02']]));
+
+    expect($request->getHeaderLine('anthropic-beta'))->toBe('skills-2025-10-02')
+        ->and($request->getUri()->getQuery())->toBe('source=custom');
+});
+
+test('delete and cancel requests are built as before', function () {
+    $delete = payloadRequest(Payload::delete('files', 'file_011CNha8iCJcU1wXNR6q4V8w'));
+    $cancel = payloadRequest(Payload::cancel('messages/batches', 'msgbatch_04Rka1yCsMLGPnR7kfPdgR8x'));
+
+    expect($delete->getMethod())->toBe('DELETE')
+        ->and($delete->getUri()->getQuery())->toBe('')
+        ->and((string) $delete->getBody())->toBe('')
+        ->and($cancel->getMethod())->toBe('POST')
+        ->and((string) $cancel->getUri())->toBe('https://api.anthropic.com/v1/messages/batches/msgbatch_04Rka1yCsMLGPnR7kfPdgR8x/cancel')
+        ->and((string) $cancel->getBody())->toBe('[]');
 });

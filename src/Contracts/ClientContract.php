@@ -9,6 +9,7 @@ use Anthropic\Contracts\Resources\CompletionsContract;
 use Anthropic\Contracts\Resources\FilesContract;
 use Anthropic\Contracts\Resources\MessagesContract;
 use Anthropic\Contracts\Resources\ModelsContract;
+use Anthropic\Responses\Raw\RawResponse;
 
 interface ClientContract
 {
@@ -56,4 +57,12 @@ interface ClientContract
      * @param  array<string, mixed>  $options
      */
     public function withOptions(array $options): ClientContract;
+
+    /**
+     * Sends a request to any API path, for an endpoint the client has no method for yet: the parameters go in the
+     * query for GET and DELETE and in a JSON body for POST and PUT. An error status throws as on every other method.
+     *
+     * @param  array<string, mixed>  $parameters
+     */
+    public function request(string $method, string $path, array $parameters = []): RawResponse;
 }

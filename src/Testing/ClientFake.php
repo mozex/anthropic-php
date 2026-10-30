@@ -9,12 +9,14 @@ use Anthropic\Contracts\ResponseContract;
 use Anthropic\Contracts\ResponseStreamContract;
 use Anthropic\Responses\Completions\StreamResponse as CompletionsStreamResponse;
 use Anthropic\Responses\Messages\StreamResponse as MessagesStreamResponse;
+use Anthropic\Responses\Raw\RawResponse;
 use Anthropic\Testing\Requests\TestRequest;
 use Anthropic\Testing\Resources\BatchesTestResource;
 use Anthropic\Testing\Resources\CompletionsTestResource;
 use Anthropic\Testing\Resources\FilesTestResource;
 use Anthropic\Testing\Resources\MessagesTestResource;
 use Anthropic\Testing\Resources\ModelsTestResource;
+use Anthropic\Testing\Resources\RawTestResource;
 use Anthropic\ValueObjects\Transporter\RequestOptions;
 use PHPUnit\Framework\Assert as PHPUnit;
 use Stringable;
@@ -40,12 +42,12 @@ class ClientFake implements ClientContract
     private ?ClientFake $root = null;
 
     /**
-     * @param  array<array-key, ResponseContract|ResponseStreamContract|CompletionsStreamResponse|MessagesStreamResponse|Throwable|Stringable|string>  $responses
+     * @param  array<array-key, ResponseContract|ResponseStreamContract|CompletionsStreamResponse|MessagesStreamResponse|RawResponse|Throwable|Stringable|string>  $responses
      */
     public function __construct(protected array $responses = []) {}
 
     /**
-     * @param  array<array-key, ResponseContract|ResponseStreamContract|CompletionsStreamResponse|MessagesStreamResponse|Throwable|Stringable|string>  $responses
+     * @param  array<array-key, ResponseContract|ResponseStreamContract|CompletionsStreamResponse|MessagesStreamResponse|RawResponse|Throwable|Stringable|string>  $responses
      */
     public function addResponses(array $responses): void
     {
@@ -181,7 +183,7 @@ class ClientFake implements ClientContract
         return array_filter($this->root()->requests, fn (TestRequest $request): bool => $request->resource() === $type);
     }
 
-    public function record(TestRequest $request): ResponseContract|ResponseStreamContract|string
+    public function record(TestRequest $request): ResponseContract|ResponseStreamContract|RawResponse|string
     {
         if ($this->options !== []) {
             $request = new TestRequest($request->resource(), $request->method(), $request->args(), $this->options);
@@ -234,6 +236,16 @@ class ClientFake implements ClientContract
     public function files(): FilesTestResource
     {
         return new FilesTestResource($this);
+    }
+
+    /**
+     * Records the request under `Raw::class` and returns the next queued response, a `RawResponse::fake()`.
+     *
+     * @param  array<string, mixed>  $parameters
+     */
+    public function request(string $method, string $path, array $parameters = []): RawResponse
+    {
+        return (new RawTestResource($this))->request($method, $path, $parameters);
     }
 
     private function root(): ClientFake

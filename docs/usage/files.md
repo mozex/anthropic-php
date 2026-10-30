@@ -104,18 +104,15 @@ $response->lastId;  // 'file_011CPMxVD3fHLUhvTqtsQA5w'
 $response->hasMore; // false
 ```
 
-Pagination works like the Models and Batches endpoints. `limit` goes up to 1000 and defaults to 20. Use `after_id` with the previous page's `lastId` to walk forward, or `before_id` with `firstId` to walk backward:
+Pagination works like the Models and Batches endpoints. `limit` goes up to 1000 and defaults to 20. Use `after_id` with the previous page's `lastId` to walk forward, or `before_id` with `firstId` to walk backward. `iterate()` does the walking for you and yields one file at a time, requesting each page when the loop reaches it:
 
 ```php
-$page1 = $client->files()->list(['limit' => 100]);
-
-while ($page1->hasMore) {
-    $page1 = $client->files()->list([
-        'limit' => 100,
-        'after_id' => $page1->lastId,
-    ]);
+foreach ($client->files()->iterate(['limit' => 100]) as $file) {
+    $file->filename;
 }
 ```
+
+`iterate()` also follows a page's `next_page`, the cursor the generally available Files API answers with in place of `after_id`.
 
 There's also an optional `scope_id` parameter to filter by session scope, which matters if you're using files inside a session.
 

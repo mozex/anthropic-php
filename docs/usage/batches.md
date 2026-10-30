@@ -125,6 +125,16 @@ $response->firstId; // 'msgbatch_04Rka1yCsMLGPnR7kfPdgR8x'
 $response->lastId;  // 'msgbatch_07V2nm5PqB3bP8szLgTmn1EG'
 ```
 
+`iterate()` walks every page for you, following `lastId`, and yields one batch at a time. Nothing is requested until you loop:
+
+```php
+foreach ($client->batches()->iterate(['limit' => 100]) as $batch) {
+    if ($batch->processingStatus === 'in_progress') {
+        // ...
+    }
+}
+```
+
 ## Canceling a batch
 
 Cancel a batch that's still processing. Requests that are already in-progress will finish, but no new requests will start:

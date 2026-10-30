@@ -9,9 +9,11 @@ use Anthropic\Responses\Models\ListResponse;
 use Anthropic\Responses\Models\RetrieveResponse;
 use Anthropic\ValueObjects\Transporter\Payload;
 use Anthropic\ValueObjects\Transporter\Response;
+use Generator;
 
 class Models implements ModelsContract
 {
+    use Concerns\Paginates;
     use Concerns\Transportable;
 
     /**
@@ -29,6 +31,18 @@ class Models implements ModelsContract
         $response = $this->transporter->requestObject($payload);
 
         return ListResponse::from($response->data(), $response->meta());
+    }
+
+    /**
+     * Lists every model, page by page: the client follows the cursor until the last page and yields one
+     * `RetrieveResponse` at a time. Nothing is requested until you loop over it.
+     *
+     * @param  array<string, mixed>  $parameters
+     * @return Generator<int, RetrieveResponse, mixed, void>
+     */
+    public function iterate(array $parameters = []): Generator
+    {
+        return $this->paginate($parameters, $this->list(...), fn (ListResponse $page): array => $page->data);
     }
 
     /**

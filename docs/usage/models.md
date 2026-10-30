@@ -58,22 +58,15 @@ $previousPage = $client->models()->list([
 ]);
 ```
 
-To fetch all models:
+To walk every page, use `iterate()`. It takes the same parameters as `list()`, follows `after_id` from page to page (or `before_id`, when you start with one), and yields one model at a time:
 
 ```php
-$allModels = [];
-
-$response = $client->models()->list(['limit' => 20]);
-$allModels = array_merge($allModels, $response->data);
-
-while ($response->hasMore) {
-    $response = $client->models()->list([
-        'limit' => 20,
-        'after_id' => $response->lastId,
-    ]);
-    $allModels = array_merge($allModels, $response->data);
+foreach ($client->models()->iterate(['limit' => 100]) as $model) {
+    $model->id; // 'claude-opus-5-5', 'claude-sonnet-5-5', ...
 }
 ```
+
+`iterate()` returns a generator, so nothing is requested until you loop, and each page is fetched when the loop reaches it: breaking out early saves the remaining requests. `iterator_to_array()` collects every model into one array.
 
 ## Retrieving a single model
 
@@ -103,6 +96,14 @@ $model->lifecycle;    // 'active', 'deprecated' or 'retired'
 $model->line;         // 'sonnet'
 $model->deprecatedAt; // when it was deprecated, or null
 $model->retiresAt;    // when requests to it start failing, or null
+```
+
+To list the models in given stages, pass `lifecycle` with up to three of `active`, `deprecated` and `retired`. Retired models show up only when you ask for them:
+
+```php
+$retired = $client->models()->list(['lifecycle' => ['retired']]);
+
+$current = $client->models()->iterate(['lifecycle' => ['active']]);
 ```
 
 `lifecycle` is the signal to act on: a `deprecated` model still answers, and its `retiresAt` tells you how long you have to move off it. A deprecated model whose `retiresAt` is already in the past is overdue to retire, so treat it as retired. `line` groups the generations of one family (`opus`, `sonnet`, `haiku` and so on), and new lines may appear. All four fields are `null` when the API doesn't send them.

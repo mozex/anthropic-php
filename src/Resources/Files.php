@@ -10,9 +10,11 @@ use Anthropic\Responses\Files\FileListResponse;
 use Anthropic\Responses\Files\FileResponse;
 use Anthropic\ValueObjects\Transporter\Payload;
 use Anthropic\ValueObjects\Transporter\Response;
+use Generator;
 
 class Files implements FilesContract
 {
+    use Concerns\Paginates;
     use Concerns\Transportable;
 
     /**
@@ -52,6 +54,18 @@ class Files implements FilesContract
         $response = $this->transporter->requestObject($payload);
 
         return FileListResponse::from($response->data(), $response->meta());
+    }
+
+    /**
+     * Lists every file, page by page: the client follows the cursor until the last page and yields one
+     * `FileResponse` at a time. Nothing is requested until you loop over it.
+     *
+     * @param  array<string, mixed>  $parameters
+     * @return Generator<int, FileResponse, mixed, void>
+     */
+    public function iterate(array $parameters = []): Generator
+    {
+        return $this->paginate($parameters, $this->list(...), fn (FileListResponse $page): array => $page->data);
     }
 
     /**

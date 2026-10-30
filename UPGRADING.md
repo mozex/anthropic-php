@@ -26,6 +26,31 @@ public function withOptions(array $options): self;
 
 `ClientFake` implements it, sharing its queue with the fake it returns.
 
+### The Contracts Gain request() And iterate()
+
+**Likelihood Of Impact: Low**
+
+For implementers of the contracts: `ClientContract` has a new `request()` method, which sends a request to any API path, and `ModelsContract`, `BatchesContract` and `FilesContract` have a new `iterate()`, which walks every page of `list()`. The `@internal` `TransporterContract` has a new `requestRaw()`. A class of your own that implements one of them needs the method:
+
+```php
+// ClientContract
+public function request(string $method, string $path, array $parameters = []): RawResponse;
+
+// ModelsContract, BatchesContract, FilesContract
+public function iterate(array $parameters = []): Generator;
+
+// TransporterContract
+public function requestRaw(Payload $payload): Response;
+```
+
+`ClientFake` and its test resources implement them. No class is final, so a subclass of `Client`, `ClientFake`, the Models, Batches or Files resources or their test resources that already declares a `request()` or `iterate()` method of its own needs these signatures, or a new name for its method.
+
+### A List In The Query Is Sent As key[]=
+
+**Likelihood Of Impact: Low**
+
+A list in a query parameter, such as the Models list's `lifecycle`, now goes out as `lifecycle[]=retired` once per value. Before, it went out as `lifecycle[0]=retired`, which the API accepts and ignores, so the filter did nothing. If your code passed such a list, the results now follow it.
+
 ## To 1.10.0
 
 ### Every Error Status Throws ErrorException

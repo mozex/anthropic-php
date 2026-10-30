@@ -54,6 +54,7 @@ Every response class has a `fake()` method:
 | `Files\FileResponse::fake()` | Files upload/retrieve metadata |
 | `Files\FileListResponse::fake()` | Files list |
 | `Files\DeletedFileResponse::fake()` | Files delete |
+| `Raw\RawResponse::fake()` | `request()` (see [Raw Requests](../usage/raw-requests.md)) |
 
 ## Overriding response fields
 
@@ -323,3 +324,24 @@ $second = $client->messages()->create([...]); // Returns "Second"
 ```
 
 If you make more requests than you have fake responses, the client will throw an error.
+
+## Faking pages for iterate()
+
+`iterate()` on the fake calls the fake's own `list()` for each page, so every page is a queued response and a recorded `list` request. Queue a page whose cursor says there's more, then the last one:
+
+```php
+use Anthropic\Resources\Models;
+use Anthropic\Responses\Models\ListResponse;
+
+$client = new ClientFake([
+    ListResponse::fake(['has_more' => true, 'last_id' => 'claude-sonnet-4-6']),
+    ListResponse::fake(),
+]);
+
+$models = iterator_to_array($client->models()->iterate());
+
+$client->assertSent(Models::class, 2);
+$client->assertSent(Models::class, fn (string $method, array $parameters = []): bool => ($parameters['after_id'] ?? null) === 'claude-sonnet-4-6');
+```
+
+The list fakes end with `has_more` false, so a single `ListResponse::fake()` is one page. The walk takes the next page from the queue only when the loop reaches it, so a loop body that makes fake calls of its own needs their responses queued between the pages.

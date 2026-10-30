@@ -8,6 +8,7 @@ use Anthropic\Responses\Batches\BatchListResponse;
 use Anthropic\Responses\Batches\BatchResponse;
 use Anthropic\Responses\Batches\BatchResultResponse;
 use Anthropic\Responses\Batches\DeletedBatchResponse;
+use Generator;
 
 interface BatchesContract
 {
@@ -35,6 +36,15 @@ interface BatchesContract
      * @param  array<string, mixed>  $parameters
      */
     public function list(array $parameters = []): BatchListResponse;
+
+    /**
+     * Lists every Message Batch, page by page: the client follows the cursor until the last page and yields one
+     * `BatchResponse` at a time. Nothing is requested until you loop over it.
+     *
+     * @param  array<string, mixed>  $parameters
+     * @return Generator<int, BatchResponse, mixed, void>
+     */
+    public function iterate(array $parameters = []): Generator;
 
     /**
      * Cancels a Message Batch.

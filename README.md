@@ -29,6 +29,7 @@ A community-maintained PHP SDK for the [Anthropic API](https://platform.claude.c
   - [Batches](https://mozex.dev/docs/anthropic-php/v1/usage/batches)
   - [Files](https://mozex.dev/docs/anthropic-php/v1/usage/files)
   - [Completions](https://mozex.dev/docs/anthropic-php/v1/usage/completions)
+  - [Raw Requests](https://mozex.dev/docs/anthropic-php/v1/usage/raw-requests)
 - Reference
   - [Configuration](https://mozex.dev/docs/anthropic-php/v1/reference/configuration)
   - [Error Handling](https://mozex.dev/docs/anthropic-php/v1/reference/error-handling)

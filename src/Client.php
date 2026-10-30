@@ -11,6 +11,8 @@ use Anthropic\Resources\Completions;
 use Anthropic\Resources\Files;
 use Anthropic\Resources\Messages;
 use Anthropic\Resources\Models;
+use Anthropic\Resources\Raw;
+use Anthropic\Responses\Raw\RawResponse;
 
 class Client implements ClientContract
 {
@@ -84,5 +86,16 @@ class Client implements ClientContract
     {
         // @phpstan-ignore new.static (users extend Client; a subclass keeps the constructor or overrides this)
         return new static($this->transporter->withOptions($options));
+    }
+
+    /**
+     * Sends a request to any API path, for an endpoint the client has no method for yet: the parameters go in the
+     * query for GET and DELETE and in a JSON body for POST and PUT. An error status throws as on every other method.
+     *
+     * @param  array<string, mixed>  $parameters
+     */
+    public function request(string $method, string $path, array $parameters = []): RawResponse
+    {
+        return (new Raw($this->transporter))->request($method, $path, $parameters);
     }
 }

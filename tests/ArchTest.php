@@ -63,6 +63,7 @@ arch('value objects')->expect('Anthropic\ValueObjects')->toOnlyUse([
 arch('client')->expect('Anthropic\Client')->toOnlyUse([
     'Anthropic\Resources',
     'Anthropic\Contracts',
+    'Anthropic\Responses\Raw\RawResponse',
 ]);
 
 arch('anthropic')->expect('Anthropic')->toOnlyUse([

@@ -110,7 +110,9 @@ This documentation covers every feature the client supports:
 - [Token Counting](./usage/token-counting.md): Count tokens before sending
 - [Models](./usage/models.md): List and inspect available models
 - [Batches](./usage/batches.md): Process large volumes of requests asynchronously
+- [Files](./usage/files.md): Upload files once and reference them in messages
 - [Completions](./usage/completions.md): The deprecated Text Completions API
+- [Raw Requests](./usage/raw-requests.md): Call an endpoint the client has no method for yet
 
 **Reference** covers cross-cutting concerns:
 
