@@ -407,6 +407,26 @@ $fake->assertNotSentOn('billing', Messages::class);
 
 Calls through the fake itself carry no connection name. A subclass can give them one by setting the protected `$connection` property, as the Laravel package's fake does for its default connection.
 
+## Faking a wait for a batch
+
+`batches()->wait()` on the fake is a recorded `retrieve()` per poll, answered from the queue, and it never sleeps. `BatchResponse::fake()` has ended, so an empty fake returns after one poll; queue the states in between to test the polling:
+
+```php
+use Anthropic\Resources\Batches;
+use Anthropic\Responses\Batches\BatchResponse;
+
+$client = new ClientFake([
+    BatchResponse::fake(['processing_status' => 'in_progress']),
+    BatchResponse::fake(),
+]);
+
+$batch = $client->batches()->wait('msgbatch_04Rka1yCsMLGPnR7kfPdgR8x');
+
+$client->assertSentTimes(Batches::class, 2);
+```
+
+For the timeout, pass a `timeout` and queue a batch in progress for each poll it makes: `timeout: 100` with `interval: 60` polls at 0, 60 and 100 seconds, so three. A `respondTo()` that always answers `in_progress` never runs out, so `wait()` without a timeout would poll it forever.
+
 ## Faking pages for iterate()
 
 `iterate()` on the fake calls the fake's own `list()` for each page, so every page is a queued response and a recorded `list` request. Queue a page whose cursor says there's more, then the last one:

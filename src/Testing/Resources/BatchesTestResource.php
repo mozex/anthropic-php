@@ -7,17 +7,22 @@ namespace Anthropic\Testing\Resources;
 use Anthropic\Contracts\Resources\BatchesContract;
 use Anthropic\Resources\Batches;
 use Anthropic\Resources\Concerns\Paginates;
+use Anthropic\Resources\Concerns\WaitsForBatches;
 use Anthropic\Responses\Batches\BatchListResponse;
 use Anthropic\Responses\Batches\BatchResponse;
 use Anthropic\Responses\Batches\BatchResultResponse;
 use Anthropic\Responses\Batches\DeletedBatchResponse;
 use Anthropic\Testing\Resources\Concerns\Testable;
+use Closure;
 use Generator;
 
 class BatchesTestResource implements BatchesContract
 {
     use Paginates;
     use Testable;
+    use WaitsForBatches {
+        wait as private poll;
+    }
 
     protected function resource(): string
     {
@@ -32,6 +37,17 @@ class BatchesTestResource implements BatchesContract
     public function retrieve(string $id): BatchResponse
     {
         return $this->record(__FUNCTION__, func_get_args());
+    }
+
+    /**
+     * Retrieves the batch until it has ended, each poll a recorded `retrieve()`, and never sleeps unless given a
+     * `$sleep`: queue the batch's states, such as one `in_progress` and then one `ended`.
+     *
+     * @param  (Closure(int): void)|null  $sleep
+     */
+    public function wait(string $id, int $interval = 60, ?int $timeout = null, ?Closure $sleep = null): BatchResponse
+    {
+        return $this->poll($id, $interval, $timeout, $sleep ?? static function (int $seconds): void {});
     }
 
     public function list(array $parameters = []): BatchListResponse

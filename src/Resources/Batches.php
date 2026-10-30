@@ -17,6 +17,7 @@ class Batches implements BatchesContract
 {
     use Concerns\Paginates;
     use Concerns\Transportable;
+    use Concerns\WaitsForBatches;
 
     /**
      * Creates a Message Batch.

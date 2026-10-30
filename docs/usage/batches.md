@@ -74,7 +74,35 @@ Batch processing statuses:
 | `canceling` | Cancellation requested, finishing in-progress requests |
 | `ended` | All requests have completed (check `requestCounts` for breakdown) |
 
-A canceled batch ends up with status `ended`, not a separate `canceled` status. The `requestCounts` breakdown tells you how many individual requests succeeded, errored, were canceled, or expired.
+A canceled batch ends up with status `ended`, not a separate `canceled` status. The `requestCounts` breakdown tells you how many individual requests succeeded, errored, were canceled, or expired. `isEnded()` is true only for `ended`; a batch that's still `canceling` hasn't ended.
+
+### Waiting for a batch to end
+
+`wait()` retrieves the batch every 60 seconds until it has ended, then returns it:
+
+```php
+$batch = $client->batches()->wait('msgbatch_04Rka1yCsMLGPnR7kfPdgR8x');
+
+$batch->isEnded(); // true
+```
+
+`interval` sets the seconds between polls. With a `timeout` in seconds, the last poll comes at the timeout and `wait()` returns the batch as it was then, so check `isEnded()`:
+
+```php
+$batch = $client->batches()->wait($id, interval: 30, timeout: 600);
+
+if (! $batch->isEnded()) {
+    // still processing after ten minutes: check again later
+}
+```
+
+The timeout counts the time slept between polls, not the time each request takes. `wait()` blocks the PHP process the whole time, and most batches take minutes to an hour (up to 24), so in a web request or a queued job, poll on a schedule instead. Pass `sleep` to replace PHP's `sleep()`, for example with one that returns at once in a test:
+
+```php
+$batch = $client->batches()->wait($id, sleep: fn (int $seconds) => null);
+```
+
+Under `ClientFake`, each poll is a recorded `retrieve()` answered from the queue, and nothing sleeps: queue one `BatchResponse::fake(['processing_status' => 'in_progress'])` and then one that has ended.
 
 ## Getting results
 
@@ -103,6 +131,17 @@ $response->meta(); // [rate limit headers](../reference/meta-information.md)
 ```
 
 Results are streamed as JSONL, so you can process them one at a time without loading everything into memory.
+
+`succeeded()`, `errored()`, `canceled()` and `expired()` yield only the results of that type:
+
+```php
+foreach ($client->batches()->results($batch->id)->errored() as $individual) {
+    $individual->customId;              // 'request-2'
+    $individual->result->error->message; // 'max_tokens: Field required'
+}
+```
+
+The results are read once, as they arrive. A second loop over the same response, through a filter or not, continues where the first one stopped, so fetch the results again with `results()` to read another type.
 
 For succeeded requests, `$individual->result->message` is a full [message response](./messages.md) with the same structure you'd get from `$client->messages()->create()`.
 
@@ -165,18 +204,11 @@ Here's the full lifecycle for a batch job:
 $batch = $client->batches()->create(['requests' => $requests]);
 
 // 2. Poll until complete
-do {
-    sleep(30);
-    $batch = $client->batches()->retrieve($batch->id);
-} while ($batch->processingStatus !== 'ended');
+$batch = $client->batches()->wait($batch->id, interval: 30);
 
 // 3. Process results
-$results = $client->batches()->results($batch->id);
-
-foreach ($results as $individual) {
-    if ($individual->result->type === 'succeeded') {
-        processResult($individual->customId, $individual->result->message);
-    }
+foreach ($client->batches()->results($batch->id)->succeeded() as $individual) {
+    processResult($individual->customId, $individual->result->message);
 }
 
 // 4. Clean up

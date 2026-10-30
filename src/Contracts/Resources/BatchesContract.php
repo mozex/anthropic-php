@@ -8,6 +8,7 @@ use Anthropic\Responses\Batches\BatchListResponse;
 use Anthropic\Responses\Batches\BatchResponse;
 use Anthropic\Responses\Batches\BatchResultResponse;
 use Anthropic\Responses\Batches\DeletedBatchResponse;
+use Closure;
 use Generator;
 
 interface BatchesContract
@@ -27,6 +28,14 @@ interface BatchesContract
      * @see https://platform.claude.com/docs/en/api/messages/batches/retrieve
      */
     public function retrieve(string $id): BatchResponse;
+
+    /**
+     * Retrieves a Message Batch every `$interval` seconds until it has ended, and returns it. With a `$timeout` in
+     * seconds, the last poll comes at the timeout, and the batch is returned as it was then: check `isEnded()`.
+     *
+     * @param  (Closure(int): void)|null  $sleep  sleeps the given seconds between polls; `sleep()` without it
+     */
+    public function wait(string $id, int $interval = 60, ?int $timeout = null, ?Closure $sleep = null): BatchResponse;
 
     /**
      * Lists Message Batches.

@@ -66,6 +66,15 @@ class BatchResponse implements ResponseContract, ResponseHasMetaInformationContr
     }
 
     /**
+     * Whether every request has finished: succeeded, errored, canceled or expired. A batch being canceled
+     * (`canceling`) hasn't ended yet.
+     */
+    public function isEnded(): bool
+    {
+        return $this->processingStatus === 'ended';
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function toArray(): array

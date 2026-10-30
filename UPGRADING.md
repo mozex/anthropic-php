@@ -12,6 +12,24 @@ A `ClientFake` given no responses used to throw on its first call. It now answer
 
 `ClientFake::record()` gains an optional second argument, the type the method returns, and `sent()` and `assertSentTimes()` are public. A subclass of your own that already declares `record()`, `sent()`, `assertSentTimes()`, `assertSentInOrder()`, `respondTo()` or `preventStrayRequests()` with another signature, or overrides `record()` without the new argument, no longer loads; so does a test resource subclass declaring `assertSentTimes()`. The exceptions gain a static `fake()`, with the same effect on a subclass that declares one.
 
+### The Batches Contract Gains wait()
+
+**Likelihood Of Impact: Low**
+
+For implementers of `BatchesContract`: it has a new `wait()` method, which retrieves a batch until it has ended. A class of your own that implements it needs the method, which the `Anthropic\Resources\Concerns\WaitsForBatches` trait provides over your `retrieve()`:
+
+```php
+public function wait(string $id, int $interval = 60, ?int $timeout = null, ?Closure $sleep = null): BatchResponse;
+```
+
+`ClientFake`'s test resource implements it. No class is final, so a subclass of the Batches resource or its test resource that already declares `wait()` needs this signature, or a new name for its method.
+
+### The Batch DTOs Gain Helpers
+
+**Likelihood Of Impact: Low**
+
+`BatchResponse` gains `isEnded()`, and `BatchResultResponse` gains `succeeded()`, `errored()`, `canceled()` and `expired()`, so a subclass that declares one of them with another signature no longer loads.
+
 ## To 1.12.0
 
 ### ErrorException Gains context()
