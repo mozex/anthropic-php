@@ -407,6 +407,24 @@ $fake->assertNotSentOn('billing', Messages::class);
 
 Calls through the fake itself carry no connection name. A subclass can give them one by setting the protected `$connection` property, as the Laravel package's fake does for its default connection.
 
+## Faking fits() and trimToFit()
+
+Each count `fits()` and `trimToFit()` make is a recorded `countTokens()`, so the fake answers them like any other call. `CountTokensResponse::fake()` is always 2,095 tokens, which never trims; answer with a count that follows the request instead:
+
+```php
+use Anthropic\Resources\Messages;
+use Anthropic\Responses\Messages\CountTokensResponse;
+use Anthropic\Testing\Requests\TestRequest;
+
+$client = (new ClientFake)->respondTo([Messages::class, 'countTokens'], fn (TestRequest $request) => CountTokensResponse::fake([
+    'input_tokens' => 1000 * count($request->args()[0]['messages']),
+]));
+
+$parameters = $client->messages()->trimToFit($parameters, 3500);
+```
+
+A responder is never used up, so the test doesn't depend on how many counts the search makes, and it answers ahead of the queue, so a queued `CreateResponse` still goes to your `create()`. Queuing the counts instead means queuing one per count the search makes, ahead of that `CreateResponse`.
+
 ## Faking a wait for a batch
 
 `batches()->wait()` on the fake is a recorded `retrieve()` per poll, answered from the queue, and it never sleeps. `BatchResponse::fake()` has ended, so an empty fake returns after one poll; queue the states in between to test the polling:

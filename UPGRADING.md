@@ -24,6 +24,20 @@ public function wait(string $id, int $interval = 60, ?int $timeout = null, ?Clos
 
 `ClientFake`'s test resource implements it. No class is final, so a subclass of the Batches resource or its test resource that already declares `wait()` needs this signature, or a new name for its method.
 
+### The Messages Contract Gains fits() And trimToFit()
+
+**Likelihood Of Impact: Low**
+
+For implementers of `MessagesContract`: it has new `fits()` and `trimToFit()` methods, which count a request against a limit and drop the oldest turns until it fits. A class of your own that implements it needs them, which the `Anthropic\Resources\Concerns\CountsToFit` trait provides over your `countTokens()`:
+
+```php
+public function fits(array $parameters, int $limit): bool;
+
+public function trimToFit(array $parameters, int $limit): array;
+```
+
+`ClientFake`'s test resource implements them. No class is final, so a subclass of the Messages resource or its test resource that already declares either needs these signatures, or a new name for its method.
+
 ### The Batch DTOs Gain Helpers
 
 **Likelihood Of Impact: Low**

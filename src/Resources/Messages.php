@@ -14,6 +14,7 @@ use Anthropic\ValueObjects\Transporter\Response;
 
 class Messages implements MessagesContract
 {
+    use Concerns\CountsToFit;
     use Concerns\Streamable;
     use Concerns\Transportable;
 

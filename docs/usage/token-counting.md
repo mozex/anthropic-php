@@ -86,27 +86,51 @@ $response->contextManagement; // ['original_input_tokens' => 70000]
 
 `contextManagement` is `null` on a count without the beta. Token counting ignores the `compaction` parameter of on-demand compaction.
 
-## Practical use
+## Checking a request fits
 
-A common pattern is to check the token count before sending a long conversation, and trim older messages if you're close to the model's context limit:
+`fits()` counts a request and compares its input tokens with a limit. Pass the same parameters you'll give `create()`: only what `count_tokens` takes is sent (`model`, `messages`, `system`, `tools`, `tool_choice`, `thinking`, `betas` and the rest), so `max_tokens`, `stream` and `temperature` don't get in the way:
 
 ```php
-$count = $client->messages()->countTokens([
-    'model' => 'claude-sonnet-5-5',
-    'messages' => $conversationHistory,
-]);
-
-if ($count->inputTokens > 180000) {
-    // Remove the oldest messages to stay within limits
-    array_splice($conversationHistory, 1, 2);
-}
-
-$response = $client->messages()->create([
+$parameters = [
     'model' => 'claude-sonnet-5-5',
     'max_tokens' => 1024,
     'messages' => $conversationHistory,
-]);
+];
+
+if (! $client->messages()->fits($parameters, 150000)) {
+    // too long: trim it, summarize it, or ask the user to start over
+}
 ```
+
+The limit counts input tokens only, so leave room for the answer yourself. A model's own input limit is `maxInputTokens` on its [model details](./models.md).
+
+`count_tokens` can't count everything `create()` takes: server tools other than the advisor, the MCP connector, and image or document blocks with a `url` or `file` source get a `BadRequestException`, which these helpers throw as it comes. Count with base64 sources, or leave those parts out of the count.
+
+## Trimming a conversation to fit
+
+`trimToFit()` drops the oldest turns of `messages` until the request fits, and returns the parameters ready for `create()`:
+
+```php
+$parameters = $client->messages()->trimToFit($parameters, 150000);
+
+$response = $client->messages()->create($parameters);
+```
+
+It only cuts before a user turn that answers no tool call, so every `tool_use` keeps its `tool_result` and the conversation still starts with the user. The system prompt, the tools and every other parameter stay as they were, but a `role: system` message among the dropped turns goes with them, so keep lasting instructions in `system`. A request that already fits comes back unchanged after one count; otherwise it counts a few more times, halving its way to a cut that fits. When even the last turn it can start from is over the limit, it throws `Anthropic\Exceptions\InvalidArgumentException` with the request's count from that turn, system prompt and tools included.
+
+Thinking blocks need one more setting. Each kept turn's thinking was produced while the dropped turns were still there, and Claude 5.1 models reject such blocks with a 400 unless you tell the API to drop them, with the `thinking-binding-controls-2026-08-01` beta:
+
+```php
+$parameters = $client->messages()->trimToFit([
+    'model' => 'claude-sonnet-5-5',
+    'max_tokens' => 1024,
+    'betas' => ['thinking-binding-controls-2026-08-01'],
+    'thinking' => ['type' => 'adaptive', 'block_binding' => ['prefix_mismatch_behavior' => 'drop_block']],
+    'messages' => $conversationHistory,
+], 150000);
+```
+
+Once a conversation is over the limit, each cut moves every turn, which costs its prompt-cache hits, so trim to well under the limit rather than just under it. `count_tokens` is free, but it has its own rate limit: call these once per request rather than in a loop. For long-running conversations, [compaction](./messages.md) keeps the history on the server's side instead.
 
 ---
 

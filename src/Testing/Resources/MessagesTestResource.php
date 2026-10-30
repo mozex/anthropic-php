@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Anthropic\Testing\Resources;
 
 use Anthropic\Contracts\Resources\MessagesContract;
+use Anthropic\Resources\Concerns\CountsToFit;
 use Anthropic\Resources\Messages;
 use Anthropic\Responses\Messages\CountTokensResponse;
 use Anthropic\Responses\Messages\CreateResponse;
@@ -13,6 +14,7 @@ use Anthropic\Testing\Resources\Concerns\Testable;
 
 class MessagesTestResource implements MessagesContract
 {
+    use CountsToFit;
     use Testable;
 
     protected function resource(): string
