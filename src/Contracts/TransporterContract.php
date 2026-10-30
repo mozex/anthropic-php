@@ -8,6 +8,7 @@ use Anthropic\Exceptions\ErrorException;
 use Anthropic\Exceptions\RateLimitException;
 use Anthropic\Exceptions\TransporterException;
 use Anthropic\Exceptions\UnserializableResponse;
+use Anthropic\ValueObjects\ClientSettings;
 use Anthropic\ValueObjects\Transporter\Payload;
 use Anthropic\ValueObjects\Transporter\Response;
 use Psr\Http\Message\ResponseInterface;
@@ -53,6 +54,12 @@ interface TransporterContract
      * Adds a custom header to the transporter.
      */
     public function addHeader(string $name, string $value): self;
+
+    /**
+     * What the transporter sends with every request: the base URI, the API version, the betas, the workspace, the
+     * retries and the timeouts the factory set, never a credential.
+     */
+    public function settings(): ClientSettings;
 
     /**
      * Returns a transporter whose requests also carry the given options, leaving this one unchanged.

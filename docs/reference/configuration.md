@@ -382,6 +382,24 @@ $client->models()->retrieve('claude-sonnet-5-5'); // carries none of them
 
 This is also how methods that take only an ID, such as `models()->retrieve()` or `batches()->results()`, get a beta header. Calling `withOptions()` on a client that already has options merges them: headers and query parameters by name, betas added up, the rest replaced. An unknown option throws an `InvalidArgumentException`. A timeout per request isn't possible through PSR-18; build a separate client with its own HTTP client for that.
 
+## Reading the settings back
+
+`settings()` on a client returns what it sends with every request, so a diagnostic page or command can show what's actually in use:
+
+```php
+$settings = $client->settings();
+
+$settings->baseUri;        // 'https://api.anthropic.com/v1/'
+$settings->apiVersion;     // '2023-06-01'
+$settings->betas;          // ['compact-2026-09-04']
+$settings->workspaceId;    // null
+$settings->maxRetries;     // 2
+$settings->timeout;        // 120.0
+$settings->connectTimeout; // null
+```
+
+It never holds the key or the token. The timeouts are known only for the Guzzle client the factory builds (`withTimeout()`, `withConnectTimeout()`); with your own HTTP client they're `null`. A `withOptions()` client reports its own betas, version and retries. `toArray()` gives them all as one array.
+
 ## PSR-18 client discovery
 
 When you don't provide an HTTP client, the factory uses `php-http/discovery` to find one. This works if your project has any PSR-18 compatible client installed (Guzzle, Symfony HTTP Client, Buzz, etc.).

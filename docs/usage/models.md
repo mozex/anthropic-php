@@ -106,7 +106,9 @@ $retired = $client->models()->list(['lifecycle' => ['retired']]);
 $current = $client->models()->iterate(['lifecycle' => ['active']]);
 ```
 
-`lifecycle` is the signal to act on: a `deprecated` model still answers, and its `retiresAt` tells you how long you have to move off it. A deprecated model whose `retiresAt` is already in the past is overdue to retire, so treat it as retired. `line` groups the generations of one family (`opus`, `sonnet`, `haiku` and so on), and new lines may appear. All four fields are `null` when the API doesn't send them.
+`lifecycle` is the signal to act on: a `deprecated` model still answers, and its `retiresAt` tells you how long you have to move off it. The schedule can move until the model retires. A deprecated model whose `retiresAt` is already in the past is overdue to retire, not retired: it may stop answering at any time, so move off it now. `line` groups the generations of one family (`opus`, `sonnet`, `haiku` and so on), and new lines may appear. All four fields are `null` when the API doesn't send them.
+
+Four helpers read those fields for you. `isRetired()` is true for a `retired` model and `isRetiring()` for a `deprecated` one, both straight from `lifecycle`. `isRetirementOverdue()` is true for a deprecated model whose date has passed, and takes an optional "now" for tests. `retirementDate()` parses `retiresAt` into a `DateTimeImmutable`, or `null`.
 
 A check you could run on a schedule, against the models your app uses:
 
@@ -114,8 +116,10 @@ A check you could run on a schedule, against the models your app uses:
 foreach (['claude-sonnet-5-5', 'claude-haiku-4-5'] as $id) {
     $model = $client->models()->retrieve($id);
 
-    if (in_array($model->lifecycle, ['deprecated', 'retired'], true)) {
-        // warn: $model->id retires at $model->retiresAt
+    if ($model->isRetired() || $model->isRetirementOverdue()) {
+        // alert: requests to $model->id fail, or may at any time
+    } elseif ($model->isRetiring()) {
+        // warn: $model->id retires on $model->retirementDate()?->format('Y-m-d')
     }
 }
 ```

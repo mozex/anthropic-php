@@ -569,7 +569,8 @@ class Factory
 
         $sendAsync = $this->makeStreamHandler($client);
 
-        $transporter = new HttpTransporter($client, $baseUri, $headers, $queryParams, $sendAsync, $this->maxRetries, $this->middleware, $this->logger, $this->retrySleep);
+        // Timeouts exist only for the Guzzle client built here (make() refuses them beside yours), so only theirs are known.
+        $transporter = new HttpTransporter($client, $baseUri, $headers, $queryParams, $sendAsync, $this->maxRetries, $this->middleware, $this->logger, $this->retrySleep, $this->timeout, $this->connectTimeout);
 
         return new Client($transporter);
     }

@@ -12,6 +12,7 @@ use Anthropic\Exceptions\RetryableException;
 use Anthropic\Exceptions\TimeoutException;
 use Anthropic\Exceptions\TransporterException;
 use Anthropic\Exceptions\UnserializableResponse;
+use Anthropic\ValueObjects\ClientSettings;
 use Anthropic\ValueObjects\Transporter\BaseUri;
 use Anthropic\ValueObjects\Transporter\Headers;
 use Anthropic\ValueObjects\Transporter\Payload;
@@ -42,6 +43,8 @@ class HttpTransporter implements TransporterContract
      * @param  Closure(RequestInterface): ResponseInterface  $streamHandler
      * @param  list<Closure(RequestInterface, Closure(RequestInterface): ResponseInterface): ResponseInterface>  $middleware  run once per attempt, the first one outermost
      * @param  (Closure(int): void)|null  $sleep  waits the given milliseconds between attempts
+     * @param  float|null  $timeout  the timeout of the HTTP client the factory built, for settings() only
+     * @param  float|null  $connectTimeout  its connection timeout, for settings() only
      */
     public function __construct(
         private readonly ClientInterface $client,
@@ -53,6 +56,8 @@ class HttpTransporter implements TransporterContract
         private readonly array $middleware = [],
         private readonly ?LoggerInterface $logger = null,
         private readonly ?Closure $sleep = null,
+        private readonly ?float $timeout = null,
+        private readonly ?float $connectTimeout = null,
     ) {
         // ..
     }
@@ -162,6 +167,28 @@ class HttpTransporter implements TransporterContract
             $this->middleware,
             $this->logger,
             $this->sleep,
+            $this->timeout,
+            $this->connectTimeout,
+        );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function settings(): ClientSettings
+    {
+        $headers = array_change_key_case($this->headers->toArray(), CASE_LOWER);
+        $betas = array_values(array_filter(array_map(trim(...), explode(',', $headers['anthropic-beta'] ?? '')), fn (string $beta): bool => $beta !== ''));
+
+        return new ClientSettings(
+            // Without user info, where a proxy's credentials may ride.
+            (string) preg_replace('#^([a-z][a-z0-9+.-]*://)[^/?\#]*@#i', '$1', $this->baseUri->toString()),
+            $headers['anthropic-version'] ?? '',
+            $betas,
+            $headers['anthropic-workspace-id'] ?? null,
+            $this->maxRetries,
+            $this->timeout,
+            $this->connectTimeout,
         );
     }
 

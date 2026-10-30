@@ -8,6 +8,24 @@
 
 `ErrorException` has a new public `context()` method, which returns the request ID, the status, the error type, the `retry-after` seconds and the error code for a log entry. Laravel's exception handler, Sentry and Flare call it on their own. A subclass of your own that already defines `context()` without the `array` return type, or with required parameters, no longer loads: rename it, or declare it as `public function context(): array`.
 
+### The Transporter Contract Gains settings()
+
+**Likelihood Of Impact: Low**
+
+For implementers of the `@internal` `TransporterContract`: it has a new `settings()` method, which returns a `ClientSettings` with the base URI, the API version, the betas, the workspace, the retries and the timeouts. `Client::settings()` reads it. A transporter of your own needs it:
+
+```php
+public function settings(): ClientSettings;
+```
+
+No class is final, so a subclass of `Client` that already declares `settings()` needs this signature, or a new name.
+
+### The Models DTO Gains Lifecycle Helpers
+
+**Likelihood Of Impact: Low**
+
+`RetrieveResponse` gains `isRetired()`, `isRetiring()`, `isRetirementOverdue()` and `retirementDate()`, so a subclass that declares one of them with another signature no longer loads.
+
 ### ClientFake Gains Connection Views
 
 **Likelihood Of Impact: Low**

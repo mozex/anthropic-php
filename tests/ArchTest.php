@@ -76,6 +76,7 @@ arch('client')->expect('Anthropic\Client')->toOnlyUse([
     'Anthropic\Resources',
     'Anthropic\Contracts',
     'Anthropic\Responses\Raw\RawResponse',
+    'Anthropic\ValueObjects\ClientSettings',
 ]);
 
 arch('anthropic')->expect('Anthropic')->toOnlyUse([

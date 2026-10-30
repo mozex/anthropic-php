@@ -13,6 +13,7 @@ use Anthropic\Resources\Messages;
 use Anthropic\Resources\Models;
 use Anthropic\Resources\Raw;
 use Anthropic\Responses\Raw\RawResponse;
+use Anthropic\ValueObjects\ClientSettings;
 
 class Client implements ClientContract
 {
@@ -86,6 +87,16 @@ class Client implements ClientContract
     {
         // @phpstan-ignore new.static (users extend Client; a subclass keeps the constructor or overrides this)
         return new static($this->transporter->withOptions($options));
+    }
+
+    /**
+     * What this client sends with every request (the base URI, the API version, the betas, the workspace, the retries
+     * and the timeouts of a Guzzle client the factory built), never its key or token: for a diagnostic page or
+     * command that shows what's in use.
+     */
+    public function settings(): ClientSettings
+    {
+        return $this->transporter->settings();
     }
 
     /**
