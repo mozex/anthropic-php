@@ -32,8 +32,6 @@ No class is final, so a subclass of `Client` that already declares `settings()` 
 
 `ClientFake` has new `onConnection()`, `assertSentOn()` and `assertNotSentOn()` methods and a protected `$connection` property, so a framework can hand out one view of a fake per connection, and `TestRequest` has `connection()` and a fifth constructor argument for it. `Factory` has a new `withConfig()`. A subclass of your own that already declares one of them with another signature no longer loads.
 
-## To 1.11.0
-
 ### Error Statuses Throw Subclasses Of ErrorException
 
 **Likelihood Of Impact: Low**
