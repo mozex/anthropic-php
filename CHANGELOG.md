@@ -2,6 +2,46 @@
 
 All notable changes to `anthropic-php` will be documented in this file.
 
+## 1.10.0 - 2026-11-01
+
+### What's Changed
+
+* `Factory::withApiVersion()` sets the `anthropic-version` header, so you can opt into API version `2026-10-21`; the default stays `2023-06-01`.
+* Responses keep every field the API sends: `toArray()` and array access return fields this release doesn't type yet and fields sent as `null`, in the API's order, so a response's content can be sent back to the API unchanged.
+* Messages responses type the MCP connector blocks (`mcp_tool_use` with `server_name`, `mcp_tool_result` with `is_error`, `mcp_tool_listing`), advisor results, `toolset_name` on computer and browser tool calls, compaction `encrypted_content` and `tool_changes` (and keep `signature` in `toArray()`), the fallback `trigger`, `input_transformations`, and fallback credit (`stop_details->fallback_credit_token`, `usage->fallbackCredit`).
+* Streamed Messages events type every field the non-streamed message has: a block start's `signature`, `caller`, `toolset_name`, `server_name`, `is_error` and the other block fields; a `message_delta`'s `stop_details` (the category of a streamed refusal) and `container`; `context_management` and `input_transformations` on the events; a compaction delta's `encrypted_content` and a thinking delta's `estimated_tokens`.
+* Models responses type `lifecycle`, `line`, `deprecated_at` and `retires_at`, the `server_tools` capability, `xhigh` effort, the `disabled` and `between_tools` thinking types, and the beta `allowed_fallback_models` and `compaction` capability.
+* A batch result's error has its `requestId`, and `toArray()` includes `request_id` beside the type and message.
+* `meta()` types the organization and workspace ID headers, `retry-after` and the fast mode rate limits; they also stay in `custom`.
+* Token counts type the beta `context_management.original_input_tokens` as `contextManagement`.
+* Streams and batch results are read 64 KiB at a time instead of byte by byte.
+* A Messages stream yields event types the client doesn't know yet instead of dropping them; `ping` is still skipped.
+* `assertNotSent()` accepts a number, like `assertSent()`, and `ClientFake` accepts a PSR-7 stream for content methods such as `files()->download()`.
+* Classes are no longer `final`, so you can extend them; `fake()` on a subclass of a response builds from the parent's fixture.
+* The docs cover the newer API features: mid-conversation system messages and tool changes, compaction on demand, the computer and browser toolsets, programmatic tool calling, the MCP connector, the advisor tool, fast mode, fallback credit, refusal categories and streamed refusals, and the current models.
+
+#### Fixes
+
+* A streamed request that fails with a 4xx or 5xx, such as a 529 overload, throws `ErrorException` with the API's error type instead of `TransporterException`.
+* Every response with a status of 400 or above throws `ErrorException` (`RateLimitException` for a 429), even when the body isn't the API's JSON. A proxy's HTML page or a plain-text 503 used to throw `UnserializableResponse` or a `TypeError`, and `files()->download()` returned the error page as the file. The message is the first line of the page's text.
+* A tool call without parameters comes out of `toArray()` with `input` as an `ArrayObject`, which encodes as `{}`: the API rejects a replayed `"input": []`.
+* Streaming an on-demand compaction no longer throws a `TypeError`: a block that arrives whole with string `content` is read as a string.
+* A model or a list page without some of the documented-nullable fields no longer throws; an errored batch result builds again from its own `toArray()`.
+* A response without `stop_sequence` no longer raises a warning.
+* A base URI ending in `/` no longer doubles the slash in request paths.
+* In `fake()` overrides, a nested item whose `type` differs from the default's replaces it, so a faked `tool_use` block no longer carries the default text.
+* The tool use docs no longer tell you to skip a tool call made from code execution: such a call is paused code waiting for your result, and the docs show how to answer it.
+
+#### Deprecated
+
+* The Text Completions resource and `completions()` are marked deprecated: the API rejects `/v1/complete` requests on current models. Use the Messages API.
+
+#### Upgrading
+
+Streams are read per the SSE spec, so a hand-written fake stream needs a blank line between events. `UPGRADING.md` lists the other changes that can affect code written against 1.8.
+
+**Full Changelog**: https://github.com/mozex/anthropic-php/compare/1.8.0...1.10.0
+
 ## 1.8.0 - 2026-08-01
 
 ### What's New
@@ -16,6 +56,7 @@ Three additions to `usage` on Messages responses:
 $response->usage->outputTokensDetails?->thinkingTokens; // how many billed output tokens were reasoning
 $response->usage->speed;                                // 'fast' or 'standard' on fast mode requests
 $response->usage->iterations;                           // per-attempt records under the fallback and compaction betas
+
 
 ```
 When streaming, `outputTokensDetails` arrives on the final `message_delta` event.
@@ -42,6 +83,7 @@ foreach ($response->content as $block) {
 
 $response->context_management; // ['applied_edits' => [...]] or null
 
+
 ```
 #### Cache diagnostics (beta)
 
@@ -50,6 +92,7 @@ With the `cache-diagnosis-2026-04-07` header and a `diagnostics` request paramet
 ```php
 $response->diagnostics?->cache_miss_reason?->type;                      // 'system_changed'
 $response->diagnostics?->cache_miss_reason?->cache_missed_input_tokens; // 41850
+
 
 ```
 On streams, `diagnostics` arrives on the `message_start` event.
@@ -93,6 +136,7 @@ $response = $client->messages()->create([
         ],
     ]],
 ]);
+
 
 
 ```
