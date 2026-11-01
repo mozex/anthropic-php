@@ -18,6 +18,7 @@ use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
+use SensitiveParameter;
 use Symfony\Component\HttpClient\Psr18Client;
 
 class Factory
@@ -92,7 +93,7 @@ class Factory
     /**
      * Sets the API key for the requests.
      */
-    public function withApiKey(string $apiKey): self
+    public function withApiKey(#[SensitiveParameter] string $apiKey): self
     {
         $this->apiKey = trim($apiKey);
 
@@ -103,7 +104,7 @@ class Factory
      * Sets a bearer token sent as `Authorization: Bearer <token>`, such as an access token from
      * Workload Identity Federation. With an API key set too, both headers are sent; a blank token sends none.
      */
-    public function withAuthToken(string $authToken): self
+    public function withAuthToken(#[SensitiveParameter] string $authToken): self
     {
         $this->authToken = trim($authToken);
 
@@ -290,7 +291,7 @@ class Factory
      *
      * @param  array<string, mixed>  $config
      */
-    public function withConfig(array $config): self
+    public function withConfig(#[SensitiveParameter] array $config): self
     {
         $unknown = array_diff(array_keys($config), self::CONFIG_KEYS);
 
@@ -387,7 +388,7 @@ class Factory
     /**
      * A string setting, trimmed, or null for none.
      */
-    private static function configString(mixed $value, string $key): ?string
+    private static function configString(#[SensitiveParameter] mixed $value, string $key): ?string
     {
         if ($value === null) {
             return null;
@@ -503,7 +504,7 @@ class Factory
      *
      * @return array<string, string>
      */
-    private static function configHeaders(mixed $headers): array
+    private static function configHeaders(#[SensitiveParameter] mixed $headers): array
     {
         if ($headers === null) {
             return [];

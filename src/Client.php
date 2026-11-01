@@ -14,6 +14,7 @@ use Anthropic\Resources\Models;
 use Anthropic\Resources\Raw;
 use Anthropic\Responses\Raw\RawResponse;
 use Anthropic\ValueObjects\ClientSettings;
+use SensitiveParameter;
 
 class Client implements ClientContract
 {
@@ -83,7 +84,7 @@ class Client implements ClientContract
      *
      * @param  array<string, mixed>  $options
      */
-    public function withOptions(array $options): static
+    public function withOptions(#[SensitiveParameter] array $options): static
     {
         // @phpstan-ignore new.static (users extend Client; a subclass keeps the constructor or overrides this)
         return new static($this->transporter->withOptions($options));

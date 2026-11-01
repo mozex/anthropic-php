@@ -11,7 +11,7 @@ class Anthropic
     /**
      * Creates a new Anthropic Client with the given API token.
      */
-    public static function client(string $apiKey): Client
+    public static function client(#[SensitiveParameter] string $apiKey): Client
     {
         return self::factory()
             ->withApiKey($apiKey)

@@ -30,6 +30,7 @@ use Psr\Http\Client\RequestExceptionInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
+use SensitiveParameter;
 use Throwable;
 
 /**
@@ -153,7 +154,7 @@ class HttpTransporter implements TransporterContract
     /**
      * {@inheritDoc}
      */
-    public function withOptions(array $options): self
+    public function withOptions(#[SensitiveParameter] array $options): self
     {
         $options = RequestOptions::from($options);
 

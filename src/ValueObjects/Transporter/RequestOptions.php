@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Anthropic\ValueObjects\Transporter;
 
 use Anthropic\Exceptions\InvalidArgumentException;
+use SensitiveParameter;
 
 /**
  * The options `withOptions()` applies to every request of the client it returns.
@@ -30,7 +31,7 @@ class RequestOptions
     /**
      * @param  array<array-key, mixed>  $options
      */
-    public static function from(array $options): self
+    public static function from(#[SensitiveParameter] array $options): self
     {
         $unknown = array_diff(array_map(strval(...), array_keys($options)), self::KEYS);
 
@@ -107,7 +108,7 @@ class RequestOptions
     /**
      * @return array<array-key, mixed>
      */
-    private static function arrayOption(mixed $value, string $key): array
+    private static function arrayOption(#[SensitiveParameter] mixed $value, string $key): array
     {
         if (! is_array($value)) {
             throw new InvalidArgumentException("The [{$key}] request option must be an array.");
@@ -119,7 +120,7 @@ class RequestOptions
     /**
      * @return array<string, string>
      */
-    private static function stringMap(mixed $value, string $key): array
+    private static function stringMap(#[SensitiveParameter] mixed $value, string $key): array
     {
         $map = [];
 
