@@ -2,6 +2,40 @@
 
 All notable changes to `anthropic-php` will be documented in this file.
 
+## 1.12.0 - 2026-11-01
+
+### What's Changed
+
+* Each error status throws its own subclass of `ErrorException` (`BadRequestException`, `AuthenticationException`, `BillingException`, `PermissionDeniedException`, `NotFoundException`, `ConflictException`, `RequestTooLargeException`, `UnprocessableEntityException`, `RateLimitException`, `InternalServerException`, `ApiTimeoutException`, `OverloadedException`), and an error in the middle of a stream throws the subclass of its type.
+* `ErrorException` has `getRequestId()`, `getErrorDetails()` and `getRetryAfter()`, and `context()` gives each API error's request ID, status, type, `retry-after` and error code to Laravel's exception handler and the Laravel packages of Sentry and Flare.
+* Connection failures throw `ConnectionException` and timeouts `TimeoutException`, both `TransporterException`s.
+* `withOptions()` returns a client whose requests carry extra headers, query parameters, betas, an API version, a workspace, a user profile or a retry count; methods that take only an ID get betas this way.
+* `Factory::withAuthToken()` sends a bearer token, such as a Workload Identity Federation access token; `withWorkspaceId()` sends `anthropic-workspace-id`.
+* `Factory::withBaseUrl()` takes a URL the way the official SDKs read `ANTHROPIC_BASE_URL`.
+* `withTimeout()` and `withConnectTimeout()` set the timeouts of the Guzzle client the factory builds.
+* `Anthropic::fromEnvironment()` builds a client from `ANTHROPIC_API_KEY` or `ANTHROPIC_AUTH_TOKEN`, `ANTHROPIC_BASE_URL` and `ANTHROPIC_CUSTOM_HEADERS`.
+* `Factory::withConfig()` builds a client from a config array. A misspelt key or a value of the wrong type throws, naming the key.
+* `Factory::withMaxRetries()` retries connection failures, timeouts and 408, 409, 429 and 5xx responses, waiting what the API asks or backing off; retries are off by default.
+* `Factory::withMiddleware()` runs code around every HTTP attempt; a middleware that throws `RetryableException` sends the request again. `Factory::withLogger()` logs each request, response and retry to a PSR-3 logger, without bodies, headers or query strings.
+* `request()` sends a request to any API path, returning a `RawResponse`; `iterate()` on `models()`, `batches()` and `files()` walks every page of a list.
+* `RefusalFallbackMiddleware` retries a refused Messages request on the fallback models you list, redeeming the refusal's fallback credit; streamed requests pass through for now.
+* `OpenTelemetryMiddleware` traces each request with OpenTelemetry's GenAI attributes and sends the trace context.
+* `Client::settings()` returns what a client sends with every request, never its key.
+* The Models responses have `isRetired()`, `isRetiring()`, `isRetirementOverdue()` and `retirementDate()`.
+* The fake's `withOptions()` shares its queue, and `assertSentWithOptions()` checks a request's options. `RawResponse::fake()` answers raw requests, and the list fakes walk with `iterate()`. `ClientFake::onConnection()` gives a fake per connection, with `assertSentOn()` and `assertNotSentOn()`.
+
+#### Fixes
+
+* A list in a query, such as the models list's `lifecycle` filter, is now sent as `key[]=`, so the API applies it.
+* A mid-stream error sent as a plain string throws `ErrorException`.
+* A header set twice under different capitalization sends only the later value.
+* `getErrorType()` returns null for an error type that isn't a string.
+* A key or token given to `Anthropic::client()`, the factory, `withConfig()` or `withOptions()` stays out of a stack trace's arguments, which error trackers such as Flare collect.
+
+`UPGRADING.md` lists the changes that can affect code written against 1.10.
+
+**Full Changelog**: https://github.com/mozex/anthropic-php/compare/1.10.0...1.12.0
+
 ## 1.10.0 - 2026-11-01
 
 ### What's Changed
@@ -58,6 +92,7 @@ $response->usage->speed;                                // 'fast' or 'standard' 
 $response->usage->iterations;                           // per-attempt records under the fallback and compaction betas
 
 
+
 ```
 When streaming, `outputTokensDetails` arrives on the final `message_delta` event.
 
@@ -84,6 +119,7 @@ foreach ($response->content as $block) {
 $response->context_management; // ['applied_edits' => [...]] or null
 
 
+
 ```
 #### Cache diagnostics (beta)
 
@@ -92,6 +128,7 @@ With the `cache-diagnosis-2026-04-07` header and a `diagnostics` request paramet
 ```php
 $response->diagnostics?->cache_miss_reason?->type;                      // 'system_changed'
 $response->diagnostics?->cache_miss_reason?->cache_missed_input_tokens; // 41850
+
 
 
 ```
@@ -136,6 +173,7 @@ $response = $client->messages()->create([
         ],
     ]],
 ]);
+
 
 
 
