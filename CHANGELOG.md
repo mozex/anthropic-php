@@ -2,6 +2,23 @@
 
 All notable changes to `anthropic-php` will be documented in this file.
 
+## 1.13.0 - 2026-11-02
+
+### What's Changed
+
+* `ClientFake` answers each call with its method's default fake until you queue a response. `preventStrayRequests()` makes an unanswered call throw instead.
+* `respondTo()` answers calls by resource, method or a closure, beside the queue. `assertSentTimes()`, `assertSentInOrder()` and `sent()` are public, and under Pest `expect($fake)->toHaveSent()`, `toHaveSentTimes()`, `toHaveSentOn()`, `toHaveSentInOrder()` and `toHaveSentNothing()` work too.
+* Every API exception has a `fake()` with its status, type and request ID, and `TransporterException::fake()` stands for a request that got no answer.
+* `CreateStreamedResponse::fake()` takes a list of events or a `CreateResponse`, and `BatchResultResponse::fake()` a list of results. Both carry the same rate-limit headers and request ID as the other fakes.
+* `Testing\Blocks` builds text, tool use, thinking and web search blocks.
+* `Testing\Recorder`, a client middleware, records a test's API calls once and replays them from a file afterwards, with no key.
+* `batches()->wait()` polls a batch until it ends. `BatchResponse` has `isEnded()`, and batch results have `succeeded()`, `errored()`, `canceled()` and `expired()`.
+* `messages()->fits()` checks a request against a token limit, and `trimToFit()` drops the oldest turns until it fits.
+
+`UPGRADING.md` lists the changes that can affect code written against 1.12, such as a fake with no responses no longer throwing.
+
+**Full Changelog**: https://github.com/mozex/anthropic-php/compare/1.12.0...1.13.0
+
 ## 1.12.0 - 2026-11-01
 
 ### What's Changed
@@ -93,6 +110,7 @@ $response->usage->iterations;                           // per-attempt records u
 
 
 
+
 ```
 When streaming, `outputTokensDetails` arrives on the final `message_delta` event.
 
@@ -120,6 +138,7 @@ $response->context_management; // ['applied_edits' => [...]] or null
 
 
 
+
 ```
 #### Cache diagnostics (beta)
 
@@ -128,6 +147,7 @@ With the `cache-diagnosis-2026-04-07` header and a `diagnostics` request paramet
 ```php
 $response->diagnostics?->cache_miss_reason?->type;                      // 'system_changed'
 $response->diagnostics?->cache_miss_reason?->cache_missed_input_tokens; // 41850
+
 
 
 
@@ -173,6 +193,7 @@ $response = $client->messages()->create([
         ],
     ]],
 ]);
+
 
 
 
