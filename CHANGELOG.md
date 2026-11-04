@@ -2,6 +2,17 @@
 
 All notable changes to `anthropic-php` will be documented in this file.
 
+## 1.14.0 - 2026-11-04
+
+### What's Changed
+
+* `withStreamCompletionHandler()` on the factory reports each Messages stream's usage once it ends, fails or is dropped. The stream has `usage()`, `model()`, `completed()` and `durationMs()`.
+* A response's usage has `billedInputTokens()`, `billedOutputTokens()`, `billedTokens()` and `rateLimitTokens()`, counted across `usage.iterations`.
+
+`UPGRADING.md` lists the changes that can affect code written against 1.13, such as a transporter of your own needing `streamCompletionHandler()`.
+
+**Full Changelog**: https://github.com/mozex/anthropic-php/compare/1.13.0...1.14.0
+
 ## 1.13.0 - 2026-11-02
 
 ### What's Changed
@@ -111,6 +122,7 @@ $response->usage->iterations;                           // per-attempt records u
 
 
 
+
 ```
 When streaming, `outputTokensDetails` arrives on the final `message_delta` event.
 
@@ -139,6 +151,7 @@ $response->context_management; // ['applied_edits' => [...]] or null
 
 
 
+
 ```
 #### Cache diagnostics (beta)
 
@@ -147,6 +160,7 @@ With the `cache-diagnosis-2026-04-07` header and a `diagnostics` request paramet
 ```php
 $response->diagnostics?->cache_miss_reason?->type;                      // 'system_changed'
 $response->diagnostics?->cache_miss_reason?->cache_missed_input_tokens; // 41850
+
 
 
 
@@ -193,6 +207,7 @@ $response = $client->messages()->create([
         ],
     ]],
 ]);
+
 
 
 
