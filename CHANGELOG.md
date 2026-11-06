@@ -2,6 +2,20 @@
 
 All notable changes to `anthropic-php` will be documented in this file.
 
+## 1.15.0 - 2026-11-06
+
+### What's Changed
+
+* A Messages stream gives its text as it arrives with `text()`, and the whole message it adds up to with `finalMessage()`, the same `CreateResponse` that `create()` returns. `finalText()`, `currentMessage()` and callbacks per event kind (`onEvent()`, `onText()`, `onThinking()`, `onContentBlock()`, `onMessage()`) come with them, and all of it works on fake streams.
+* `MessageAccumulator` folds stream events you read another way into the message they add up to.
+* `RefusalFallbackMiddleware` falls back on streamed requests too: a refused stream goes on with the next model's events spliced onto it, behind a `fallback` block, under one `message_start`.
+* The middleware takes every `fallback` block out of the history you send back, where it used to take only those at the front of a turn.
+* `CreateResponse::$stop_reason` is nullable, for a message folded from a stream before its `message_delta`.
+
+`UPGRADING.md` lists the changes that can affect code written against 1.14, such as the nullable `stop_reason` and a subclass of the Messages `StreamResponse` that declares one of its new methods.
+
+**Full Changelog**: https://github.com/mozex/anthropic-php/compare/1.14.0...1.15.0
+
 ## 1.14.0 - 2026-11-04
 
 ### What's Changed
@@ -123,6 +137,7 @@ $response->usage->iterations;                           // per-attempt records u
 
 
 
+
 ```
 When streaming, `outputTokensDetails` arrives on the final `message_delta` event.
 
@@ -152,6 +167,7 @@ $response->context_management; // ['applied_edits' => [...]] or null
 
 
 
+
 ```
 #### Cache diagnostics (beta)
 
@@ -160,6 +176,7 @@ With the `cache-diagnosis-2026-04-07` header and a `diagnostics` request paramet
 ```php
 $response->diagnostics?->cache_miss_reason?->type;                      // 'system_changed'
 $response->diagnostics?->cache_miss_reason?->cache_missed_input_tokens; // 41850
+
 
 
 
@@ -207,6 +224,7 @@ $response = $client->messages()->create([
         ],
     ]],
 ]);
+
 
 
 
