@@ -120,7 +120,8 @@ test('the trace context goes out with the request, from the span that traces it'
     [$span] = tracedSpans($exporter);
 
     expect($history[0]['request']->getHeaderLine('traceparent'))
-        ->toBe('00-'.$span->getTraceId().'-'.$span->getSpanId().'-01');
+        ->toBe(sprintf('00-%s-%s-%02x', $span->getTraceId(), $span->getSpanId(), $span->getContext()->getTraceFlags()))
+        ->and($span->getContext()->isSampled())->toBeTrue();
 });
 
 test('no trace context is sent with a propagator that sends none', function () {
